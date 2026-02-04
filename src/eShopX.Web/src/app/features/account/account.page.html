@@ -1,0 +1,37 @@
+<ui-section title="Account" subtitle="Sign in or manage your profile.">
+  @if (isLoading() || !me()) {
+    <div
+      class="h-24 rounded-2xl border border-dashed border-neutral-200 bg-neutral-50"
+    ></div>
+  }
+  @if (me(); as me) {
+    <div class="rounded-2xl border border-neutral-200 bg-white p-6 text-sm">
+      <div class="flex items-start gap-4">
+        <img
+          class="h-14 w-14 rounded-full border border-neutral-200 object-cover"
+          [src]="me.avatarUrl || '/user-default.png'"
+          alt="user avatar"
+        />
+        <div>
+          <div class="text-base font-semibold text-neutral-900">{{ me.name }}</div>
+          <div class="mt-2 text-neutral-600">{{ me.email }}</div>
+          <div class="text-neutral-600">{{ me.phone }}</div>
+        </div>
+      </div>
+      <div class="mt-4 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-2 text-xs text-neutral-600">
+        @if (me.isAdmin) {
+          管理員
+        } @else {
+          賣家狀態：{{ sellerStatusLabel(me) }}
+        }
+      </div>
+      <div class="mt-4 text-xs text-neutral-500">Member since {{ me.createdAt | date: 'yyyy-MM-dd' }}</div>
+      <a
+        class="mt-5 inline-flex items-center text-xs font-semibold uppercase tracking-widest text-neutral-500 hover:text-neutral-900"
+        routerLink="/account/settings"
+        >
+        Edit Settings
+      </a>
+    </div>
+  }
+</ui-section>

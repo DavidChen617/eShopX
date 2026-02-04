@@ -1,0 +1,44 @@
+@if (isLoading()) {
+  <div class="flex items-center justify-center h-64">
+    <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+  </div>
+} @else {
+  <div class="relative overflow-hidden bg-gradient-to-b from-[#FFF4EE] via-white to-[#FFF9F2]">
+    <div class="pointer-events-none absolute -top-32 right-[-120px] h-80 w-80 rounded-full bg-[#FF7A2F]/20 blur-3xl"></div>
+    <div class="pointer-events-none absolute top-72 left-[-140px] h-72 w-72 rounded-full bg-[#FFB347]/20 blur-3xl"></div>
+
+    <div class="mx-auto max-w-6xl px-4 pb-10 pt-6">
+      <div class="mb-6 flex items-end justify-between">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.3em] text-[#FF6A1A]/70">Daily picks</div>
+          <h1 class="mt-2 text-3xl font-extrabold text-[#2E1A0F]">
+            精選好物，今天就出發
+          </h1>
+          <p class="mt-2 text-sm text-[#6B4C3B]">秒殺、分類、推薦一次逛完，收藏你喜歡的生活靈感。</p>
+        </div>
+        <div class="hidden sm:flex items-center gap-2 text-xs text-[#6B4C3B]">
+          <span class="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 shadow-sm">
+            <span class="h-2 w-2 rounded-full bg-[#FF5000]"></span> 即時熱賣
+          </span>
+          <span class="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 shadow-sm">
+            <span class="h-2 w-2 rounded-full bg-[#FFB347]"></span> 嚴選推薦
+          </span>
+        </div>
+      </div>
+
+      <!-- 輪播 Banner -->
+      <app-banner-carousel [slides]="banners()" />
+
+      <!-- 限時秒殺 -->
+      @if (flashSale(); as sale) {
+        <app-flash-sale-section [data]="sale" />
+      }
+
+      <!-- 分類宮格 -->
+      <app-category-grid [categories]="categories()" />
+
+      <!-- 猜你喜歡 -->
+      <app-product-feed [products]="recommendProducts()" title="猜你喜歡" />
+    </div>
+  </div>
+}

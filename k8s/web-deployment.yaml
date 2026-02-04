@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eshopx-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eshopx-web
+  template:
+    metadata:
+      labels:
+        app: eshopx-web
+    spec:
+      containers:
+        - name: web
+          image: davidchen617/eshopx-web:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eshopx-web
+spec:
+  selector:
+    app: eshopx-web
+  ports:
+    - port: 80
+      targetPort: 80

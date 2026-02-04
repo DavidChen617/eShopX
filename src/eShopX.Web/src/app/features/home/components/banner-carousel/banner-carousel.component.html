@@ -1,0 +1,24 @@
+<div class="banner-carousel mx-2 sm:mx-0">
+  <div class="relative overflow-hidden rounded-3xl border border-white/70 bg-white shadow-[0_20px_50px_-40px_rgba(0,0,0,0.45)]">
+    <nz-carousel nzAutoPlay [nzAutoPlaySpeed]="3500" nzEffect="scrollx">
+    @for (slide of slides(); track slide.id) {
+      <div nz-carousel-content>
+        <a [routerLink]="slide.link" class="block relative" draggable="false" (dragstart)="$event.preventDefault()">
+          <img
+            [src]="slide.imageUrl"
+            [alt]="slide.title"
+            class="w-full h-52 sm:h-64 object-cover select-none"
+            draggable="false"
+            (dragstart)="$event.preventDefault()"
+          />
+          <div class="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/40 via-black/10 to-transparent"></div>
+          <div class="pointer-events-none absolute bottom-4 left-4 right-4 rounded-2xl bg-white/85 p-4 backdrop-blur">
+            <div class="text-xs uppercase tracking-[0.3em] text-[#FF6A1A]/70">Hot pick</div>
+            <h3 class="mt-1 text-lg font-extrabold text-[#2E1A0F]">{{ slide.title }}</h3>
+          </div>
+        </a>
+      </div>
+    }
+    </nz-carousel>
+  </div>
+</div>

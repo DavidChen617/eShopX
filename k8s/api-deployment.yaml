@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eshopx-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eshopx-api
+  template:
+    metadata:
+      labels:
+        app: eshopx-api
+    spec:
+      containers:
+        - name: api
+          image: davidchen617/eshopx-api:latest
+          ports:
+            - containerPort: 5177
+          env:
+            - name: ASPNETCORE_URLS
+              value: http://0.0.0.0:5177
+            - name: ConnectionStrings__PostgreSQL
+              value: Host=eshopx-postgres;Port=5432;Username=user;Password=password;Database=eShopX
+            - name: ConnectionStrings__Redis
+              value: eshopx-redis:6379,password=redis123,defaultDatabase=0
+            - name: Jwt__SecretKey
+              value: oBapaL9FBUwUzQdVnAbjPT7wua7Wk46oBt2d8mBccsw
+            - name: Jwt__RefreshTokenExpirationDays
+              value: "7"
+            - name: Jwt__Issuer
+              value: eShopX
+            - name: Jwt__Audience
+              value: eShopX-Users
+            - name: Jwt__AccessTokenExpirationMinutes
+              value: "60"
+            - name: GoogleAuth__RedirectUrl
+              value: http://localhost:4200/auth/google/callback
+            - name: GoogleAuth__ClientSecret
+              value: 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
+            - name: GoogleAuth__ClientId
+              value: 81840048967-d6k4331ks8sllq08qac4morq5877t843.apps.googleusercontent.com
+            - name: LineAuth__RedirectUri
+              value: http://localhost:4200/auth/line/callback
+            - name: LineAuth__ChannelSecret
+              value: c6cd86985db306f9f36f97c5264e4058
+            - name: LineAuth__ChannelId
+              value: "2009031910"
+            - name: LinePay__PublicBaseUrl
+              value: https://26138c220e64.ngrok-free.app
+            - name: LinePay__FrontendBaseUrl
+              value: http://localhost:4200
+            - name: LinePay__ChannelSecret
+              value: 2017c295cc6c57271b7c02fe4960166d
+            - name: LinePay__ChannelId
+              value: "2009032765"
+            - name: LinePay__BaseUrl
+              value: https://sandbox-api-pay.line.me
+            - name: PayPal__PublicBaseUrl
+              value: https://26138c220e64.ngrok-free.app
+            - name: PayPal__FrontendBaseUrl
+              value: http://localhost:4200
+            - name: PayPal__ClientSecret
+              value: EKUGHyYvCdMoQXcTBuU5MdTBfTgHg6MvJjNYN7ROXif4xUraCghxWPgPIAxPCxYSzDY6XqGOs-eHBsd3
+            - name: PayPal__ClientId
+              value: AbhORxguKI20EAnGPkqb-4rbZMblOZNZVnEOLRl-wtXxBqHyDp9lBQbP6JiDioPSLfkJbx9TzlnzNwvZ
+            - name: PayPal__BaseUrl
+              value: https://api-m.sandbox.paypal.com
+            - name: Mail__UseStartTls
+              value: "true"
+            - name: Mail__UseSsl
+              value: "false"
+            - name: Mail__UserName
+              value: a880617c@gmail.com
+            - name: Mail__SmtpPort
+              value: "587"
+            - name: Mail__SmtpHost
+              value: smtp.gmail.com
+            - name: Mail__Password
+              value: "yfks mgxw pirs iisq"
+            - name: Mail__FromName
+              value: eShopX
+            - name: Mail__FromEmail
+              value: a880617c@gmail.com
+            - name: Cloudinary__CloudName
+              value: decgap2tl
+            - name: Cloudinary__ApiSecret
+              value: MYv6caxbTWM9nGfvuDZvTRlTR8Q
+            - name: Cloudinary__ApiKey
+              value: "839847297376569"
+            - name: Cors__AllowedOrigins
+              value: https://eshop-x.com
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eshopx-api
+spec:
+  selector:
+    app: eshopx-api
+  ports:
+    - port: 5177
+      targetPort: 5177

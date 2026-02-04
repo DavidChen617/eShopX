@@ -1,0 +1,15 @@
+<div class="aspect-[4/5] w-full overflow-hidden rounded-3xl bg-neutral-100">
+  @if (mainImageUrl) {
+    <img class="h-full w-full object-cover" [src]="mainImageUrl" [alt]="alt" />
+  }
+</div>
+<div class="mt-4 grid grid-cols-3 gap-3">
+  @for (image of images; track image) {
+    <button
+      class="aspect-[4/5] overflow-hidden rounded-2xl bg-neutral-100"
+      (click)="setMain(image.url)"
+      >
+      <img class="h-full w-full object-cover" [src]="image.url" [alt]="alt" />
+    </button>
+  }
+</div>

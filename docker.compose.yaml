@@ -1,0 +1,98 @@
+services:
+  postgresql:
+    image: postgres
+    container_name: postgres1
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: eShopX
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data/postgresql/18/main
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command:
+      [
+        "redis-server",
+        "--requirepass", "redis123",
+        "--appendonly", "yes"
+      ]
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: src/eShopX.Api/Dockerfile
+    container_name: eshopx-api
+    depends_on:
+      - postgresql
+      - redis
+    environment:
+      ASPNETCORE_URLS: http://0.0.0.0:5177
+      ConnectionStrings:PostgreSQL: Host=postgresql;Port=5432;Username=user;Password=password;Database=eShopX
+      ConnectionStrings:Redis: redis:6379,password=redis123,defaultDatabase=0
+      
+      Jwt:SecretKey: ${JWT_SECRET_KEY:-}
+      Jwt:RefreshTokenExpirationDays: ${JWT_REFRESH_DAYS:-7}
+      Jwt:Issuer: ${JWT_ISSUER:-eShopX}
+      Jwt:Audience: ${JWT_AUDIENCE:-eShopX-Users}
+      Jwt:AccessTokenExpirationMinutes: ${JWT_ACCESS_MINUTES:-60}
+      Mail:UseStartTls: ${MAIL_USE_STARTTLS:-true}
+      Mail:UseSsl: ${MAIL_USE_SSL:-false}
+      Mail:UserName: ${MAIL_USERNAME:-}
+      Mail:SmtpPort: ${MAIL_SMTP_PORT:-587}
+      Mail:SmtpHost: ${MAIL_SMTP_HOST:-smtp.gmail.com}
+      Mail:Password: ${MAIL_PASSWORD:-}
+      Mail:FromName: ${MAIL_FROM_NAME:-eShopX}
+      Mail:FromEmail: ${MAIL_FROM_EMAIL:-}
+      PayPal:PublicBaseUrl: ${PAYPAL_PUBLIC_BASE_URL:-}
+      PayPal:FrontendBaseUrl: ${PAYPAL_FRONTEND_BASE_URL:-}
+      PayPal:ClientSecret: ${PAYPAL_CLIENT_SECRET:-}
+      PayPal:ClientId: ${PAYPAL_CLIENT_ID:-}
+      PayPal:BaseUrl: ${PAYPAL_BASE_URL:-https://api-m.sandbox.paypal.com}
+      LinePay:PublicBaseUrl: ${LINEPAY_PUBLIC_BASE_URL:-}
+      LinePay:FrontendBaseUrl: ${LINEPAY_FRONTEND_BASE_URL:-}
+      LinePay:ChannelSecret: ${LINEPAY_CHANNEL_SECRET:-}
+      LinePay:ChannelId: ${LINEPAY_CHANNEL_ID:-}
+      LinePay:BaseUrl: ${LINEPAY_BASE_URL:-https://sandbox-api-pay.line.me}
+      LineAuth:RedirectUri: ${LINEAUTH_REDIRECT_URI:-}
+      LineAuth:ChannelSecret: ${LINEAUTH_CHANNEL_SECRET:-}
+      LineAuth:ChannelId: ${LINEAUTH_CHANNEL_ID:-}
+      GoogleAuth:RedirectUrl: ${GOOGLE_REDIRECT_URL:-}
+      GoogleAuth:ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
+      GoogleAuth:ClientId: ${GOOGLE_CLIENT_ID:-}
+      Cloudinary:CloudName: ${CLOUDINARY_CLOUD_NAME:-}
+      Cloudinary:ApiSecret: ${CLOUDINARY_API_SECRET:-}
+      Cloudinary:ApiKey: ${CLOUDINARY_API_KEY:-}
+    ports:
+      - "5177:5177"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5177/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: src/eShopX.Web/Dockerfile
+    container_name: eshopx-web
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+
+volumes:
+  pgdata:
+    driver: local
+  redis_data:
+    driver: local

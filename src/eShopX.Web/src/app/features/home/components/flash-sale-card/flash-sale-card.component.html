@@ -1,0 +1,59 @@
+<div class="flash-sale-card bg-white rounded-lg overflow-hidden shadow-sm w-32 flex-shrink-0">
+  <!-- 商品圖片 -->
+  <div class="relative">
+    <img
+      [src]="item().imageUrl"
+      [alt]="item().name"
+      class="w-full h-32 object-cover"
+    />
+    @if (item().badge) {
+      <nz-tag
+        [nzColor]="isSoldOut() ? 'default' : 'red'"
+        class="absolute top-1 left-1 text-xs"
+      >
+        {{ item().badge }}
+      </nz-tag>
+    }
+  </div>
+
+  <!-- 商品資訊 -->
+  <div class="p-2">
+    <div class="text-xs text-gray-600 truncate">{{ item().name }}</div>
+
+    <!-- 價格 -->
+    <div class="mt-1">
+      <span class="text-[#FF2D54] font-bold">¥{{ item().price }}</span>
+      <span class="text-xs text-gray-400 line-through ml-1">¥{{ item().originalPrice }}</span>
+    </div>
+
+    <!-- 進度條 -->
+    <div class="flash-sale-progress mt-2">
+      <nz-progress
+        [nzPercent]="soldPercent()"
+        [nzShowInfo]="false"
+        nzSize="small"
+        [nzStrokeColor]="{ '0%': '#FF5000', '100%': '#FF2D54' }"
+      ></nz-progress>
+      <div class="text-[10px] text-gray-500 text-center mt-1">
+        @if (isSoldOut()) {
+          已售罄
+        } @else {
+          已搶 {{ soldPercent() }}%
+        }
+      </div>
+    </div>
+
+    <!-- 搶購按鈕 -->
+    <button
+      nz-button
+      nzType="primary"
+      nzSize="small"
+      nzBlock
+      [nzDanger]="!isSoldOut()"
+      [disabled]="isSoldOut()"
+      class="mt-2 text-xs"
+    >
+      {{ isSoldOut() ? '已售罄' : '立即搶' }}
+    </button>
+  </div>
+</div>

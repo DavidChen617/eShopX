@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eshopx-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: eshop-x.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: eshopx-api
+                port:
+                  number: 5177
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: eshopx-web
+                port:
+                  number: 80

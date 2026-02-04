@@ -1,0 +1,15 @@
+<section class="py-12 sm:py-16">
+  <ui-container>
+    @if (title || subtitle) {
+      <div class="mb-8">
+        @if (title) {
+          <h2 class="text-2xl font-semibold tracking-tight text-neutral-900">{{ title }}</h2>
+        }
+        @if (subtitle) {
+          <p class="mt-2 text-sm text-neutral-600">{{ subtitle }}</p>
+        }
+      </div>
+    }
+    <ng-content />
+  </ui-container>
+</section>

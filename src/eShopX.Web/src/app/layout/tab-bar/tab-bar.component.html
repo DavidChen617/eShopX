@@ -1,0 +1,41 @@
+<!-- 底部固定 Tab Bar -->
+<nav class="tab-bar">
+  <a
+    routerLink="/"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
+    class="tab-bar-item"
+  >
+    <nz-icon nzType="home" nzTheme="outline"></nz-icon>
+    <span>首頁</span>
+  </a>
+
+  <a
+    routerLink="/products"
+    routerLinkActive="active"
+    class="tab-bar-item"
+  >
+    <nz-icon nzType="appstore" nzTheme="outline"></nz-icon>
+    <span>分類</span>
+  </a>
+
+  <a
+    routerLink="/cart"
+    routerLinkActive="active"
+    class="tab-bar-item"
+  >
+    <nz-badge [nzCount]="cartCount" [nzOverflowCount]="99">
+      <nz-icon nzType="shopping-cart" nzTheme="outline"></nz-icon>
+    </nz-badge>
+    <span>購物車</span>
+  </a>
+
+  <a
+    routerLink="/account"
+    routerLinkActive="active"
+    class="tab-bar-item"
+  >
+    <nz-icon nzType="user" nzTheme="outline"></nz-icon>
+    <span>我的</span>
+  </a>
+</nav>

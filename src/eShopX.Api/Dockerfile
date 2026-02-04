@@ -3,7 +3,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-COPY eShopx.slnx ./
+COPY eShopX.slnx ./
 COPY global.json ./
 COPY src/ApplicationCore/ApplicationCore.csproj src/ApplicationCore/
 COPY src/Infrastructure/Infrastructure.csproj src/Infrastructure/

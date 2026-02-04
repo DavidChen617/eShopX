@@ -37,7 +37,7 @@ jobs:
       - name: Build & Push Web
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: src/eShopX.Web
           file: src/eShopX.Web/Dockerfile
           push: true
           tags: |

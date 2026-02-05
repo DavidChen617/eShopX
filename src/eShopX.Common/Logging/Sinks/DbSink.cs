@@ -4,6 +4,6 @@ public sealed class DbSink : ILogSink
 {
     public void Emit(string message)
     {
-        // 寫入資料庫
+        // TODO written database
     }
 }

@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Text.Json;
+
 using eShopX.Common.Extensions;
+
 using Microsoft.Extensions.Logging;
 
 namespace eShopX.Common.Mediator.Behaviors;

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using eShopX.Common.Validation;
+
 using Xunit;
 
 namespace eShopX.Common.Test;

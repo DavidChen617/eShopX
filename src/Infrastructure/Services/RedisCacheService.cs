@@ -1,4 +1,5 @@
 using eShopX.Common.Extensions;
+
 using StackExchange.Redis;
 
 namespace Infrastructure.Services;

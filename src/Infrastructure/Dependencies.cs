@@ -1,7 +1,10 @@
 ﻿using System.Security.Claims;
 using System.Text;
+
 using CloudinaryDotNet;
+
 using eShopX.Common.Proxy;
+
 using Infrastructure.Auth;
 using Infrastructure.Auth.ThirdPartyAuth;
 using Infrastructure.Data;
@@ -12,8 +15,10 @@ using Infrastructure.Payments.Line;
 using Infrastructure.Payments.Line.Models;
 using Infrastructure.Payments.PayPal;
 using Infrastructure.Services;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+
 using StackExchange.Redis;
 
 namespace Infrastructure;
@@ -32,16 +37,16 @@ public static class Dependencies
 
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
         services.AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>));
-        
+
         // Redis
         var options = ConfigurationOptions.Parse(
             configuration.GetConnectionString(nameof(ConnectionStrings.Redis))!);
         options.AbortOnConnectFail = false;
         services.AddSingleton<IConnectionMultiplexer>(_ =>
             ConnectionMultiplexer.Connect(options));
-        
+
         // services.AddSingleton<IConnectionMultiplexer>(_ =>
-            // ConnectionMultiplexer.Connect(configuration.GetConnectionString(nameof(ConnectionStrings.Redis))!));
+        // ConnectionMultiplexer.Connect(configuration.GetConnectionString(nameof(ConnectionStrings.Redis))!));
         services.AddScoped<ICacheService, RedisCacheService>();
 
         // Jwt

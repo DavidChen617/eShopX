@@ -3,7 +3,7 @@ using eShopX.Common.Proxy;
 namespace ApplicationCore.Interfaces;
 
 [UseDispatchProxy(typeof(LoggingProxy<>))]
-public interface ICacheService: IInterceptable
+public interface ICacheService : IInterceptable
 {
     Task<T> GetOrSetAsync<T>(
         string key,

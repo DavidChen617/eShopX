@@ -1,7 +1,10 @@
 using System;
 using System.Threading.Tasks;
+
 using eShopX.Common.Proxy;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using Xunit;
 
 namespace eShopX.Common.Test;

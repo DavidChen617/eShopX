@@ -1,4 +1,5 @@
 using eShopX.Common.Responses;
+
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;

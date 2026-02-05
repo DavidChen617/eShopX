@@ -1,5 +1,5 @@
-using ApplicationCore.UseCases.Products.UploadProductImage;
 using ApplicationCore.Interfaces;
+using ApplicationCore.UseCases.Products.UploadProductImage;
 
 namespace ApplicationCore.UseCases.Products.UpdateProductImage;
 

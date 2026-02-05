@@ -20,7 +20,7 @@ public sealed class FileSink : ILogSink
         var path = Path.Combine(_directory, _filePrefix + DateTime.Now.ToString("yyyyMMdd") + ".log");
         lock (_lock)
         {
-            File.AppendAllText(path, message + Environment.NewLine + Environment.NewLine ,Encoding.UTF8);
+            File.AppendAllText(path, message + Environment.NewLine + Environment.NewLine, Encoding.UTF8);
         }
     }
 }

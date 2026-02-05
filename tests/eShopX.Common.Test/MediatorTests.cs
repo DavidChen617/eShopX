@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+
 using eShopX.Common.Exceptions;
 using eShopX.Common.Logging;
 using eShopX.Common.Mediator;
 using eShopX.Common.Mediator.Behaviors;
 using eShopX.Common.Validation;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using Xunit;
 
 namespace eShopX.Common.Test;

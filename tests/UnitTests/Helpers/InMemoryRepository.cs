@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+
 using ApplicationCore.Interfaces;
 
 namespace UnitTests.Helpers;

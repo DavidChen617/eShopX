@@ -1,7 +1,9 @@
 using BenchmarkDotNet.Attributes;
+
 using eShopX.Common.Mediator;
 using eShopX.Common.Mediator.Behaviors;
 using eShopX.Common.Validation;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace eShopX.Common.Benchmarks.Benchmarks;

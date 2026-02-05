@@ -1,4 +1,5 @@
 using System.Security.Claims;
+
 using ApplicationCore.UseCases.Users.DeleteAvatar;
 
 namespace eShopX.Endpoints.Users;

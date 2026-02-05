@@ -1,9 +1,12 @@
 using ApplicationCore.Entities;
 using ApplicationCore.UseCases.Orders;
 using ApplicationCore.UseCases.Orders.CreateOrder;
-using eShopX.Common.Mapping;
+
 using eShopX.Common.Exceptions;
+using eShopX.Common.Mapping;
+
 using Moq;
+
 using UnitTests.Helpers;
 
 namespace UnitTests.UseCases.Orders;

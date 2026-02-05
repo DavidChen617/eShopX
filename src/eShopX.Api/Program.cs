@@ -1,10 +1,13 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
 using ApplicationCore;
+
 using eShopX.Common.Exceptions.Handlers;
 using eShopX.Common.Logging;
 using eShopX.Common.Mapping;
 using eShopX.Common.Proxy;
+
 using Infrastructure;
 using Infrastructure.Data;
 
@@ -93,12 +96,12 @@ builder.Logging.ClearProviders()
 
 var app = builder.Build();
 
-using var scope = app.Services.CreateScope(); 
-var db = scope.ServiceProvider.GetRequiredService<EShopContext>();
-await DbInitializer.SeedAsync(db);
-
 if (app.Environment.IsDevelopment())
 {
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<EShopContext>();
+    await DbInitializer.SeedAsync(db);
+
     app.MapOpenApi();
 }
 

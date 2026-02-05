@@ -1,5 +1,7 @@
 ﻿using System.Threading.Channels;
+
 using eShopX.Common.Logging.Sinks;
+
 using Microsoft.Extensions.Options;
 
 namespace eShopX.Common.Logging;

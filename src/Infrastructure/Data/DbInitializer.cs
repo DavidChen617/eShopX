@@ -35,7 +35,7 @@ public static class DbInitializer
         const string adminEmail = "admin@example.com";
         if (await context.Users.AnyAsync(x => x.Email == adminEmail))
             return;
-        
+
         var hasher = new PasswordHasher();
         var admin = new User
         {

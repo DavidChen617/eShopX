@@ -1,4 +1,5 @@
 using System.Security.Claims;
+
 using ApplicationCore.UseCases.Sellers.RejectSeller;
 
 namespace eShopX.Endpoints.Sellers;

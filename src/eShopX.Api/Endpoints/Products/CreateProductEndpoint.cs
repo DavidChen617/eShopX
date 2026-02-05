@@ -1,4 +1,5 @@
 using System.Security.Claims;
+
 using ApplicationCore.UseCases.Products.CreateProduct;
 
 namespace eShopX.Endpoints.Products;

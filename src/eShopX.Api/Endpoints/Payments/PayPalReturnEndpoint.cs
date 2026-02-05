@@ -1,9 +1,11 @@
-using ApplicationCore.Interfaces;
 using ApplicationCore.Entities;
+using ApplicationCore.Interfaces;
 using ApplicationCore.UseCases.Orders.CreatePaidOrderFromCart;
+
 using Infrastructure.Options;
 using Infrastructure.Payments;
 using Infrastructure.Payments.PayPal;
+
 using Microsoft.Extensions.Options;
 
 namespace eShopX.Endpoints.Payments;

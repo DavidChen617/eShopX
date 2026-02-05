@@ -1,5 +1,7 @@
 using BenchmarkDotNet.Attributes;
+
 using eShopX.Common.Proxy;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace eShopX.Common.Benchmarks.Benchmarks;

@@ -1,8 +1,11 @@
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.UseCases.Auth.Login;
+
 using eShopX.Common.Exceptions;
+
 using Moq;
+
 using UnitTests.Helpers;
 
 namespace UnitTests.UseCases.Auth;

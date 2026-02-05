@@ -1,5 +1,6 @@
 using eShopX.Common.Extensions;
 using eShopX.Common.Logging;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

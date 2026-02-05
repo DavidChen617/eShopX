@@ -1,8 +1,12 @@
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
+
 using eShopX.Common.Exceptions;
+
 using Google.Apis.Auth;
+
 using Infrastructure.Options;
+
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Auth.ThirdPartyAuth;

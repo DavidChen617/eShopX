@@ -1,5 +1,6 @@
 using ApplicationCore.Entities;
 using ApplicationCore.UseCases.Carts.CheckoutPreview;
+
 using UnitTests.Helpers;
 
 namespace UnitTests.UseCases.Carts;

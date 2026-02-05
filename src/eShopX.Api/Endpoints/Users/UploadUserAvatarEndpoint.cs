@@ -1,4 +1,5 @@
 using System.Security.Claims;
+
 using ApplicationCore.Interfaces;
 using ApplicationCore.UseCases.Users.UploadAvatar;
 

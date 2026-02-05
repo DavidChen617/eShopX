@@ -1,4 +1,5 @@
 using BenchmarkDotNet.Attributes;
+
 using eShopX.Common.Validation;
 
 namespace eShopX.Common.Benchmarks.Benchmarks;

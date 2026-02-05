@@ -1,6 +1,7 @@
+using System.Security.Claims;
+
 using ApplicationCore.Interfaces;
 using ApplicationCore.UseCases.Products.UploadProductImage;
-using System.Security.Claims;
 
 namespace eShopX.Endpoints.Products;
 

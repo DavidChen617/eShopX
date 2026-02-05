@@ -1,6 +1,8 @@
 using System.Reflection;
+
 using eShopX.Common.Mediator.Behaviors;
 using eShopX.Common.Validation;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace eShopX.Common.Mediator;

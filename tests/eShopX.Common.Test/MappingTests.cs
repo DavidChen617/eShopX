@@ -1,6 +1,9 @@
 using System;
+
 using eShopX.Common.Mapping;
+
 using Microsoft.Extensions.DependencyInjection;
+
 using Xunit;
 
 namespace eShopX.Common.Test;

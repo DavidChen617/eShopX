@@ -1,4 +1,5 @@
 using System.Net;
+
 using eShopX.Common.Validation;
 
 namespace eShopX.Common.Exceptions;

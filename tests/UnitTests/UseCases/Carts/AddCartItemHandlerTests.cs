@@ -1,6 +1,8 @@
 using ApplicationCore.Entities;
 using ApplicationCore.UseCases.Carts.AddCartItem;
+
 using eShopX.Common.Exceptions;
+
 using UnitTests.Helpers;
 
 namespace UnitTests.UseCases.Carts;

@@ -1,4 +1,5 @@
 using Infrastructure.Options;
+
 using Microsoft.Extensions.Options;
 
 namespace eShopX.Endpoints.Payments;

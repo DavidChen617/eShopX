@@ -1,5 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Threading.Channels;
+﻿using System.Threading.Channels;
+
+using Microsoft.Extensions.Logging;
 
 namespace eShopX.Common.Logging;
 

@@ -7,11 +7,17 @@ resource "aws_key_pair" "k8s" {
   public_key = tls_private_key.ssh.public_key_openssh
 }
 
+resource "local_file" "ssh_private_key_pem" {
+  filename        = "${path.module}/eshopx-k8s.pem"
+  content         = tls_private_key.ssh.private_key_openssh
+  file_permission = "0600"
+}
+
 resource "random_string" "token_id" {
   length  = 6
   lower   = true
   upper   = false
-  number  = true
+  numeric = true
   special = false
 }
 
@@ -19,7 +25,7 @@ resource "random_string" "token_secret" {
   length  = 16
   lower   = true
   upper   = false
-  number  = true
+  numeric = true
   special = false
 }
 
@@ -28,7 +34,7 @@ locals {
 }
 
 resource "aws_instance" "master" {
-  ami                         = data.aws_ami.ubuntu.id
+  ami                         = var.ami_id
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.public.id
   vpc_security_group_ids      = [aws_security_group.master.id]
@@ -70,7 +76,7 @@ resource "aws_instance" "master" {
     PRIVATE_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
     kubeadm init \
-      --apiserver-advertise-address=${PRIVATE_IP} \
+      --apiserver-advertise-address=$${PRIVATE_IP} \
       --pod-network-cidr=192.168.0.0/16 \
       --token ${local.kubeadm_token} \
       --token-ttl 0
@@ -82,16 +88,20 @@ resource "aws_instance" "master" {
     # Calico
     su - ubuntu -c "kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.3/manifests/calico.yaml"
 
-    echo "kubeadm join ${PRIVATE_IP}:6443 --token ${local.kubeadm_token} --discovery-token-unsafe-skip-ca-verification" > /home/ubuntu/join.sh
+    echo "kubeadm join $${PRIVATE_IP}:6443 --token ${local.kubeadm_token} --discovery-token-unsafe-skip-ca-verification" > /home/ubuntu/join.sh
     chmod +x /home/ubuntu/join.sh
   EOF
 
-  tags = merge(local.tags, { Name = "${var.project_name}-master" })
+  tags = merge(local.tags, { Name = "${var.project_name}-k3s-master" })
+
+  lifecycle {
+    ignore_changes = [user_data]
+  }
 }
 
 resource "aws_instance" "workers" {
   count                  = 2
-  ami                    = data.aws_ami.ubuntu.id
+  ami                    = var.ami_id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.private.id
   vpc_security_group_ids = [aws_security_group.worker.id]
@@ -134,5 +144,9 @@ resource "aws_instance" "workers" {
     kubeadm join ${aws_instance.master.private_ip}:6443 --token ${local.kubeadm_token} --discovery-token-unsafe-skip-ca-verification
   EOF
 
-  tags = merge(local.tags, { Name = "${var.project_name}-worker-${count.index + 1}" })
+  tags = merge(local.tags, { Name = "${var.project_name}-k3s-worker-${count.index + 1}" })
+
+  lifecycle {
+    ignore_changes = [user_data]
+  }
 }

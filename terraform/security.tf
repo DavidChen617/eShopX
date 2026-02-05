@@ -1,15 +1,15 @@
 resource "aws_security_group" "master" {
-  name        = "${var.project_name}-master"
-  description = "K8s control-plane"
+  name        = "${var.project_name}-k3s-master"
+  description = "K3s master security group"
   vpc_id      = aws_vpc.main.id
-  tags        = merge(local.tags, { Name = "${var.project_name}-master" })
+  tags        = merge(local.tags, { Name = "${var.project_name}-k3s-master" })
 }
 
 resource "aws_security_group" "worker" {
-  name        = "${var.project_name}-worker"
-  description = "K8s workers"
+  name        = "${var.project_name}-k3s-worker"
+  description = "K3s worker security group"
   vpc_id      = aws_vpc.main.id
-  tags        = merge(local.tags, { Name = "${var.project_name}-worker" })
+  tags        = merge(local.tags, { Name = "${var.project_name}-k3s-worker" })
 }
 
 # SSH to master
@@ -41,12 +41,42 @@ resource "aws_security_group_rule" "master_https" {
   security_group_id = aws_security_group.master.id
 }
 
+# NodePort HTTP
+resource "aws_security_group_rule" "master_nodeport_http" {
+  type              = "ingress"
+  from_port         = 31726
+  to_port           = 31726
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.master.id
+}
+
+# NodePort HTTPS
+resource "aws_security_group_rule" "master_nodeport_https" {
+  type              = "ingress"
+  from_port         = 32598
+  to_port           = 32598
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.master.id
+}
+
 # Allow workers to reach control-plane
 resource "aws_security_group_rule" "master_from_worker_all" {
   type                     = "ingress"
   from_port                = 0
   to_port                  = 0
   protocol                 = "-1"
+  source_security_group_id = aws_security_group.worker.id
+  security_group_id        = aws_security_group.master.id
+}
+
+# Allow workers to reach kube-apiserver
+resource "aws_security_group_rule" "master_kubeapi" {
+  type                     = "ingress"
+  from_port                = 6443
+  to_port                  = 6443
+  protocol                 = "tcp"
   source_security_group_id = aws_security_group.worker.id
   security_group_id        = aws_security_group.master.id
 }

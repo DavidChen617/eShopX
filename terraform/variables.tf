@@ -28,6 +28,11 @@ variable "instance_type" {
   default = "t3.medium"
 }
 
+variable "ami_id" {
+  type    = string
+  default = "ami-0d49f1fe982e06148"
+}
+
 variable "ssh_allowed_cidr" {
   type    = string
   default = "0.0.0.0/0"

@@ -15,6 +15,8 @@ public static class CustomLoggerExtension
                 builder.Services.Configure(configure);
             }
 
+            builder.Services.AddSingleton<ILogDispatcher, ChannelLogDispatcher>();
+            builder.Services.AddHostedService<LogBackgroundService>();
             builder.Services.AddSingleton<ILoggerProvider, CustomLoggerProvider>();
             return builder;
         }

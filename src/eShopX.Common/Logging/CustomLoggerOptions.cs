@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Threading.Channels;
 
 namespace eShopX.Common.Logging;
 
@@ -11,4 +12,8 @@ public class CustomLoggerOptions
     public string LogDirectory { get; set; } = "Logs";
     public string FilePrefix { get; set; } = "app-";
     public bool IncludeScopes { get; set; } = true;
+    public int ChannelCapacity { get; set; } = 1024;
+    public BoundedChannelFullMode ChannelFullMode { get; set; } = BoundedChannelFullMode.DropOldest;
+    public bool IncludeThreadId { get; set; } = false;
+    public bool IncludeSinkThreadId { get; set; } = false;
 }

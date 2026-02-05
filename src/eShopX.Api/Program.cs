@@ -87,6 +87,8 @@ builder.Logging.ClearProviders()
     options.LogDirectory = "Logs";
     options.FilePrefix = "app-";
     options.MinLevel = LogLevel.Information;
+    options.IncludeThreadId = false;
+    options.IncludeSinkThreadId = false;
 });
 
 var app = builder.Build();

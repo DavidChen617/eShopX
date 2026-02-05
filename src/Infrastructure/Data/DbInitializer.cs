@@ -32,16 +32,15 @@ public static class DbInitializer
 
     private static async Task SeedAdminUserAsync(EShopContext context)
     {
-        const string adminEmail = "a880618c@gmail.com";
+        const string adminEmail = "admin@example.com";
         if (await context.Users.AnyAsync(x => x.Email == adminEmail))
             return;
-
+        
         var hasher = new PasswordHasher();
         var admin = new User
         {
-            Id = Guid.NewGuid(),
             Name = "David Chen",
-            Email = adminEmail,
+            Email = "admin@example.com",
             Phone = string.Empty,
             PasswordHash = hasher.HashPassword("1qaz!QAZ"),
             IsAdmin = true,

@@ -12,9 +12,12 @@ spec:
       labels:
         app: eshopx-web
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8s-work1
       containers:
         - name: web
           image: davidchen617/eshopx-web:latest
+          args: ["nginx","-g","daemon off;"]
           ports:
             - containerPort: 80
 ---

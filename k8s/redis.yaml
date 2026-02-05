@@ -8,6 +8,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
+    storageClassName: local-path
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -23,6 +24,8 @@ spec:
       labels:
         app: eshopx-redis
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8s-work1
       containers:
         - name: redis
           image: redis:latest

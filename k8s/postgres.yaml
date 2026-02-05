@@ -8,6 +8,7 @@ spec:
   resources:
     requests:
       storage: 5Gi
+    storageClassName: local-path
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -23,6 +24,8 @@ spec:
       labels:
         app: eshopx-postgres
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8s-work1
       containers:
         - name: postgres
           image: postgres:latest

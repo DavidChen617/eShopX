@@ -12,6 +12,8 @@ spec:
       labels:
         app: eshopx-api
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8s-work1
       containers:
         - name: api
           image: davidchen617/eshopx-api:latest

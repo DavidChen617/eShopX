@@ -36,7 +36,7 @@ importers:
         specifier: ^21.0.0
         version: 21.0.0(@angular/common@21.1.2(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2))(@angular/platform-browser@21.1.2(@angular/animations@21.1.2(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2)))(@angular/common@21.1.2(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@tailwindcss/postcss':
-        specifier: ^4.1.18
+        specifier: ^4.0.0
         version: 4.1.18
       ng-zorro-antd:
         specifier: ^21.0.2
@@ -48,7 +48,7 @@ importers:
         specifier: ~7.8.0
         version: 7.8.2
       tailwindcss:
-        specifier: 4.1.18
+        specifier: ^4.1.18
         version: 4.1.18
       tslib:
         specifier: ^2.3.0

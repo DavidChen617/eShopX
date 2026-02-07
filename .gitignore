@@ -6,6 +6,16 @@
 # dotenv files
 .env
 
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.pem
+
+# K8s/keys
+*.key
+*.key.pub
+
 # User-specific files
 *.rsuser
 *.suo

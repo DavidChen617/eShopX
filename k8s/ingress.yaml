@@ -1,26 +1,23 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: eshopx-ingress
+  name: eshopx-ing
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - eshop-x.com
+    secretName: super-cow
   rules:
-    - host: eshop-x.com
-      http:
-        paths:
-          - path: /api
-            pathType: Prefix
-            backend:
-              service:
-                name: eshopx-api
-                port:
-                  number: 5177
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: eshopx-web
-                port:
-                  number: 80
+  - host: eshop-x.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: eshopx-web
+            port:
+              number: 80

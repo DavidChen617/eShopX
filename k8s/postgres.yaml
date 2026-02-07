@@ -1,20 +1,9 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: eshopx-postgres-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 5Gi
-    storageClassName: local-path
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: eshopx-postgres
 spec:
+  serviceName: eshopx-postgres-headless
   replicas: 1
   selector:
     matchLabels:
@@ -28,7 +17,7 @@ spec:
         kubernetes.io/hostname: k8s-work1
       containers:
         - name: postgres
-          image: postgres:latest
+          image: postgres:18
           ports:
             - containerPort: 5432
           envFrom:
@@ -36,14 +25,32 @@ spec:
                 name: eshopx-postgres-secret
           env:
             - name: PGDATA
-              value: /var/lib/postgresql/data/postgresql/18/main
+              value: /var/lib/postgresql/18/docker
           volumeMounts:
             - name: pgdata
-              mountPath: /var/lib/postgresql/data
-      volumes:
-        - name: pgdata
-          persistentVolumeClaim:
-            claimName: eshopx-postgres-pvc
+              mountPath: /var/lib/postgresql
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp3
+        resources:
+          requests:
+            storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eshopx-postgres-headless
+spec:
+  clusterIP: None
+  selector:
+    app: eshopx-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
 ---
 apiVersion: v1
 kind: Service

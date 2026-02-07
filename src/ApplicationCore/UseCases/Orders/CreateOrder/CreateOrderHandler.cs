@@ -9,6 +9,28 @@ public class CreateOrderHandler(
     public async Task<CreateOrderResponse> Handle(CreateOrderCommand command,
         CancellationToken cancellationToken = default)
     {
+        const int maxRetries = 3;
+        
+        for (int attempt = 0; attempt < maxRetries; ++attempt)
+        {
+            try
+            {
+                return await CreateOrderInternalAsync(command, cancellationToken);
+            }
+            catch (ConcurrencyException) when(attempt < maxRetries - 1)
+            {
+                // Concurrency conflict, wait and try again                                                                                                             
+                await Task.Delay(Random.Shared.Next(10, 50), cancellationToken);
+            }
+        }
+        
+        throw new ConflictException("系統繁忙，請稍後再試");
+    }
+    
+    private async Task<CreateOrderResponse> CreateOrderInternalAsync(                                                                                          
+        CreateOrderCommand command,                                                                                                                            
+        CancellationToken cancellationToken)                                                                                                                   
+    {                                                                                                                                                          
         var (userId, shippingName, shippingAddress, shippingPhone, items) =
             command;
 

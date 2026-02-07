@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using eShopX.Common.Exceptions;
 
 namespace Infrastructure.Data.Repositories;
 
@@ -103,8 +104,15 @@ public class RepositoryBase<TEntity>(DbContext dbContext) : IRepository<TEntity>
         dbContext.Set<TEntity>().UpdateRange(entities);
     }
 
-    public Task<int> SaveChangesAsync(CancellationToken ct = default)
+    public async Task<int> SaveChangesAsync(CancellationToken ct = default)
     {
-        return dbContext.SaveChangesAsync(ct);
+        try
+        {
+            return await dbContext.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateConcurrencyException e)
+        {
+            throw new ConcurrencyException("The information has been modified by someone else, please try again. " + e.Message); 
+        }
     }
 }

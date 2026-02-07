@@ -25,12 +25,24 @@ namespace Infrastructure;
 
 public static class Dependencies
 {
-    public static void ConfigureServices(this IServiceCollection services, IConfiguration configuration)
+    public static void ConfigureInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<EShopContext>((sp, options) =>
+        services.AddDbContext<EShopContext>((_, options) =>
         {
             options.UseNpgsql(
-                    configuration.GetConnectionString(nameof(ConnectionStrings.PostgreSQL)))
+                    configuration.GetConnectionString(nameof(ConnectionStrings.PostgreSQL)),
+                    npgsqlOptions =>
+                    {
+                        // Connection pool optimization
+                        npgsqlOptions.MinBatchSize(1);
+                        npgsqlOptions.MaxBatchSize(100);
+                        
+                        // Enable connection retries
+                        npgsqlOptions.EnableRetryOnFailure(
+                            maxRetryCount: 3,
+                            maxRetryDelay: TimeSpan.FromSeconds(5),
+                            errorCodesToAdd: null);
+                    })
                 .EnableSensitiveDataLogging()
                 .EnableDetailedErrors();
         });
@@ -44,9 +56,6 @@ public static class Dependencies
         options.AbortOnConnectFail = false;
         services.AddSingleton<IConnectionMultiplexer>(_ =>
             ConnectionMultiplexer.Connect(options));
-
-        // services.AddSingleton<IConnectionMultiplexer>(_ =>
-        // ConnectionMultiplexer.Connect(configuration.GetConnectionString(nameof(ConnectionStrings.Redis))!));
         services.AddScoped<ICacheService, RedisCacheService>();
 
         // Jwt

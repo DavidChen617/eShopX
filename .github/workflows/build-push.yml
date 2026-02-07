@@ -5,7 +5,43 @@ on:
     branches: ["main"]
 
 jobs:
+  ef-migrate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Generate migration script
+        run: |
+          dotnet tool install --global dotnet-ef
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet ef migrations script --idempotent \
+            --project src/Infrastructure/Infrastructure.csproj \
+            --startup-project src/eShopX.Api/eShopX.Api.csproj \
+            -o migrations.sql
+
+      - name: Upload migrations artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: migrations
+          path: migrations.sql
+
+      - name: Upload k8s manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: k8s
+          path: k8s/
+
   build:
+    needs: ef-migrate
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -13,7 +49,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -44,14 +80,44 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/eshopx-web:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/eshopx-web:${{ github.sha }}
 
-  deploy:
+  migrate:
     needs: build
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v6
+      - name: Download migrations artifact
+        uses: actions/download-artifact@v7
         with:
-          sparse-checkout: |
-            k8s
-          sparse-checkout-cone-mode: false
+          name: migrations
+          path: .
+      - name: Create ConfigMap
+        run: |
+          kubectl delete configmap db-migrations --ignore-not-found
+          kubectl create configmap db-migrations --from-file=migrations.sql
+      - name: Apply migration
+        run: |
+          kubectl run psql-migrate --rm -i --restart=Never \
+            --image=postgres:18 \
+            --overrides='{
+              "spec": {
+                "containers": [{
+                  "name": "psql",
+                  "image": "postgres:18",
+                  "command": ["sh","-c","psql -h eshopx-postgres -U user -d eShopX -f /migrations/migrations.sql"],
+                  "volumeMounts": [{"name":"migrations","mountPath":"/migrations"}],
+                  "env": [{"name":"PGPASSWORD","value":"password"}]
+                }],
+                "volumes": [{"name":"migrations","configMap":{"name":"db-migrations"}}]
+              }
+            }'
+
+  deploy:
+    needs: migrate
+    runs-on: self-hosted
+    steps:
+      - name: Download k8s manifests
+        uses: actions/download-artifact@v4
+        with:
+          name: k8s
+          path: k8s
       - name: Apply manifests
         run: kubectl apply -f k8s/

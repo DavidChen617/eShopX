@@ -34,6 +34,18 @@ variable "instance_type" {
   default     = "t3.medium"
 }
 
+variable "root_volume_size" {
+  type        = number
+  description = "Root EBS volume size (GiB)"
+  default     = 20
+}
+
+variable "root_volume_type" {
+  type        = string
+  description = "Root EBS volume type"
+  default     = "gp3"
+}
+
 variable "ami_id" {
   type        = string
   description = "AMI ID for EC2 instance"

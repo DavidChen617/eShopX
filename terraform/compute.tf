@@ -19,12 +19,16 @@ resource "local_file" "private_key" {
 }
 
 resource "aws_instance" "master" {
-  ami = var.ami_id
+  ami = data.aws_ami.ubuntu_2404.id
   instance_type = var.instance_type
   subnet_id = aws_subnet.public.id
-  vpc_security_group_ids = [aws_security_group.ec2.id]
+  vpc_security_group_ids = [aws_security_group.master.id]
   associate_public_ip_address = true
   key_name = aws_key_pair.generated.key_name
+  root_block_device {
+    volume_type = var.root_volume_type
+    volume_size = var.root_volume_size
+  }
   
   tags = merge(local.tags, {
     Name = "${var.project_name}-master"
@@ -33,12 +37,16 @@ resource "aws_instance" "master" {
 
 resource "aws_instance" "worker" {
   count = 2
-  ami = var.ami_id
+  ami = data.aws_ami.ubuntu_2404.id
   instance_type = var.instance_type
   subnet_id = aws_subnet.public.id
-  vpc_security_group_ids = [aws_security_group.ec2.id]
+  vpc_security_group_ids = [aws_security_group.worker.id]
   associate_public_ip_address = true
   key_name = aws_key_pair.generated.key_name
+  root_block_device {
+    volume_type = var.root_volume_type
+    volume_size = var.root_volume_size
+  }
   
   tags = merge(local.tags, {
     Name = "${var.project_name}-worker-${count.index + 1}"

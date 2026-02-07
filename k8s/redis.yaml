@@ -26,6 +26,10 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: k8s-work1
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
       containers:
         - name: redis
           image: redis:latest

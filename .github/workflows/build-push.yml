@@ -25,7 +25,7 @@ jobs:
           dotnet build src/eShopX.Api/eShopX.Api.csproj -c Release
           dotnet tool install --global dotnet-ef
           export PATH="$PATH:$HOME/.dotnet/tools"
-          dotnet ef migrations script --idempotent --no-build \
+          dotnet ef migrations script --idempotent --no-build --configuration Release \
             --project src/Infrastructure/Infrastructure.csproj \
             --startup-project src/eShopX.Api/eShopX.Api.csproj \
             -o migrations.sql

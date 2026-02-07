@@ -38,7 +38,9 @@ public class RedisCacheService(IConnectionMultiplexer multiplexer) : ICacheServi
 
     public async Task RemoveByPrefixAsync(string prefix, CancellationToken cancellationToken = default)
     {
+        var pattern = KeyPrefix + prefix + "*";
         var endpoints = multiplexer.GetEndPoints();
+        
         foreach (var endpoint in endpoints)
         {
             var server = multiplexer.GetServer(endpoint);
@@ -47,8 +49,10 @@ public class RedisCacheService(IConnectionMultiplexer multiplexer) : ICacheServi
                 continue;
             }
 
-            var pattern = KeyPrefix + prefix + "*";
-            foreach (var key in server.Keys(database: _db.Database, pattern: pattern))
+            await foreach (var key in server.KeysAsync(
+                               database: _db.Database,
+                               pattern: pattern,
+                               pageSize: 100).WithCancellation(cancellationToken))
             {
                 await _db.KeyDeleteAsync(key);
             }

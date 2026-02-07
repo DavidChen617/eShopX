@@ -43,3 +43,11 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/eshopx-web:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/eshopx-web:${{ github.sha }}
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v6
+      - name: Apply manifests
+        run: kubectl apply -f k8s/

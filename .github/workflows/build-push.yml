@@ -22,6 +22,7 @@ jobs:
       - name: Generate migration script
         run: |
           dotnet restore src/eShopX.Api/eShopX.Api.csproj
+          dotnet build src/eShopX.Api/eShopX.Api.csproj -c Release
           dotnet tool install --global dotnet-ef
           export PATH="$PATH:$HOME/.dotnet/tools"
           dotnet ef migrations script --idempotent \

@@ -1,13 +1,10 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-
 using ApplicationCore;
-
 using eShopX.Common.Exceptions.Handlers;
 using eShopX.Common.Logging;
 using eShopX.Common.Mapping;
 using eShopX.Common.Proxy;
-
 using Infrastructure;
 using Infrastructure.Data;
 

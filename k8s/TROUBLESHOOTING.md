@@ -36,3 +36,24 @@
   - 先安裝 cert-manager：
     - `kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml`
   - 等 `cert-manager-webhook` Ready 後再建立 `ClusterIssuer`
+
+## 9. gp3 / EBS CSI Driver 無法動態建立 PVC
+
+- 現象：
+  - `PVC` 長時間 `Pending`
+  - `StorageClass` 使用 `gp3` 但沒有 volume 建立
+- 原因：
+  - 節點未掛 IAM Role（缺少 `AmazonEBSCSIDriverPolicy`）
+  - `aws-ebs-csi-driver` 未安裝或未就緒
+- 解法：
+  - 建立/綁定 IAM Role（含 `AmazonEBSCSIDriverPolicy`）到所有節點
+    - 建立 trust policy（`trust-policy.json`）：
+      - `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"},"Action":"sts:AssumeRole"}]}`
+    - 建立角色：
+      - `aws iam create-role --role-name <role-name> --assume-role-policy-document file://trust-policy.json`
+    - `aws iam attach-role-policy --role-name <role-name> --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy`
+  - 安裝 EBS CSI Driver：
+    - `kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=master"`
+  - 建立 `gp3` StorageClass（`k8s/gp3-storageclass.yaml`）
+  - 檢查 driver 是否就緒：
+    - `kubectl get pods -n kube-system | grep ebs`

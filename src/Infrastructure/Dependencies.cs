@@ -1,24 +1,22 @@
 ﻿using System.Security.Claims;
 using System.Text;
-
 using CloudinaryDotNet;
-
+using Confluent.Kafka;
 using eShopX.Common.Proxy;
-
 using Infrastructure.Auth;
 using Infrastructure.Auth.ThirdPartyAuth;
 using Infrastructure.Data;
 using Infrastructure.Data.Repositories;
+using Infrastructure.Messaging;
 using Infrastructure.Options;
 using Infrastructure.Payments;
 using Infrastructure.Payments.Line;
 using Infrastructure.Payments.Line.Models;
 using Infrastructure.Payments.PayPal;
 using Infrastructure.Services;
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-
 using StackExchange.Redis;
 
 namespace Infrastructure;
@@ -57,6 +55,7 @@ public static class Dependencies
         services.AddSingleton<IConnectionMultiplexer>(_ =>
             ConnectionMultiplexer.Connect(options));
         services.AddScoped<ICacheService, RedisCacheService>();
+        services.AddScoped<IFlashSalePurchaseService, FlashSalePurchaseService>();
 
         // Jwt
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.OptionKey));
@@ -115,5 +114,38 @@ public static class Dependencies
                 PayPalCaptureOrderResponse>, PayPalService>();
 
         services.DecorateWithDispatchProxyFromAttributes(new[] { typeof(Dependencies).Assembly });
+        
+        // kafka
+        services.Configure<KafkaOptions>(configuration.GetSection(KafkaOptions.OptionKey));
+        services.AddSingleton<IProducer<string,string>>(sp =>
+        {
+            var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+            
+            var config = new ProducerConfig                                                                                                        
+            {                                                                                                                                      
+                BootstrapServers = kafkaOptions.BootstrapServers,                                                                                 
+                Acks = Acks.All,  // Ensure message is acknowledged by all replicas                                                                                
+                EnableIdempotence = true  // Prevent duplicate sending                                                                                          
+            };  
+            
+            return new ProducerBuilder<string, string>(config).Build();
+        });
+        services.AddSingleton<IConsumer<string, string>>(sp =>
+        {
+            var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+            
+            var config = new ConsumerConfig                                                                                                        
+            {                                                                                                                                      
+                BootstrapServers = kafkaOptions.BootstrapServers,                                                                                 
+                GroupId = kafkaOptions.GroupId,                                                                                            
+                AutoOffsetReset = AutoOffsetReset.Earliest,                                                                                        
+                EnableAutoCommit = false  // Manual commit, make sure the processing is successful before confirming                                                                       
+            };                                                                                                                                     
+                                                                                                                                                 
+            return new ConsumerBuilder<string, string>(config).Build();
+        });
+
+        services.AddSingleton<IFlashSaleOrderPublisher, FlashSaleOrderPublisher>();
+        services.AddHostedService<FlashSaleOrderConsumer>();
     }
 }

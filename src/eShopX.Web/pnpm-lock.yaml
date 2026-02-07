@@ -36,11 +36,11 @@ importers:
         specifier: ^21.0.0
         version: 21.0.0(@angular/common@21.1.2(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2))(@angular/platform-browser@21.1.2(@angular/animations@21.1.2(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2)))(@angular/common@21.1.2(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@tailwindcss/postcss':
-        specifier: ^4.0.0
+        specifier: ^4.1.18
         version: 4.1.18
       ng-zorro-antd:
         specifier: ^21.0.2
-        version: 21.0.2(17f934c1371f22edf035b1778c4c95af)
+        version: 21.0.2(2wngltvtbnehdfutgjalgia5jq)
       postcss:
         specifier: ^8.5.6
         version: 8.5.6
@@ -5369,7 +5369,7 @@ snapshots:
 
   negotiator@1.0.0: {}
 
-  ng-zorro-antd@21.0.2(17f934c1371f22edf035b1778c4c95af):
+  ng-zorro-antd@21.0.2(2wngltvtbnehdfutgjalgia5jq):
     dependencies:
       '@angular/cdk': 21.1.2(@angular/common@21.1.2(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2))(@angular/platform-browser@21.1.2(@angular/animations@21.1.2(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2)))(@angular/common@21.1.2(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@angular/common': 21.1.2(@angular/core@21.1.2(@angular/compiler@21.1.2)(rxjs@7.8.2))(rxjs@7.8.2)

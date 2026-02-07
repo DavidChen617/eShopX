@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      ConnectionStrings__PostgreSQL: ${{ vars.CONNECTIONSTRINGS__POSTGRESQL }}
 
     steps:
       - name: Checkout

@@ -1,18 +1,16 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using ApplicationCore;
+using System.Threading.RateLimiting;
 using eShopX.Common.Exceptions.Handlers;
 using eShopX.Common.Logging;
 using eShopX.Common.Mapping;
 using eShopX.Common.Proxy;
-using Infrastructure;
-using Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpoints();
 
-builder.Services.ConfigureServices(builder.Configuration);
+builder.Services.ConfigureInfrastructureServices(builder.Configuration);
 
 builder.Services.AddMediator(typeof(IAssemblyMarker).Assembly)
     .AddValidators(typeof(IAssemblyMarker).Assembly)
@@ -76,6 +74,24 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Rate Limiting - Current limiting and anti-brushing
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    
+    // Global current limit: 100 times per second per IP
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+            factory: _ => new FixedWindowRateLimiterOptions{ PermitLimit = 100, Window = TimeSpan.FromSeconds(1) }));
+    
+    // Flash Sale only: 5 per second per user
+    options.AddPolicy("FlashSale", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.User.Identity?.Name ?? context.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
+            factory: _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromSeconds(1) }));
+});
+
 builder.Services.AddOpenApi();
 
 builder.Logging.ClearProviders()
@@ -108,6 +124,7 @@ app.UseHttpsRedirection();
 app.UseScopeId();
 app.UseCors("MyPolicy");
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 app.MapEndpoints();
 app.UseExceptionHandler();

@@ -9,9 +9,9 @@ public class RedisCacheService(IConnectionMultiplexer multiplexer) : ICacheServi
     private readonly IDatabase _db = multiplexer.GetDatabase();
     private const string KeyPrefix = "eshopx:";
 
-    public async Task<T> GetOrSetAsync<T>(
+    public async Task<T?> GetOrSetAsync<T>(
         string key,
-        Func<CancellationToken, Task<T>> factory,
+        Func<CancellationToken, Task<T?>> factory,
         TimeSpan ttl,
         CancellationToken cancellationToken = default) where T : class
     {
@@ -28,6 +28,9 @@ public class RedisCacheService(IConnectionMultiplexer multiplexer) : ICacheServi
         }
 
         var value = await factory(cancellationToken);
+        if (value is null)
+            return null;
+
         var payload = value.ToJson();
         var jitter = TimeSpan.FromMilliseconds(ttl.TotalMilliseconds * (Random.Shared.NextDouble() * 0.2 - 0.1));
         await _db.StringSetAsync(cacheKey, payload, ttl + jitter);

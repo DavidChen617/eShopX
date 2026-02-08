@@ -17,6 +17,7 @@ public record FlashSaleSlotItem(
     string Status);
 
 public record FlashSaleProductItem(
+    Guid FlashSaleItemId,
     Guid ProductId,
     string Name,
     string? ImageUrl,

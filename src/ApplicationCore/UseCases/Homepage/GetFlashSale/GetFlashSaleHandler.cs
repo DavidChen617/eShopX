@@ -28,7 +28,7 @@ public class GetFlashSaleHandler(
 
                 var sale = flashSale.FirstOrDefault();
                 if (sale == null)
-                    return new CacheBox<GetFlashSaleResponse>(null);
+                    return null;
 
                 var slots = await slotRepository.QueryAsync(q =>
                         q.Where(s => s.FlashSaleId == sale.Id)
@@ -48,6 +48,7 @@ public class GetFlashSaleHandler(
                             .OrderBy(i => i.SortOrder)
                             .Select(i => new
                             {
+                                i.Id,
                                 i.ProductId,
                                 i.FlashPrice,
                                 i.StockTotal,
@@ -79,6 +80,7 @@ public class GetFlashSaleHandler(
                     imageMap.TryGetValue(i.ProductId, out var imageUrl);
 
                     return new FlashSaleProductItem(
+                        i.Id,
                         i.ProductId,
                         product?.Name ?? string.Empty,
                         imageUrl,
@@ -89,17 +91,17 @@ public class GetFlashSaleHandler(
                         i.Badge);
                 }).ToList();
 
-                return new CacheBox<GetFlashSaleResponse>(new GetFlashSaleResponse(
+                return new GetFlashSaleResponse(
                     sale.Id,
                     sale.Title,
                     sale.Subtitle,
                     sale.StartsAt,
                     sale.EndsAt,
                     slotItems,
-                    productItems));
+                    productItems);
             },
             TimeSpan.FromMinutes(2),
             cancellationToken);
-        return cached.Value;
+        return cached;
     }
 }

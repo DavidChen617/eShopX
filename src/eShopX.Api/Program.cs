@@ -29,7 +29,7 @@ builder.Services
     .AddExceptionHandler<ForbiddenExceptionHandler>()
     .AddExceptionHandler<GlobalExceptionHandler>();
 
-builder.Services.DecorateWithDispatchProxyFromAttributes(typeof(Dependencies).Assembly, typeof(IAssemblyMarker).Assembly);
+builder.Services.DecorateWithDispatchProxyFromAttributes([typeof(Dependencies).Assembly, typeof(IAssemblyMarker).Assembly]);
 
 builder.Services.AddHttpClient();
 

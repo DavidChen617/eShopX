@@ -25,7 +25,7 @@ export class HeaderComponent {
     private readonly authService: AuthService,
     private readonly accountService: AccountService,
     private readonly cartService: CartService,
-    private readonly router: Router
+    private readonly router: Router,
   ) {
     this.cartCount = this.cartService.cartCount;
     effect(() => {

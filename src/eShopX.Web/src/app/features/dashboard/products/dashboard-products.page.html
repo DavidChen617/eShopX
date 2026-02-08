@@ -1,11 +1,11 @@
 <ui-section title="商品管理" subtitle="管理你的上架商品">
   <div class="rounded-2xl border border-neutral-200 bg-white p-6">
-    <div class="text-sm font-semibold text-neutral-900">
-      新增商品
-    </div>
+    <div class="text-sm font-semibold text-neutral-900">新增商品</div>
     <div class="mt-4 grid gap-4 md:grid-cols-2">
       <div>
-        <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500">商品名稱</label>
+        <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500"
+          >商品名稱</label
+        >
         <input
           class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
           type="text"
@@ -15,7 +15,9 @@
         />
       </div>
       <div>
-        <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500">價格</label>
+        <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500"
+          >價格</label
+        >
         <input
           class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
           type="number"
@@ -25,7 +27,9 @@
         />
       </div>
       <div>
-        <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500">分類</label>
+        <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500"
+          >分類</label
+        >
         <select
           class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
           [value]="createCategoryId() ?? ''"
@@ -33,12 +37,14 @@
         >
           <option value="">未分類</option>
           @for (cat of categories(); track cat.id) {
-            <option [value]="cat.id">{{ cat.name }}</option>
+          <option [value]="cat.id">{{ cat.name }}</option>
           }
         </select>
       </div>
       <div>
-        <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500">庫存</label>
+        <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500"
+          >庫存</label
+        >
         <input
           class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
           type="number"
@@ -59,7 +65,9 @@
         </label>
       </div>
       <div class="md:col-span-2">
-        <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500">描述</label>
+        <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500"
+          >描述</label
+        >
         <textarea
           class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
           rows="3"
@@ -69,75 +77,75 @@
         ></textarea>
       </div>
       @if (!editingId()) {
-        <div class="md:col-span-2">
-          <div class="mt-2 flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-3 py-2">
-            <label
-              class="cursor-pointer rounded-lg bg-neutral-900 px-3 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
-              for="create-product-images"
-            >
-              商品圖片
-            </label>
-            <span class="truncate text-xs text-neutral-500">
-              {{ pendingImages().length ? pendingImages().length + ' 個檔案' : '尚未選擇檔案' }}
-            </span>
-            <input
-              id="create-product-images"
-              class="sr-only"
-              type="file"
-              accept="image/*"
-              multiple
-              (change)="onPendingImagesChange($event)"
-            />
+      <div class="md:col-span-2">
+        <div
+          class="mt-2 flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-3 py-2"
+        >
+          <label
+            class="cursor-pointer rounded-lg bg-neutral-900 px-3 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
+            for="create-product-images"
+          >
+            商品圖片
+          </label>
+          <span class="truncate text-xs text-neutral-500">
+            {{ pendingImages().length ? pendingImages().length + ' 個檔案' : '尚未選擇檔案' }}
+          </span>
+          <input
+            id="create-product-images"
+            class="sr-only"
+            type="file"
+            accept="image/*"
+            multiple
+            (change)="onPendingImagesChange($event)"
+          />
+        </div>
+        @if (pendingImages().length > 0) {
+        <div class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          @for (img of pendingImages(); track $index) {
+          <div class="rounded-xl border border-neutral-200 bg-white p-3">
+            <div class="flex items-center justify-between">
+              <div class="text-xs font-semibold text-neutral-800">圖片 {{ $index + 1 }}</div>
+              <button
+                type="button"
+                class="text-xs text-rose-500 hover:text-rose-600"
+                (click)="removePendingImage($index)"
+              >
+                移除
+              </button>
+            </div>
+            <div class="mt-2 text-xs text-neutral-500">{{ img.name }}</div>
+            <div class="mt-2 flex items-center gap-2 text-xs text-neutral-600">
+              <input
+                type="radio"
+                name="pendingPrimary"
+                class="h-4 w-4"
+                [checked]="pendingPrimaryIndex() === $index"
+                (change)="pendingPrimaryIndex.set($index)"
+              />
+              設為主圖
+            </div>
           </div>
-          @if (pendingImages().length > 0) {
-            <div class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              @for (img of pendingImages(); track $index) {
-                <div class="rounded-xl border border-neutral-200 bg-white p-3">
-                  <div class="flex items-center justify-between">
-                    <div class="text-xs font-semibold text-neutral-800">圖片 {{ $index + 1 }}</div>
-                    <button
-                      type="button"
-                      class="text-xs text-rose-500 hover:text-rose-600"
-                      (click)="removePendingImage($index)"
-                    >
-                      移除
-                    </button>
-                  </div>
-                  <div class="mt-2 text-xs text-neutral-500">{{ img.name }}</div>
-                  <div class="mt-2 flex items-center gap-2 text-xs text-neutral-600">
-                    <input
-                      type="radio"
-                      name="pendingPrimary"
-                      class="h-4 w-4"
-                      [checked]="pendingPrimaryIndex() === $index"
-                      (change)="pendingPrimaryIndex.set($index)"
-                    />
-                    設為主圖
-                  </div>
-                </div>
-              }
-            </div>
-            <div class="mt-2 text-xs text-neutral-500">
-              可多次選擇圖片累加；主圖將設為你勾選的圖片。
-            </div>
           }
         </div>
+        <div class="mt-2 text-xs text-neutral-500">
+          可多次選擇圖片累加；主圖將設為你勾選的圖片。
+        </div>
+        }
+      </div>
       }
     </div>
 
     @if (createError()) {
-      <div class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600">
-        {{ createError() }}
-      </div>
+    <div class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600">
+      {{ createError() }}
+    </div>
     }
 
     <div class="mt-4 flex flex-wrap gap-3">
       <ui-button (click)="saveCreate()" [disabled]="saving()">
         {{ saving() ? '儲存中...' : '新增商品' }}
       </ui-button>
-      <ui-button variant="secondary" (click)="startCreate()">
-        清空
-      </ui-button>
+      <ui-button variant="secondary" (click)="startCreate()"> 清空 </ui-button>
     </div>
   </div>
 
@@ -145,88 +153,93 @@
     <div class="text-sm font-semibold text-neutral-900">商品列表</div>
 
     @if (isLoading()) {
-      <div class="mt-4 h-28 rounded-xl border border-dashed border-neutral-200 bg-neutral-50"></div>
-    }
-
-    @if (!isLoading() && items().length === 0) {
-      <div class="mt-4 text-sm text-neutral-500">目前沒有商品。</div>
-    }
-
-    @if (!isLoading() && items().length > 0) {
-      <div class="mt-4 grid gap-4">
-        @for (item of items(); track item.productId) {
-          <div class="rounded-xl border border-neutral-200 p-4">
-            <div class="flex flex-wrap items-start gap-4">
-              <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
-                @if (item.primaryImageUrl) {
-                  <img [src]="item.primaryImageUrl" class="h-full w-full object-cover" alt="product" />
-                } @else {
-                  <div class="flex h-full w-full items-center justify-center text-[10px] text-neutral-400">
-                    無圖片
-                  </div>
-                }
-              </div>
-              <div class="flex-1">
-                <div class="text-base font-semibold text-neutral-900">{{ item.name }}</div>
-                <div class="mt-1 text-sm text-neutral-500">{{ item.description }}</div>
-                <div class="mt-2 text-xs text-neutral-400">
-                  價格 NT$ {{ item.price }} · 庫存 {{ item.stockQuantity }}
-                </div>
-                <div class="mt-2 text-xs text-neutral-500">
-                  狀態：{{ item.isActive ? '上架中' : '已下架' }}
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <ui-button variant="secondary" (click)="startEdit(item)">編輯</ui-button>
-                <ui-button variant="ghost" (click)="remove(item)">刪除</ui-button>
-              </div>
+    <div class="mt-4 h-28 rounded-xl border border-dashed border-neutral-200 bg-neutral-50"></div>
+    } @if (!isLoading() && items().length === 0) {
+    <div class="mt-4 text-sm text-neutral-500">目前沒有商品。</div>
+    } @if (!isLoading() && items().length > 0) {
+    <div class="mt-4 grid gap-4">
+      @for (item of items(); track item.productId) {
+      <div class="rounded-xl border border-neutral-200 p-4">
+        <div class="flex flex-wrap items-start gap-4">
+          <div
+            class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50"
+          >
+            @if (item.primaryImageUrl) {
+            <img [src]="item.primaryImageUrl" class="h-full w-full object-cover" alt="product" />
+            } @else {
+            <div
+              class="flex h-full w-full items-center justify-center text-[10px] text-neutral-400"
+            >
+              無圖片
             </div>
-
+            }
           </div>
-        }
+          <div class="flex-1">
+            <div class="text-base font-semibold text-neutral-900">{{ item.name }}</div>
+            <div class="mt-1 text-sm text-neutral-500">{{ item.description }}</div>
+            <div class="mt-2 text-xs text-neutral-400">
+              價格 NT$ {{ item.price }} · 庫存 {{ item.stockQuantity }}
+            </div>
+            <div class="mt-2 text-xs text-neutral-500">
+              狀態：{{ item.isActive ? '上架中' : '已下架' }}
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <ui-button variant="secondary" (click)="startEdit(item)">編輯</ui-button>
+            <ui-button variant="ghost" (click)="remove(item)">刪除</ui-button>
+          </div>
+        </div>
       </div>
-    }
-
-    @if (listError()) {
-      <div class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600">
-        {{ listError() }}
-      </div>
+      }
+    </div>
+    } @if (listError()) {
+    <div class="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600">
+      {{ listError() }}
+    </div>
     }
   </div>
 </ui-section>
 
 @if (isEditModalOpen()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-    <div class="flex h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl">
-      <div class="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
-        <div class="text-base font-semibold text-neutral-900">編輯商品</div>
-        <button class="text-sm text-neutral-500 hover:text-neutral-700" (click)="closeEditModal()">
-          關閉
-        </button>
-      </div>
-      <div class="min-h-0 flex-1 overflow-y-auto px-6 py-4">
-        <div class="grid gap-4">
-          <div>
-            <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500">商品名稱</label>
-            <input
-              class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
-              type="text"
-              [value]="editName()"
-              (input)="editName.set($any($event.target).value ?? ''); clearEditError()"
-            />
-          </div>
-          <div>
-            <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500">價格</label>
-            <input
-              class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
-              type="number"
-              [value]="editPrice()"
-              (input)="editPrice.set(parseNumber($any($event.target).value, 0)); clearEditError()"
-              min="0"
-            />
-          </div>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+  <div
+    class="flex h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl"
+  >
+    <div class="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
+      <div class="text-base font-semibold text-neutral-900">編輯商品</div>
+      <button class="text-sm text-neutral-500 hover:text-neutral-700" (click)="closeEditModal()">
+        關閉
+      </button>
+    </div>
+    <div class="min-h-0 flex-1 overflow-y-auto px-6 py-4">
+      <div class="grid gap-4">
         <div>
-          <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500">庫存</label>
+          <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500"
+            >商品名稱</label
+          >
+          <input
+            class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
+            type="text"
+            [value]="editName()"
+            (input)="editName.set($any($event.target).value ?? ''); clearEditError()"
+          />
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500"
+            >價格</label
+          >
+          <input
+            class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
+            type="number"
+            [value]="editPrice()"
+            (input)="editPrice.set(parseNumber($any($event.target).value, 0)); clearEditError()"
+            min="0"
+          />
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500"
+            >庫存</label
+          >
           <input
             class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
             type="number"
@@ -236,7 +249,9 @@
           />
         </div>
         <div>
-          <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500">分類</label>
+          <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500"
+            >分類</label
+          >
           <select
             class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
             [value]="editCategoryId() ?? ''"
@@ -244,137 +259,139 @@
           >
             <option value="">未分類</option>
             @for (cat of categories(); track cat.id) {
-              <option [value]="cat.id">{{ cat.name }}</option>
+            <option [value]="cat.id">{{ cat.name }}</option>
             }
           </select>
         </div>
-          <label class="flex items-center gap-2 text-sm text-neutral-700">
-            <input
-              type="checkbox"
-              class="h-4 w-4 rounded border-neutral-300"
+        <label class="flex items-center gap-2 text-sm text-neutral-700">
+          <input
+            type="checkbox"
+            class="h-4 w-4 rounded border-neutral-300"
             [checked]="editIsActive()"
             (change)="editIsActive.set($any($event.target).checked); clearEditError()"
-            />
-            上架中
-          </label>
-          <div>
-            <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500">描述</label>
-            <textarea
-              class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
-              rows="3"
+          />
+          上架中
+        </label>
+        <div>
+          <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500"
+            >描述</label
+          >
+          <textarea
+            class="mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-3 text-sm focus:border-neutral-900 focus:outline-none"
+            rows="3"
             [value]="editDescription()"
             (input)="editDescription.set($any($event.target).value ?? ''); clearEditError()"
           ></textarea>
-          </div>
         </div>
+      </div>
 
       @if (editingId(); as editId) {
-        <div class="mt-6 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-          <div class="mt-3 grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
-            <div>
-              <div class="mt-2 flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-3 py-2">
-                <label
-                  class="cursor-pointer rounded-lg bg-neutral-900 px-3 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
-                  for="product-image-upload"
-                >
-                  商品圖片
-                </label>
-                <span class="truncate text-xs text-neutral-500">{{ getUploadFileName() }}</span>
-                <input
-                  id="product-image-upload"
-                  class="sr-only"
-                  type="file"
-                  accept="image/*"
-                  (change)="onFileChange($event)"
-                />
-              </div>
-            </div>
-            <div class="flex flex-wrap items-center gap-3">
-              <label class="flex items-center gap-2 text-xs text-neutral-700">
-                <input
-                  type="checkbox"
-                  class="h-4 w-4 rounded border-neutral-300"
-                  [checked]="uploadPrimary()"
-                  (change)="uploadPrimary.set($any($event.target).checked)"
-                />
-                設為主圖
+      <div class="mt-6 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+        <div class="mt-3 grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <div
+              class="mt-2 flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-3 py-2"
+            >
+              <label
+                class="cursor-pointer rounded-lg bg-neutral-900 px-3 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
+                for="product-image-upload"
+              >
+                商品圖片
               </label>
-              <div class="flex items-center gap-2 text-xs text-neutral-500">
-                <span>排序</span>
-                <input
-                  class="h-9 w-20 rounded-lg border border-neutral-200 bg-white px-2 text-sm"
-                  type="number"
-                  [value]="uploadSortOrder()"
-                  (input)="uploadSortOrder.set(parseNumber($any($event.target).value, 0))"
-                  min="0"
-                />
-              </div>
-              <ui-button (click)="uploadImage(editId)" [disabled]="saving()">
-                上傳
-              </ui-button>
+              <span class="truncate text-xs text-neutral-500">{{ getUploadFileName() }}</span>
+              <input
+                id="product-image-upload"
+                class="sr-only"
+                type="file"
+                accept="image/*"
+                (change)="onFileChange($event)"
+              />
             </div>
           </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <label class="flex items-center gap-2 text-xs text-neutral-700">
+              <input
+                type="checkbox"
+                class="h-4 w-4 rounded border-neutral-300"
+                [checked]="uploadPrimary()"
+                (change)="uploadPrimary.set($any($event.target).checked)"
+              />
+              設為主圖
+            </label>
+            <div class="flex items-center gap-2 text-xs text-neutral-500">
+              <span>排序</span>
+              <input
+                class="h-9 w-20 rounded-lg border border-neutral-200 bg-white px-2 text-sm"
+                type="number"
+                [value]="uploadSortOrder()"
+                (input)="uploadSortOrder.set(parseNumber($any($event.target).value, 0))"
+                min="0"
+              />
+            </div>
+            <ui-button (click)="uploadImage(editId)" [disabled]="saving()"> 上傳 </ui-button>
+          </div>
+        </div>
 
-          @if (isImagesLoading(editId)) {
-            <div class="mt-4 h-20 rounded-lg border border-dashed border-neutral-200 bg-white"></div>
-          }
-
-          @if (!isImagesLoading(editId)) {
-            <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              @for (img of getImages(editId); track img.id) {
-                <div class="rounded-xl border border-neutral-200 bg-white p-3">
-                  <div class="relative">
-                    <img [src]="img.url" class="h-28 w-full rounded-lg object-cover" alt="product image" />
-                    @if (img.isPrimary) {
-                      <span class="absolute left-2 top-2 rounded-full bg-emerald-500/90 px-2 py-1 text-[10px] font-semibold text-white">
-                        主圖
-                      </span>
-                    }
-                  </div>
-                  <div class="mt-2 flex items-center justify-between text-xs text-neutral-500">
-                    <span>排序：{{ img.sortOrder }}</span>
-                    <span>{{ img.format.toUpperCase() }}</span>
-                  </div>
-                  <div class="mt-2 flex flex-wrap items-center gap-2">
-                    <ui-button variant="secondary" (click)="setPrimary(editId, img.id)">
-                      設為主圖
-                    </ui-button>
-                    <input
-                      class="h-8 w-16 rounded-lg border border-neutral-200 bg-white px-2 text-sm"
-                      type="number"
-                      [value]="getSortDraft(img.id)"
-                      (input)="setSortDraft(img.id, parseNumber($any($event.target).value, 0))"
-                      min="0"
-                    />
-                    <ui-button
-                      variant="secondary"
-                      (click)="updateSortOrder(editId, img.id, getSortDraft(img.id))"
-                    >
-                      套用排序
-                    </ui-button>
-                    <ui-button variant="ghost" (click)="removeImage(editId, img.id)">
-                      刪除
-                    </ui-button>
-                  </div>
-                </div>
+        @if (isImagesLoading(editId)) {
+        <div class="mt-4 h-20 rounded-lg border border-dashed border-neutral-200 bg-white"></div>
+        } @if (!isImagesLoading(editId)) {
+        <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          @for (img of getImages(editId); track img.id) {
+          <div class="rounded-xl border border-neutral-200 bg-white p-3">
+            <div class="relative">
+              <img
+                [src]="img.url"
+                class="h-28 w-full rounded-lg object-cover"
+                alt="product image"
+              />
+              @if (img.isPrimary) {
+              <span
+                class="absolute left-2 top-2 rounded-full bg-emerald-500/90 px-2 py-1 text-[10px] font-semibold text-white"
+              >
+                主圖
+              </span>
               }
             </div>
+            <div class="mt-2 flex items-center justify-between text-xs text-neutral-500">
+              <span>排序：{{ img.sortOrder }}</span>
+              <span>{{ img.format.toUpperCase() }}</span>
+            </div>
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              <ui-button variant="secondary" (click)="setPrimary(editId, img.id)">
+                設為主圖
+              </ui-button>
+              <input
+                class="h-8 w-16 rounded-lg border border-neutral-200 bg-white px-2 text-sm"
+                type="number"
+                [value]="getSortDraft(img.id)"
+                (input)="setSortDraft(img.id, parseNumber($any($event.target).value, 0))"
+                min="0"
+              />
+              <ui-button
+                variant="secondary"
+                (click)="updateSortOrder(editId, img.id, getSortDraft(img.id))"
+              >
+                套用排序
+              </ui-button>
+              <ui-button variant="ghost" (click)="removeImage(editId, img.id)"> 刪除 </ui-button>
+            </div>
+          </div>
           }
         </div>
-      }
+        }
       </div>
+      }
+    </div>
 
-      @if (editError()) {
-        <div class="px-6 pb-2 text-xs text-rose-600">
-          {{ editError() }}
-        </div>
-      }
-      <div class="flex items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4">
-        <ui-button variant="secondary" (click)="closeEditModal()">取消</ui-button>
-        <ui-button (click)="saveEdit()" [disabled]="saving()">
-          {{ saving() ? '儲存中...' : '更新商品' }}
-        </ui-button>
-      </div>
+    @if (editError()) {
+    <div class="px-6 pb-2 text-xs text-rose-600">{{ editError() }}</div>
+    }
+    <div class="flex items-center justify-end gap-3 border-t border-neutral-200 px-6 py-4">
+      <ui-button variant="secondary" (click)="closeEditModal()">取消</ui-button>
+      <ui-button (click)="saveEdit()" [disabled]="saving()">
+        {{ saving() ? '儲存中...' : '更新商品' }}
+      </ui-button>
     </div>
   </div>
+</div>
 }

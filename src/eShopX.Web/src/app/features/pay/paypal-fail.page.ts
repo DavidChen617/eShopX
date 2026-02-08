@@ -14,7 +14,10 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
           <div>Reason: {{ reason() || '-' }}</div>
           <div>Order ID: {{ orderId() || '-' }}</div>
         </div>
-        <a class="mt-5 inline-flex rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white" routerLink="/">
+        <a
+          class="mt-5 inline-flex rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white"
+          routerLink="/"
+        >
           回首頁
         </a>
       </div>

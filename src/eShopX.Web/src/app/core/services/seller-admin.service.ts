@@ -18,14 +18,14 @@ export class SellerAdminService {
   approve(userId: string): Promise<ApproveSellerResponse> {
     return this.api.post<ApproveSellerResponse, Record<string, never>>(
       `/api/sellers/${userId}/approve`,
-      {}
+      {},
     );
   }
 
   reject(userId: string, reason: string): Promise<RejectSellerResponse> {
     return this.api.post<RejectSellerResponse, { reason: string }>(
       `/api/sellers/${userId}/reject`,
-      { reason }
+      { reason },
     );
   }
 }

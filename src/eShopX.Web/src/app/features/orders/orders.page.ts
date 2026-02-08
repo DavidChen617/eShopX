@@ -20,7 +20,7 @@ export class OrdersPageComponent {
 
   constructor(
     private readonly ordersService: OrdersService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
   ) {
     void this.load();
   }

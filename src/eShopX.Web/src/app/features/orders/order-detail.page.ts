@@ -16,7 +16,10 @@ export class OrderDetailPageComponent {
   order = signal<GetOrderResponse | null>(null);
   isLoading = signal(true);
 
-  constructor(private readonly route: ActivatedRoute, private readonly ordersService: OrdersService) {
+  constructor(
+    private readonly route: ActivatedRoute,
+    private readonly ordersService: OrdersService,
+  ) {
     const orderId = this.route.snapshot.paramMap.get('id') ?? '';
     void this.load(orderId);
   }

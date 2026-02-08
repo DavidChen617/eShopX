@@ -20,7 +20,10 @@ export class RegisterPageComponent {
   error = signal('');
   success = signal('');
 
-  constructor(private readonly authService: AuthService, private readonly router: Router) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly router: Router,
+  ) {}
 
   async submit(): Promise<void> {
     this.error.set('');

@@ -28,7 +28,7 @@ export class ProductsPageComponent {
   constructor(
     private readonly productService: ProductService,
     private readonly homepageService: HomepageService,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
   ) {
     this.route.queryParamMap.subscribe((params) => {
       const q = params.get('q') ?? '';
@@ -59,7 +59,7 @@ export class ProductsPageComponent {
   private async ensureCategories(): Promise<void> {
     if (this.categories().length > 0) return;
     const list = await this.homepageService.getCategories();
-    this.categories.set(list.map(cat => ({ id: cat.id, name: cat.name })));
+    this.categories.set(list.map((cat) => ({ id: cat.id, name: cat.name })));
   }
 
   private updateTitle(query: string, categoryId: string, categoryName: string): void {
@@ -69,7 +69,7 @@ export class ProductsPageComponent {
         this.subtitle.set('分類商品');
         return;
       }
-      const match = this.categories().find(cat => cat.id === categoryId);
+      const match = this.categories().find((cat) => cat.id === categoryId);
       if (match) {
         this.title.set(match.name);
         this.subtitle.set('分類商品');

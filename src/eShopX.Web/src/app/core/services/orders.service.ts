@@ -8,7 +8,11 @@ export class OrdersService {
   constructor(private readonly api: ApiService) {}
 
   getOrders(userId: string, page = 1, pageSize = 10): Promise<GetUserOrderResponse> {
-    return this.api.get<GetUserOrderResponse>('/api/orders', { userId, page, pageSize });
+    return this.api.get<GetUserOrderResponse>('/api/orders', {
+      userId,
+      page,
+      pageSize,
+    });
   }
 
   getOrderDetail(orderId: string): Promise<GetOrderResponse> {

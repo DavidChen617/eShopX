@@ -57,11 +57,10 @@ export class AccountSettingsPageComponent {
               sellerStatus: result.status,
               sellerAppliedAt: result.appliedAt,
             }
-          : current
+          : current,
       );
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : '申請失敗，請稍後再試。';
+      const message = error instanceof Error ? error.message : '申請失敗，請稍後再試。';
       this.applyError.set(message);
     } finally {
       this.applyLoading.set(false);

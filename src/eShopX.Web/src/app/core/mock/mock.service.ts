@@ -9,11 +9,7 @@ import {
   GetProductResponse,
   GetUserOrderResponse,
 } from '../models/api-models';
-import {
-  BannerSlide,
-  CategoryEntry,
-  RecommendProduct,
-} from '../models/home-models';
+import { BannerSlide, CategoryEntry, RecommendProduct } from '../models/home-models';
 import {
   mockCart,
   mockFlashSale,

@@ -23,7 +23,7 @@ export class LineCallbackPageComponent {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
   ) {
     this.route.queryParams.subscribe((params) => {
       const code = params['code'];

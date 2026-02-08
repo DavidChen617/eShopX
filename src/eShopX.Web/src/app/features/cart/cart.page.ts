@@ -1,6 +1,5 @@
 import { Component, signal } from '@angular/core';
 
-
 import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
 import { GetCartResponse } from '../../core/models/api-models';
@@ -21,7 +20,7 @@ export class CartPageComponent {
 
   constructor(
     private readonly cartService: CartService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
   ) {
     void this.load();
   }

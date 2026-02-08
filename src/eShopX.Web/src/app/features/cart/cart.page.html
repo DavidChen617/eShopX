@@ -1,101 +1,99 @@
 <ui-section title="Cart" subtitle="Review your items before checkout.">
   <div class="space-y-4">
     @if (isLoading() || !cart()) {
-      <div
-        class="h-16 rounded-2xl border border-dashed border-neutral-200 bg-neutral-50"
-      ></div>
-    }
-    @if (!isLoading() && !cart()) {
-      <div class="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-6 text-sm text-neutral-500">
-        請先登入查看購物車。
-      </div>
-    }
-    @for (item of cart()?.items; track item) {
-      <div
-        class="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4"
-        >
-        <div>
-          <div class="text-sm font-semibold text-neutral-900">{{ item.productName }}</div>
-          <div class="text-xs text-neutral-500">
-            \${{ item.unitPrice }} · Qty {{ item.quantity }} · Stock {{ item.stockQuantity }}
-          </div>
+    <div class="h-16 rounded-2xl border border-dashed border-neutral-200 bg-neutral-50"></div>
+    } @if (!isLoading() && !cart()) {
+    <div
+      class="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-6 text-sm text-neutral-500"
+    >
+      請先登入查看購物車。
+    </div>
+    } @for (item of cart()?.items; track item) {
+    <div
+      class="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4"
+    >
+      <div>
+        <div class="text-sm font-semibold text-neutral-900">{{ item.productName }}</div>
+        <div class="text-xs text-neutral-500">
+          \${{ item.unitPrice }} · Qty {{ item.quantity }} · Stock {{ item.stockQuantity }}
         </div>
-        <div class="flex items-center gap-3">
-          <div class="flex items-center gap-2 rounded-full border border-neutral-200 px-2 py-1 text-xs">
-            <button
-              class="h-6 w-6 rounded-full border border-neutral-200 text-sm"
-              (click)="changeQuantity(item.productId, item.quantity - 1)"
-              [disabled]="isUpdating()"
-            >
-              -
-            </button>
-            <span class="min-w-[24px] text-center">{{ item.quantity }}</span>
-            <button
-              class="h-6 w-6 rounded-full border border-neutral-200 text-sm"
-              (click)="changeQuantity(item.productId, item.quantity + 1)"
-              [disabled]="isUpdating() || item.quantity >= item.stockQuantity"
-            >
-              +
-            </button>
-          </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div
+          class="flex items-center gap-2 rounded-full border border-neutral-200 px-2 py-1 text-xs"
+        >
           <button
-            class="text-xs text-rose-500 hover:text-rose-600"
-            (click)="removeItem(item.productId)"
+            class="h-6 w-6 rounded-full border border-neutral-200 text-sm"
+            (click)="changeQuantity(item.productId, item.quantity - 1)"
             [disabled]="isUpdating()"
           >
-            移除
+            -
           </button>
-          <div class="text-sm font-semibold text-neutral-900">\${{ item.subtotal }}</div>
+          <span class="min-w-[24px] text-center">{{ item.quantity }}</span>
+          <button
+            class="h-6 w-6 rounded-full border border-neutral-200 text-sm"
+            (click)="changeQuantity(item.productId, item.quantity + 1)"
+            [disabled]="isUpdating() || item.quantity >= item.stockQuantity"
+          >
+            +
+          </button>
         </div>
-      </div>
-    }
-    @if (cart() && (cart()?.items?.length ?? 0) === 0) {
-      <div
-        class="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-6 text-sm text-neutral-500"
-        >
-        Your cart is empty.
-      </div>
-    }
-    @if (cart(); as cart) {
-      <div
-        class="flex items-center justify-between rounded-2xl bg-neutral-50 p-4 text-sm font-semibold"
-        >
-        <div>Total ({{ cart.totalItems }} items)</div>
-        <div>\${{ cart.totalAmount }}</div>
-      </div>
-      <div class="flex items-center justify-between text-xs text-neutral-500">
         <button
-          class="text-rose-500 hover:text-rose-600"
-          (click)="clearCart()"
+          class="text-xs text-rose-500 hover:text-rose-600"
+          (click)="removeItem(item.productId)"
           [disabled]="isUpdating()"
         >
-          清空購物車
+          移除
         </button>
-        @if (actionError()) {
-          <span class="text-rose-500">{{ actionError() }}</span>
-        }
+        <div class="text-sm font-semibold text-neutral-900">\${{ item.subtotal }}</div>
       </div>
-      <div class="mt-4 flex flex-col gap-3">
-        <button
-          type="button"
-          class="w-full rounded-lg bg-[#00c300] px-4 py-3 text-sm font-semibold text-white hover:bg-[#00a800]"
-          (click)="payWithLinePay()"
-          [disabled]="isUpdating() || cart.items.length === 0"
-        >
-          使用 LINE Pay 付款
-        </button>
-        <button
-          type="button"
-          class="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-500"
-          (click)="payWithPayPal()"
-          [disabled]="isUpdating() || cart.items.length === 0"
-        >
-          Pay with PayPal
-        </button>
-        @if (payError()) {
-          <div class="text-xs text-rose-500">{{ payError() }}</div>
-        }
-      </div>
+    </div>
+    } @if (cart() && (cart()?.items?.length ?? 0) === 0) {
+    <div
+      class="rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 p-6 text-sm text-neutral-500"
+    >
+      Your cart is empty.
+    </div>
+    } @if (cart(); as cart) {
+    <div
+      class="flex items-center justify-between rounded-2xl bg-neutral-50 p-4 text-sm font-semibold"
+    >
+      <div>Total ({{ cart.totalItems }} items)</div>
+      <div>\${{ cart.totalAmount }}</div>
+    </div>
+    <div class="flex items-center justify-between text-xs text-neutral-500">
+      <button
+        class="text-rose-500 hover:text-rose-600"
+        (click)="clearCart()"
+        [disabled]="isUpdating()"
+      >
+        清空購物車
+      </button>
+      @if (actionError()) {
+      <span class="text-rose-500">{{ actionError() }}</span>
+      }
+    </div>
+    <div class="mt-4 flex flex-col gap-3">
+      <button
+        type="button"
+        class="w-full rounded-lg bg-[#00c300] px-4 py-3 text-sm font-semibold text-white hover:bg-[#00a800]"
+        (click)="payWithLinePay()"
+        [disabled]="isUpdating() || cart.items.length === 0"
+      >
+        使用 LINE Pay 付款
+      </button>
+      <button
+        type="button"
+        class="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-500"
+        (click)="payWithPayPal()"
+        [disabled]="isUpdating() || cart.items.length === 0"
+      >
+        Pay with PayPal
+      </button>
+      @if (payError()) {
+      <div class="text-xs text-rose-500">{{ payError() }}</div>
+      }
+    </div>
     }
   </div>
 </ui-section>

@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 
 import { ApiService } from './api.service';
-import { ApplyForSellerResponse, GetMeResponse, UploadUserAvatarResponse } from '../models/api-models';
+import {
+  ApplyForSellerResponse,
+  GetMeResponse,
+  UploadUserAvatarResponse,
+} from '../models/api-models';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
@@ -14,7 +18,7 @@ export class AccountService {
   updateMe(request: { name: string; phone: string; address?: string | null }): Promise<void> {
     return this.api.put<void, { name: string; phone: string; address?: string | null }>(
       '/api/users/me',
-      request
+      request,
     );
   }
 

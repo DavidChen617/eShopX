@@ -23,7 +23,7 @@ export class AdminSellersPageComponent {
 
   constructor(
     private readonly accountService: AccountService,
-    private readonly sellerAdminService: SellerAdminService
+    private readonly sellerAdminService: SellerAdminService,
   ) {
     void this.load();
   }

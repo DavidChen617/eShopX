@@ -1,44 +1,310 @@
 @if (isLoading()) {
-  <div class="flex items-center justify-center h-64">
-    <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
-  </div>
+<div class="flex items-center justify-center h-64">
+  <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+</div>
 } @else {
-  <div class="relative overflow-hidden bg-gradient-to-b from-[#FFF4EE] via-white to-[#FFF9F2]">
-    <div class="pointer-events-none absolute -top-32 right-[-120px] h-80 w-80 rounded-full bg-[#FF7A2F]/20 blur-3xl"></div>
-    <div class="pointer-events-none absolute top-72 left-[-140px] h-72 w-72 rounded-full bg-[#FFB347]/20 blur-3xl"></div>
+<div class="relative overflow-hidden bg-gradient-to-b from-[#FFF4EE] via-white to-[#FFF9F2]">
+  <div
+    class="pointer-events-none absolute -top-32 right-[-120px] h-80 w-80 rounded-full bg-[#FF7A2F]/20 blur-3xl"
+  ></div>
+  <div
+    class="pointer-events-none absolute top-72 left-[-140px] h-72 w-72 rounded-full bg-[#FFB347]/20 blur-3xl"
+  ></div>
 
-    <div class="mx-auto max-w-6xl px-4 pb-10 pt-6">
-      <div class="mb-6 flex items-end justify-between">
-        <div>
-          <div class="text-xs font-semibold uppercase tracking-[0.3em] text-[#FF6A1A]/70">Daily picks</div>
-          <h1 class="mt-2 text-3xl font-extrabold text-[#2E1A0F]">
-            精選好物，今天就出發
-          </h1>
-          <p class="mt-2 text-sm text-[#6B4C3B]">秒殺、分類、推薦一次逛完，收藏你喜歡的生活靈感。</p>
+  <div class="mx-auto max-w-6xl px-4 pb-14 pt-6">
+    <div class="mb-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+      <div
+        class="rounded-3xl bg-gradient-to-br from-[#FF5000] via-[#FF6A1A] to-[#FF2D54] p-6 text-white shadow-[0_24px_60px_-30px_rgba(255,80,0,0.65)]"
+      >
+        <div class="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
+          Taobao style
         </div>
-        <div class="hidden sm:flex items-center gap-2 text-xs text-[#6B4C3B]">
-          <span class="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 shadow-sm">
-            <span class="h-2 w-2 rounded-full bg-[#FF5000]"></span> 即時熱賣
-          </span>
-          <span class="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 shadow-sm">
-            <span class="h-2 w-2 rounded-full bg-[#FFB347]"></span> 嚴選推薦
-          </span>
+        <h1 class="mt-3 text-3xl font-extrabold leading-tight sm:text-4xl">
+          春日大促開跑<br />今日必搶好物
+        </h1>
+        <p class="mt-3 text-sm text-white/90">
+          秒殺、紅包、限時折扣一站搞定，平台賣家優惠同步上架。
+        </p>
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+          <button
+            class="rounded-full bg-white px-5 py-2 text-sm font-semibold text-[#FF5000] shadow-sm"
+          >
+            立即搶購
+          </button>
+          <button
+            class="rounded-full border border-white/50 px-5 py-2 text-sm font-semibold text-white"
+          >
+            逛逛分類
+          </button>
+          <div class="ml-auto hidden items-center gap-2 text-xs text-white/80 sm:flex">
+            <span class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1">
+              <span class="h-2 w-2 rounded-full bg-[#FFD15A]"></span> 即時熱賣
+            </span>
+            <span class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1">
+              <span class="h-2 w-2 rounded-full bg-white"></span> 7天直降
+            </span>
+          </div>
         </div>
       </div>
 
-      <!-- 輪播 Banner -->
-      <app-banner-carousel [slides]="banners()" />
+      <div class="grid gap-4">
+        <div
+          class="rounded-3xl border border-[#FF8A4C]/30 bg-white p-5 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.45)]"
+        >
+          <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[#FF6A1A]/70">
+            Platform
+          </div>
+          <div class="mt-2 text-lg font-bold text-[#2E1A0F]">賣家新品直送</div>
+          <p class="mt-2 text-xs text-[#6B4C3B]">今日上新 1,268 件，限時免運搶先購。</p>
+          <div class="mt-4 flex gap-2">
+            <div class="flex-1 rounded-2xl bg-[#FFF3E8] p-3">
+              <div class="text-xs text-[#6B4C3B]">跨店滿減</div>
+              <div class="mt-1 text-lg font-bold text-[#FF5000]">滿 299 減 40</div>
+            </div>
+            <div class="flex-1 rounded-2xl bg-[#FFF0F4] p-3">
+              <div class="text-xs text-[#6B4C3B]">爆品券</div>
+              <div class="mt-1 text-lg font-bold text-[#FF2D54]">限領 2 小時</div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="rounded-3xl border border-[#FF8A4C]/30 bg-gradient-to-r from-[#FFF6EF] to-[#FFF0F4] p-5"
+        >
+          <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[#FF6A1A]/70">
+            Seller board
+          </div>
+          <div class="mt-2 text-lg font-bold text-[#2E1A0F]">熱門店鋪榜</div>
+          <div class="mt-3 grid gap-2 text-sm text-[#6B4C3B]">
+            <div class="flex items-center justify-between rounded-full bg-white/80 px-3 py-2">
+              <span>原創設計館</span>
+              <span class="font-semibold text-[#FF5000]">+28% 成交</span>
+            </div>
+            <div class="flex items-center justify-between rounded-full bg-white/80 px-3 py-2">
+              <span>潮流生活館</span>
+              <span class="font-semibold text-[#FF5000]">+19% 成交</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <!-- 限時秒殺 -->
-      @if (flashSale(); as sale) {
-        <app-flash-sale-section [data]="sale" />
-      }
+    <div class="mb-6 grid gap-3 sm:grid-cols-4">
+      <div class="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-[#2E1A0F] shadow-sm">
+        當日秒殺
+      </div>
+      <div class="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-[#2E1A0F] shadow-sm">
+        人氣榜單
+      </div>
+      <div class="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-[#2E1A0F] shadow-sm">
+        賣家專區
+      </div>
+      <div class="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-[#2E1A0F] shadow-sm">
+        買家秀
+      </div>
+    </div>
 
-      <!-- 分類宮格 -->
-      <app-category-grid [categories]="categories()" />
+    <app-banner-carousel [slides]="banners()" />
 
-      <!-- 猜你喜歡 -->
+    @if (flashSale(); as sale) {
+    <app-flash-sale-section [data]="sale" />
+    }
+
+    <div class="mt-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.3em] text-[#FF6A1A]/70">
+            Categories
+          </div>
+          <h2 class="mt-2 text-2xl font-extrabold text-[#2E1A0F]">分類直達</h2>
+        </div>
+        <span class="text-xs font-semibold text-[#FF6A1A]">更多分類</span>
+      </div>
+      <div class="mt-4 rounded-3xl bg-white p-4 shadow-sm">
+        <app-category-grid [categories]="categories()" />
+      </div>
+    </div>
+
+    <div class="mt-10 grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
+      <div class="rounded-3xl border border-[#FF8A4C]/30 bg-white p-6 shadow-sm">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xl font-extrabold text-[#2E1A0F]">今日主推</h3>
+          <span class="text-xs font-semibold text-[#FF6A1A]">限時 3 小時</span>
+        </div>
+        <div class="mt-5 grid gap-4 sm:grid-cols-[1.2fr_0.8fr]">
+          <div class="rounded-2xl bg-gradient-to-br from-[#FFF0E6] to-[#FFE4EE] p-5">
+            <div class="text-xs font-semibold text-[#FF6A1A]">熱銷爆款</div>
+            <div class="mt-2 text-lg font-bold text-[#2E1A0F]">城市輕奢皮革包</div>
+            <div class="mt-1 text-sm text-[#6B4C3B]">賣家聯名款，限量 200 件</div>
+            <div class="mt-4 text-2xl font-extrabold text-[#FF2D54]">NT$ 1,280</div>
+            <button
+              class="mt-4 rounded-full bg-[#FF5000] px-4 py-2 text-sm font-semibold text-white"
+            >
+              立即下單
+            </button>
+          </div>
+          <div class="grid gap-3">
+            <div class="rounded-2xl border border-[#FFE1D2] bg-[#FFF8F4] p-4">
+              <div class="text-xs text-[#6B4C3B]">居家好物</div>
+              <div class="mt-1 font-semibold text-[#2E1A0F]">北歐香氛蠟燭</div>
+              <div class="mt-2 text-sm font-bold text-[#FF5000]">NT$ 399</div>
+            </div>
+            <div class="rounded-2xl border border-[#FFE1D2] bg-[#FFF8F4] p-4">
+              <div class="text-xs text-[#6B4C3B]">3C 好評</div>
+              <div class="mt-1 font-semibold text-[#2E1A0F]">磁吸快充行動電源</div>
+              <div class="mt-2 text-sm font-bold text-[#FF5000]">NT$ 699</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="rounded-3xl border border-[#FF8A4C]/30 bg-gradient-to-br from-[#FFF3EA] to-[#FFF7F2] p-6"
+      >
+        <div class="text-xs font-semibold uppercase tracking-[0.2em] text-[#FF6A1A]/70">
+          Coupons
+        </div>
+        <h3 class="mt-2 text-xl font-extrabold text-[#2E1A0F]">紅包 / 優惠券</h3>
+        <div class="mt-4 grid gap-3">
+          <div class="rounded-2xl bg-white px-4 py-3 shadow-sm">
+            <div class="text-xs text-[#6B4C3B]">跨店滿減券</div>
+            <div class="mt-1 text-lg font-bold text-[#FF5000]">滿 399 減 60</div>
+          </div>
+          <div class="rounded-2xl bg-white px-4 py-3 shadow-sm">
+            <div class="text-xs text-[#6B4C3B]">新品加碼券</div>
+            <div class="mt-1 text-lg font-bold text-[#FF2D54]">滿 699 減 120</div>
+          </div>
+          <div class="rounded-2xl bg-white px-4 py-3 shadow-sm">
+            <div class="text-xs text-[#6B4C3B]">免運券</div>
+            <div class="mt-1 text-lg font-bold text-[#FF5000]">全站免運 1 次</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10 rounded-3xl border border-[#FF8A4C]/30 bg-white p-6 shadow-sm">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.3em] text-[#FF6A1A]/70">
+            Sellers
+          </div>
+          <h3 class="mt-2 text-xl font-extrabold text-[#2E1A0F]">熱門店鋪推薦</h3>
+        </div>
+        <button
+          class="rounded-full border border-[#FF8A4C]/40 px-4 py-2 text-xs font-semibold text-[#FF6A1A]"
+        >
+          看更多店鋪
+        </button>
+      </div>
+      <div class="mt-5 grid gap-3 sm:grid-cols-3">
+        <div class="rounded-2xl bg-[#FFF5EE] p-4">
+          <div class="text-sm font-semibold text-[#2E1A0F]">森活選物</div>
+          <div class="mt-1 text-xs text-[#6B4C3B]">本週成交 +32%</div>
+        </div>
+        <div class="rounded-2xl bg-[#FFF5EE] p-4">
+          <div class="text-sm font-semibold text-[#2E1A0F]">城市機能館</div>
+          <div class="mt-1 text-xs text-[#6B4C3B]">滿千折百</div>
+        </div>
+        <div class="rounded-2xl bg-[#FFF5EE] p-4">
+          <div class="text-sm font-semibold text-[#2E1A0F]">風格美學社</div>
+          <div class="mt-1 text-xs text-[#6B4C3B]">熱銷 1000+ 件</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-extrabold text-[#2E1A0F]">新品 / 熱銷</h3>
+        <div class="flex gap-2 text-xs">
+          <span class="rounded-full bg-[#FF5000] px-3 py-1 font-semibold text-white">熱銷</span>
+          <span
+            class="rounded-full border border-[#FF8A4C]/40 px-3 py-1 font-semibold text-[#FF6A1A]"
+            >新品</span
+          >
+        </div>
+      </div>
+      <div class="mt-4 grid gap-3 sm:grid-cols-3">
+        <div class="rounded-2xl bg-white p-4 shadow-sm">
+          <div class="text-xs text-[#6B4C3B]">熱銷 No.1</div>
+          <div class="mt-2 text-sm font-semibold text-[#2E1A0F]">智能運動手環</div>
+          <div class="mt-2 text-sm font-bold text-[#FF2D54]">NT$ 1,099</div>
+        </div>
+        <div class="rounded-2xl bg-white p-4 shadow-sm">
+          <div class="text-xs text-[#6B4C3B]">上新 48 小時</div>
+          <div class="mt-2 text-sm font-semibold text-[#2E1A0F]">極簡陶瓷杯組</div>
+          <div class="mt-2 text-sm font-bold text-[#FF2D54]">NT$ 699</div>
+        </div>
+        <div class="rounded-2xl bg-white p-4 shadow-sm">
+          <div class="text-xs text-[#6B4C3B]">口碑熱銷</div>
+          <div class="mt-2 text-sm font-semibold text-[#2E1A0F]">輕量摺疊推車</div>
+          <div class="mt-2 text-sm font-bold text-[#FF2D54]">NT$ 2,980</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-extrabold text-[#2E1A0F]">生活主題館</h3>
+        <span class="text-xs font-semibold text-[#FF6A1A]">探索更多</span>
+      </div>
+      <div class="mt-4 grid gap-3 sm:grid-cols-3">
+        <div class="rounded-2xl bg-gradient-to-br from-[#FFF0E6] to-[#FFE8F1] p-5">
+          <div class="text-sm font-semibold text-[#2E1A0F]">居家舒適感</div>
+          <div class="mt-1 text-xs text-[#6B4C3B]">客廳、香氛、收納</div>
+        </div>
+        <div class="rounded-2xl bg-gradient-to-br from-[#FFF4DF] to-[#FFE9CC] p-5">
+          <div class="text-sm font-semibold text-[#2E1A0F]">城市通勤</div>
+          <div class="mt-1 text-xs text-[#6B4C3B]">機能服飾、背包</div>
+        </div>
+        <div class="rounded-2xl bg-gradient-to-br from-[#FFF0F4] to-[#FFE1E8] p-5">
+          <div class="text-sm font-semibold text-[#2E1A0F]">戶外微旅行</div>
+          <div class="mt-1 text-xs text-[#6B4C3B]">輕裝備、露營</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10 rounded-3xl border border-[#FF8A4C]/30 bg-white p-6 shadow-sm">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-extrabold text-[#2E1A0F]">買家秀</h3>
+        <span class="text-xs font-semibold text-[#FF6A1A]">立即分享</span>
+      </div>
+      <div class="mt-4 grid gap-3 sm:grid-cols-3">
+        <div class="rounded-2xl bg-[#FFF8F2] p-4">
+          <div class="text-sm font-semibold text-[#2E1A0F]">@小晴</div>
+          <div class="mt-2 text-xs text-[#6B4C3B]">「實物比想像更精緻！」</div>
+        </div>
+        <div class="rounded-2xl bg-[#FFF8F2] p-4">
+          <div class="text-sm font-semibold text-[#2E1A0F]">@Jordan</div>
+          <div class="mt-2 text-xs text-[#6B4C3B]">「物流快，客服回覆很有耐心。」</div>
+        </div>
+        <div class="rounded-2xl bg-[#FFF8F2] p-4">
+          <div class="text-sm font-semibold text-[#2E1A0F]">@阿文</div>
+          <div class="mt-2 text-xs text-[#6B4C3B]">「價格有感，買到想要的好物。」</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10">
       <app-product-feed [products]="recommendProducts()" title="猜你喜歡" />
     </div>
+
+    <div class="mt-10 grid gap-3 sm:grid-cols-4">
+      <div class="rounded-2xl bg-white p-4 text-center shadow-sm">
+        <div class="text-sm font-semibold text-[#2E1A0F]">正品保障</div>
+        <div class="mt-1 text-xs text-[#6B4C3B]">平台嚴選驗證</div>
+      </div>
+      <div class="rounded-2xl bg-white p-4 text-center shadow-sm">
+        <div class="text-sm font-semibold text-[#2E1A0F]">7 天鑑賞</div>
+        <div class="mt-1 text-xs text-[#6B4C3B]">快速退換貨</div>
+      </div>
+      <div class="rounded-2xl bg-white p-4 text-center shadow-sm">
+        <div class="text-sm font-semibold text-[#2E1A0F]">快速配送</div>
+        <div class="mt-1 text-xs text-[#6B4C3B]">多倉直送</div>
+      </div>
+      <div class="rounded-2xl bg-white p-4 text-center shadow-sm">
+        <div class="text-sm font-semibold text-[#2E1A0F]">客服支援</div>
+        <div class="mt-1 text-xs text-[#6B4C3B]">7x24 在線</div>
+      </div>
+    </div>
   </div>
+</div>
 }

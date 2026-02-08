@@ -1,26 +1,25 @@
 <ui-section title="Orders" subtitle="Track your recent orders.">
   <div class="space-y-4">
     @if (isLoading() || !orders()) {
-      <div
-        class="h-16 rounded-2xl border border-dashed border-neutral-200 bg-neutral-50"
-      ></div>
-    }
-    @for (order of orders()?.items; track order) {
-      <a
-        class="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 transition hover:-translate-y-1 hover:shadow-md"
-        [routerLink]="['/orders', order.orderId]"
-        >
-        <div>
-          <div class="text-sm font-semibold text-neutral-900">Order #{{ order.orderId.slice(0, 8) }}</div>
-          <div class="text-xs text-neutral-500">
-            {{ order.orderStatus }} · {{ order.itemCount }} items · {{ order.paymentMethod }}
-          </div>
-          <div class="text-xs text-neutral-400">
-            付款時間：{{ order.paidAt | date: 'yyyy-MM-dd HH:mm' }}
-          </div>
+    <div class="h-16 rounded-2xl border border-dashed border-neutral-200 bg-neutral-50"></div>
+    } @for (order of orders()?.items; track order) {
+    <a
+      class="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white p-4 transition hover:-translate-y-1 hover:shadow-md"
+      [routerLink]="['/orders', order.orderId]"
+    >
+      <div>
+        <div class="text-sm font-semibold text-neutral-900">
+          Order #{{ order.orderId.slice(0, 8) }}
         </div>
-        <div class="text-right text-sm font-semibold text-neutral-900">\${{ order.totalAmount }}</div>
-      </a>
+        <div class="text-xs text-neutral-500">
+          {{ order.orderStatus }} · {{ order.itemCount }} items · {{ order.paymentMethod }}
+        </div>
+        <div class="text-xs text-neutral-400">
+          付款時間：{{ order.paidAt | date: 'yyyy-MM-dd HH:mm' }}
+        </div>
+      </div>
+      <div class="text-right text-sm font-semibold text-neutral-900">\${{ order.totalAmount }}</div>
+    </a>
     }
   </div>
 </ui-section>

@@ -1,4 +1,8 @@
-import { ApplicationConfig, provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import {
+  ApplicationConfig,
+  provideZonelessChangeDetection,
+  importProvidersFrom,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { apiBaseInterceptor } from './core/interceptors/api-base.interceptor';
@@ -39,7 +43,9 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([apiBaseInterceptor, authInterceptor, apiResponseInterceptor])),
+    provideHttpClient(
+      withInterceptors([apiBaseInterceptor, authInterceptor, apiResponseInterceptor]),
+    ),
     provideAnimationsAsync(),
     provideNzI18n(zh_TW),
     importProvidersFrom(NzIconModule.forRoot(icons)),

@@ -19,7 +19,7 @@ export class SearchPageComponent {
   constructor(
     private readonly productService: ProductService,
     private readonly route: ActivatedRoute,
-    private readonly router: Router
+    private readonly router: Router,
   ) {
     this.route.queryParamMap.subscribe((params) => {
       const q = params.get('q') ?? '';

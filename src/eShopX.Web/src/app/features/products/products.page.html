@@ -1,46 +1,43 @@
 <ui-section [title]="title()" [subtitle]="subtitle()">
   <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
     @for (product of products(); track product) {
-      <ui-product-card [product]="product" badge="Core" />
-    }
-    @for (_ of [0,1,2,3]; track _) {
-      <div
-        class="h-80 rounded-2xl border border-dashed border-neutral-200 bg-neutral-50"
-        [class.hidden]="!isLoading() || products().length > 0"
-      ></div>
+    <ui-product-card [product]="product" badge="Core" />
+    } @for (_ of [0,1,2,3]; track _) {
+    <div
+      class="h-80 rounded-2xl border border-dashed border-neutral-200 bg-neutral-50"
+      [class.hidden]="!isLoading() || products().length > 0"
+    ></div>
     }
   </div>
 
   @if (totalPages() > 1) {
-    <div class="mt-8 flex flex-wrap items-center justify-center gap-2 text-sm">
-      @if (page() > 1) {
-        <button
-          class="rounded-full border border-neutral-200 px-3 py-1 text-neutral-600 hover:border-neutral-300"
-          (click)="goToPage(page() - 1)"
-        >
-          上一頁
-        </button>
-      }
-      @for (p of [].constructor(totalPages()); track $index) {
-        <button
-          class="h-8 w-8 rounded-full border text-xs"
-          [class.border-neutral-900]="page() === $index + 1"
-          [class.text-neutral-900]="page() === $index + 1"
-          [class.border-neutral-200]="page() !== $index + 1"
-          [class.text-neutral-500]="page() !== $index + 1"
-          (click)="goToPage($index + 1)"
-        >
-          {{ $index + 1 }}
-        </button>
-      }
-      @if (page() < totalPages()) {
-        <button
-          class="rounded-full border border-neutral-200 px-3 py-1 text-neutral-600 hover:border-neutral-300"
-          (click)="goToPage(page() + 1)"
-        >
-          下一頁
-        </button>
-      }
-    </div>
+  <div class="mt-8 flex flex-wrap items-center justify-center gap-2 text-sm">
+    @if (page() > 1) {
+    <button
+      class="rounded-full border border-neutral-200 px-3 py-1 text-neutral-600 hover:border-neutral-300"
+      (click)="goToPage(page() - 1)"
+    >
+      上一頁
+    </button>
+    } @for (p of [].constructor(totalPages()); track $index) {
+    <button
+      class="h-8 w-8 rounded-full border text-xs"
+      [class.border-neutral-900]="page() === $index + 1"
+      [class.text-neutral-900]="page() === $index + 1"
+      [class.border-neutral-200]="page() !== $index + 1"
+      [class.text-neutral-500]="page() !== $index + 1"
+      (click)="goToPage($index + 1)"
+    >
+      {{ $index + 1 }}
+    </button>
+    } @if (page() < totalPages()) {
+    <button
+      class="rounded-full border border-neutral-200 px-3 py-1 text-neutral-600 hover:border-neutral-300"
+      (click)="goToPage(page() + 1)"
+    >
+      下一頁
+    </button>
+    }
+  </div>
   }
 </ui-section>

@@ -29,16 +29,20 @@ export class CartService {
   async addToCart(userId: string, productId: string, quantity = 1): Promise<AddCartItemResponse> {
     const result = await this.api.post<AddCartItemResponse, AddCartItemRequest>(
       `/api/carts/${userId}/items`,
-      { productId, quantity }
+      { productId, quantity },
     );
     await this.getCart(userId);
     return result;
   }
 
-  async updateQuantity(userId: string, productId: string, quantity: number): Promise<UpdateCartItemResponse> {
+  async updateQuantity(
+    userId: string,
+    productId: string,
+    quantity: number,
+  ): Promise<UpdateCartItemResponse> {
     const result = await this.api.put<UpdateCartItemResponse, { quantity: number }>(
       `/api/carts/${userId}/items/${productId}`,
-      { quantity }
+      { quantity },
     );
     await this.getCart(userId);
     return result;

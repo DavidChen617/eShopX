@@ -1,16 +1,9 @@
 <div class="flash-sale-card bg-white rounded-lg overflow-hidden shadow-sm w-32 flex-shrink-0">
   <!-- 商品圖片 -->
   <div class="relative">
-    <img
-      [src]="item().imageUrl"
-      [alt]="item().name"
-      class="w-full h-32 object-cover"
-    />
+    <img [src]="item().imageUrl" [alt]="item().name" class="w-full h-32 object-cover" />
     @if (item().badge) {
-      <nz-tag
-        [nzColor]="isSoldOut() ? 'default' : 'red'"
-        class="absolute top-1 left-1 text-xs"
-      >
+      <nz-tag [nzColor]="isSoldOut() ? 'default' : 'red'" class="absolute top-1 left-1 text-xs">
         {{ item().badge }}
       </nz-tag>
     }

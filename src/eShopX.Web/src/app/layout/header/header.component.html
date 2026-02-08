@@ -11,26 +11,26 @@
 
         <!-- 搜索框 -->
         <div class="flex-1 max-w-2xl">
-        <nz-input-group [nzSuffix]="suffixIconSearch" class="rounded-full overflow-hidden">
-          <input
-            type="text"
-            nz-input
-            placeholder="搜索商品"
-            class="rounded-full"
-            [ngModel]="searchKeyword()"
-            (ngModelChange)="searchKeyword.set($event)"
-            (keyup.enter)="onSearch()"
-          />
-        </nz-input-group>
-        <ng-template #suffixIconSearch>
-          <button
-            class="flex items-center justify-center bg-[#FF5000] text-white px-4 py-1 -mr-3 cursor-pointer hover:bg-[#FF2D54] transition-colors"
-            (click)="onSearch()"
-          >
-            <nz-icon nzType="search" nzTheme="outline"></nz-icon>
-            <span class="ml-1 text-sm">搜索</span>
-          </button>
-        </ng-template>
+          <nz-input-group [nzSuffix]="suffixIconSearch" class="rounded-full overflow-hidden">
+            <input
+              type="text"
+              nz-input
+              placeholder="搜索商品"
+              class="rounded-full"
+              [ngModel]="searchKeyword()"
+              (ngModelChange)="searchKeyword.set($event)"
+              (keyup.enter)="onSearch()"
+            />
+          </nz-input-group>
+          <ng-template #suffixIconSearch>
+            <button
+              class="flex items-center justify-center bg-[#FF5000] text-white px-4 py-1 -mr-3 cursor-pointer hover:bg-[#FF2D54] transition-colors"
+              (click)="onSearch()"
+            >
+              <nz-icon nzType="search" nzTheme="outline"></nz-icon>
+              <span class="ml-1 text-sm">搜索</span>
+            </button>
+          </ng-template>
         </div>
       </div>
 
@@ -39,7 +39,11 @@
           <!-- 購物車 -->
           <a routerLink="/cart" class="text-white hover:text-yellow-200 transition-colors">
             <nz-badge [nzCount]="cartCount()">
-              <nz-icon nzType="shopping-cart" nzTheme="outline" class="text-2xl text-white"></nz-icon>
+              <nz-icon
+                nzType="shopping-cart"
+                nzTheme="outline"
+                class="text-2xl text-white"
+              ></nz-icon>
             </nz-badge>
           </a>
         }
@@ -48,12 +52,8 @@
         <div class="text-sm">
           @if (!isAuthenticated()) {
             <div class="flex items-center gap-3">
-              <a routerLink="/auth/login" class="text-white hover:text-yellow-200">
-                登入
-              </a>
-              <a routerLink="/auth/register" class="text-white hover:text-yellow-200">
-                註冊
-              </a>
+              <a routerLink="/auth/login" class="text-white hover:text-yellow-200"> 登入 </a>
+              <a routerLink="/auth/register" class="text-white hover:text-yellow-200"> 註冊 </a>
             </div>
           }
           @if (isAuthenticated()) {
@@ -65,9 +65,7 @@
                   alt="user avatar"
                 />
               </a>
-              <button (click)="logout()" class="text-white hover:text-yellow-200">
-                登出
-              </button>
+              <button (click)="logout()" class="text-white hover:text-yellow-200">登出</button>
             </div>
           }
         </div>
@@ -80,39 +78,53 @@
     <nav class="mx-auto max-w-6xl px-4">
       <ul class="flex items-center gap-6 text-sm py-2">
         <li>
-          <a routerLink="/" class="text-white hover:text-yellow-200 font-medium flex items-center gap-1">
+          <a
+            routerLink="/"
+            class="text-white hover:text-yellow-200 font-medium flex items-center gap-1"
+          >
             <nz-icon nzType="home" nzTheme="outline"></nz-icon>
             首頁
           </a>
         </li>
         <li>
-          <a routerLink="/products" [queryParams]="{ flash: 'true' }" class="text-yellow-200 font-bold flex items-center gap-1">
+          <a
+            routerLink="/products"
+            [queryParams]="{ flash: 'true' }"
+            class="text-yellow-200 font-bold flex items-center gap-1"
+          >
             <nz-icon nzType="thunderbolt" nzTheme="outline"></nz-icon>
             限時秒殺
           </a>
         </li>
         <li>
-          <a routerLink="/products" class="text-white hover:text-yellow-200 flex items-center gap-1">
+          <a
+            routerLink="/products"
+            class="text-white hover:text-yellow-200 flex items-center gap-1"
+          >
             <nz-icon nzType="appstore" nzTheme="outline"></nz-icon>
             全部商品
           </a>
         </li>
         <li>
-          <a routerLink="/products" class="text-white hover:text-yellow-200 flex items-center gap-1">
+          <a
+            routerLink="/products"
+            class="text-white hover:text-yellow-200 flex items-center gap-1"
+          >
             <nz-icon nzType="appstore" nzTheme="outline"></nz-icon>
             分類
           </a>
         </li>
         @if (isAuthenticated()) {
           <li>
-            <a routerLink="/orders" class="text-white hover:text-yellow-200">
-              我的訂單
-            </a>
+            <a routerLink="/orders" class="text-white hover:text-yellow-200"> 我的訂單 </a>
           </li>
         }
         @if (isAuthenticated() && (isSeller() || me()?.isAdmin)) {
           <li>
-            <a routerLink="/dashboard/products" class="text-white hover:text-yellow-200 flex items-center gap-1">
+            <a
+              routerLink="/dashboard/products"
+              class="text-white hover:text-yellow-200 flex items-center gap-1"
+            >
               <nz-icon nzType="appstore" nzTheme="outline"></nz-icon>
               上架商品
             </a>
@@ -120,7 +132,10 @@
         }
         @if (isAuthenticated() && me()?.isAdmin) {
           <li>
-            <a routerLink="/admin/sellers" class="text-white hover:text-yellow-200 flex items-center gap-1">
+            <a
+              routerLink="/admin/sellers"
+              class="text-white hover:text-yellow-200 flex items-center gap-1"
+            >
               <nz-icon nzType="safety-certificate" nzTheme="outline"></nz-icon>
               賣家審核
             </a>

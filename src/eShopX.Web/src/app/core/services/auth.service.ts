@@ -70,7 +70,8 @@ export class AuthService {
   private readonly googleProfileKey = 'eshopx.googleProfile';
   private readonly authenticatedSignal = signal(false);
   readonly authState = this.authenticatedSignal.asReadonly();
-  private readonly clientId = '81840048967-d6k4331ks8sllq08qac4morq5877t843.apps.googleusercontent.com';
+  private readonly clientId =
+    '81840048967-d6k4331ks8sllq08qac4morq5877t843.apps.googleusercontent.com';
   private readonly redirectUri = 'http://localhost:4200/auth/google/callback';
   private readonly scope = 'openid email profile';
   private readonly lineChannelId = '2009031910';
@@ -78,7 +79,7 @@ export class AuthService {
   private readonly lineScope = 'openid profile email';
   constructor(
     private readonly storage: LocalStorageService,
-    private readonly http: HttpClient
+    private readonly http: HttpClient,
   ) {
     this.authenticatedSignal.set(this.isAuthenticated());
   }
@@ -88,9 +89,7 @@ export class AuthService {
   }
 
   async login(request: LoginRequest): Promise<LoginResult> {
-    const result = await firstValueFrom(
-      this.http.post<LoginResult>('/api/auth/login', request)
-    );
+    const result = await firstValueFrom(this.http.post<LoginResult>('/api/auth/login', request));
 
     this.storage.setItem(this.accessTokenKey, result.accessToken);
     this.storage.setItem(this.refreshTokenKey, result.refreshToken);
@@ -105,7 +104,7 @@ export class AuthService {
 
   async register(request: RegisterRequest): Promise<RegisterResult> {
     const result = await firstValueFrom(
-      this.http.post<RegisterResult>('/api/auth/register', request)
+      this.http.post<RegisterResult>('/api/auth/register', request),
     );
     return result;
   }
@@ -152,7 +151,7 @@ export class AuthService {
   private randomString(len = 64) {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
     const bytes = crypto.getRandomValues(new Uint8Array(len));
-    return Array.from(bytes, b => charset[b % charset.length]).join('');
+    return Array.from(bytes, (b) => charset[b % charset.length]).join('');
   }
 
   exchangeGoogleCode(code: string, state: string) {
@@ -236,11 +235,10 @@ export class AuthService {
       scope: this.scope,
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
-      state
+      state,
     });
 
-    window.location.href =
-      `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   }
 
   async loginWithLine() {
@@ -264,15 +262,14 @@ export class AuthService {
       code_challenge_method: 'S256',
     });
 
-    window.location.href =
-      `https://access.line.me/oauth2/v2.1/authorize?${params.toString()}`;
+    window.location.href = `https://access.line.me/oauth2/v2.1/authorize?${params.toString()}`;
   }
 
   async createLinePayOrder(
     amount: number,
     currency: string,
     items: { id: string; name: string; quantity: number; price: number }[],
-    orderId?: string
+    orderId?: string,
   ): Promise<void> {
     const finalOrderId = orderId ?? `LP-${Date.now()}`;
     const userId = this.getUserId();
@@ -293,13 +290,15 @@ export class AuthService {
         },
       ],
       redirectUrls: {
-        confirmUrl: `/pay/line/confirm?amount=${amount}&currency=${currency}&orderId=${finalOrderId}${userId ? `&userId=${userId}` : ''}`,
+        confirmUrl: `/pay/line/confirm?amount=${amount}&currency=${currency}&orderId=${finalOrderId}${
+          userId ? `&userId=${userId}` : ''
+        }`,
         cancelUrl: '/pay/line/cancel',
       },
     };
 
     const response = await firstValueFrom(
-      this.http.post<LinePayRequestResponse>('/api/payments/line/request', body)
+      this.http.post<LinePayRequestResponse>('/api/payments/line/request', body),
     );
 
     const url = response?.info?.paymentUrl?.web;
@@ -321,7 +320,7 @@ export class AuthService {
     };
 
     const response = await firstValueFrom(
-      this.http.post<PayPalCreateOrderResult>('/api/payments/paypal/create-order', body)
+      this.http.post<PayPalCreateOrderResult>('/api/payments/paypal/create-order', body),
     );
 
     const approveUrl = response?.approveUrl;

@@ -31,5 +31,5 @@ export const apiResponseInterceptor: HttpInterceptorFn = (req, next) =>
         return throwError(() => new Error(err.error.message));
       }
       return throwError(() => err);
-    })
+    }),
   );

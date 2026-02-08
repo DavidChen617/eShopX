@@ -13,7 +13,10 @@ export interface ApiResponse<T> {
 export class ApiService {
   constructor(private readonly http: HttpClient) {}
 
-  async get<T>(path: string, params?: Record<string, string | number | boolean | undefined>): Promise<T> {
+  async get<T>(
+    path: string,
+    params?: Record<string, string | number | boolean | undefined>,
+  ): Promise<T> {
     let httpParams = new HttpParams();
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
@@ -23,30 +26,22 @@ export class ApiService {
       });
     }
 
-    const response = await firstValueFrom(
-      this.http.get<T>(path, { params: httpParams })
-    );
+    const response = await firstValueFrom(this.http.get<T>(path, { params: httpParams }));
     return this.unwrapMaybe(response);
   }
 
   async post<T, B = unknown>(path: string, body?: B): Promise<T> {
-    const response = await firstValueFrom(
-      this.http.post<T>(path, body)
-    );
+    const response = await firstValueFrom(this.http.post<T>(path, body));
     return this.unwrapMaybe(response);
   }
 
   async put<T, B = unknown>(path: string, body?: B): Promise<T> {
-    const response = await firstValueFrom(
-      this.http.put<T>(path, body)
-    );
+    const response = await firstValueFrom(this.http.put<T>(path, body));
     return this.unwrapMaybe(response);
   }
 
   async delete<T>(path: string): Promise<T> {
-    const response = await firstValueFrom(
-      this.http.delete<T>(path)
-    );
+    const response = await firstValueFrom(this.http.delete<T>(path));
     return this.unwrapMaybe(response);
   }
 

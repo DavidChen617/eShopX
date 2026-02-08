@@ -51,7 +51,7 @@ export class DashboardProductsPageComponent {
 
   constructor(
     private readonly sellerProductService: SellerProductService,
-    private readonly homepageService: HomepageService
+    private readonly homepageService: HomepageService,
   ) {
     void this.load();
   }
@@ -64,7 +64,10 @@ export class DashboardProductsPageComponent {
         const categories = await this.homepageService.getCategories();
         this.categories.set(categories);
       }
-      const result = await this.sellerProductService.getMyProducts({ page: 1, pageSize: 50 });
+      const result = await this.sellerProductService.getMyProducts({
+        page: 1,
+        pageSize: 50,
+      });
       this.items.set(result.items ?? []);
     } catch (err) {
       this.listError.set(err instanceof Error ? err.message : '載入失敗，請稍後再試。');
@@ -202,7 +205,10 @@ export class DashboardProductsPageComponent {
     this.imagesLoading.update((map) => ({ ...map, [productId]: true }));
     try {
       const result = await this.sellerProductService.getImages(productId);
-      this.images.update((map) => ({ ...map, [productId]: result.images ?? [] }));
+      this.images.update((map) => ({
+        ...map,
+        [productId]: result.images ?? [],
+      }));
       this.imageSortDrafts.update((map) => {
         const next = { ...map };
         (result.images ?? []).forEach((img) => {
@@ -298,7 +304,7 @@ export class DashboardProductsPageComponent {
         productId,
         file,
         this.uploadPrimary(),
-        this.uploadSortOrder()
+        this.uploadSortOrder(),
       );
       this.uploadFile.set(null);
       this.uploadPrimary.set(false);
@@ -315,7 +321,9 @@ export class DashboardProductsPageComponent {
     this.saving.set(true);
     this.editError.set(null);
     try {
-      await this.sellerProductService.updateImage(productId, imageId, { isPrimary: true });
+      await this.sellerProductService.updateImage(productId, imageId, {
+        isPrimary: true,
+      });
       await this.loadImages(productId);
     } catch (err) {
       this.editError.set(err instanceof Error ? err.message : '更新主圖失敗。');
@@ -328,7 +336,9 @@ export class DashboardProductsPageComponent {
     this.saving.set(true);
     this.editError.set(null);
     try {
-      await this.sellerProductService.updateImage(productId, imageId, { sortOrder });
+      await this.sellerProductService.updateImage(productId, imageId, {
+        sortOrder,
+      });
       await this.loadImages(productId);
     } catch (err) {
       this.editError.set(err instanceof Error ? err.message : '更新排序失敗。');

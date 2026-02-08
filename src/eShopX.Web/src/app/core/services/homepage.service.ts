@@ -68,7 +68,7 @@ export class HomepageService {
 
   async getBanners(): Promise<BannerSlide[]> {
     const response = await this.api.get<GetBannersResponse>('/api/homepage/banners');
-    return response.items.map(item => ({
+    return response.items.map((item) => ({
       id: item.id,
       title: item.title,
       imageUrl: item.imageUrl,
@@ -78,7 +78,7 @@ export class HomepageService {
 
   async getCategories(): Promise<CategoryEntry[]> {
     const response = await this.api.get<GetCategoriesResponse>('/api/homepage/categories');
-    return response.items.map(item => ({
+    return response.items.map((item) => ({
       id: item.id,
       name: item.name,
       icon: item.icon,
@@ -95,13 +95,13 @@ export class HomepageService {
       subtitle: response.subtitle ?? '',
       startsAt: response.startsAt,
       endsAt: response.endsAt,
-      slots: response.slots.map(slot => ({
+      slots: response.slots.map((slot) => ({
         id: slot.id,
         label: slot.label,
         startsAt: slot.startsAt,
         status: slot.status as 'upcoming' | 'live' | 'ended',
       })),
-      items: response.items.map(item => ({
+      items: response.items.map((item) => ({
         productId: item.productId,
         name: item.name,
         imageUrl: item.imageUrl ?? 'https://placehold.co/320x320',
@@ -121,7 +121,7 @@ export class HomepageService {
 
   async getRecommendProducts(): Promise<RecommendProduct[]> {
     const response = await this.api.get<GetRecommendProductsResponse>('/api/homepage/recommend');
-    return response.items.map(item => ({
+    return response.items.map((item) => ({
       id: item.id,
       name: item.name,
       imageUrl: item.imageUrl ?? 'https://placehold.co/400x400',

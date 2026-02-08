@@ -13,7 +13,8 @@ export const routes: Routes = [
       },
       {
         path: 'products',
-        loadChildren: () => import('./features/products/products.routes').then((m) => m.PRODUCTS_ROUTES),
+        loadChildren: () =>
+          import('./features/products/products.routes').then((m) => m.PRODUCTS_ROUTES),
       },
       {
         path: 'cart',
@@ -25,7 +26,8 @@ export const routes: Routes = [
       },
       {
         path: 'account',
-        loadChildren: () => import('./features/account/account.routes').then((m) => m.ACCOUNT_ROUTES),
+        loadChildren: () =>
+          import('./features/account/account.routes').then((m) => m.ACCOUNT_ROUTES),
       },
       {
         path: 'auth',
@@ -63,13 +65,14 @@ export const routes: Routes = [
       },
       {
         path: 'search',
-        loadComponent: () => import('./features/search/search.page').then((m) => m.SearchPageComponent),
+        loadComponent: () =>
+          import('./features/search/search.page').then((m) => m.SearchPageComponent),
       },
       {
         path: 'dashboard/products',
         loadComponent: () =>
           import('./features/dashboard/products/dashboard-products.page').then(
-            (m) => m.DashboardProductsPageComponent
+            (m) => m.DashboardProductsPageComponent,
           ),
       },
       {

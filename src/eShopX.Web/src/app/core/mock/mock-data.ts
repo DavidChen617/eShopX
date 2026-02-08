@@ -7,11 +7,7 @@ import {
   GetProductResponse,
   GetUserOrderResponse,
 } from '../models/api-models';
-import {
-  BannerSlide,
-  CategoryEntry,
-  RecommendProduct,
-} from '../models/home-models';
+import { BannerSlide, CategoryEntry, RecommendProduct } from '../models/home-models';
 import { FlashSaleData } from '../models/flash-sale-models';
 
 export const mockProducts: GetProductResponse = {
@@ -303,10 +299,30 @@ export const mockFlashSale: FlashSaleData = {
   startsAt: '2026-02-02T12:00:00Z',
   endsAt: '2026-02-02T23:59:59Z',
   slots: [
-    { id: 'slot-1', label: '10:00', startsAt: '2026-02-01T10:00:00Z', status: 'ended' },
-    { id: 'slot-2', label: '12:00', startsAt: '2026-02-01T12:00:00Z', status: 'live' },
-    { id: 'slot-3', label: '14:00', startsAt: '2026-02-01T14:00:00Z', status: 'upcoming' },
-    { id: 'slot-4', label: '16:00', startsAt: '2026-02-01T16:00:00Z', status: 'upcoming' },
+    {
+      id: 'slot-1',
+      label: '10:00',
+      startsAt: '2026-02-01T10:00:00Z',
+      status: 'ended',
+    },
+    {
+      id: 'slot-2',
+      label: '12:00',
+      startsAt: '2026-02-01T12:00:00Z',
+      status: 'live',
+    },
+    {
+      id: 'slot-3',
+      label: '14:00',
+      startsAt: '2026-02-01T14:00:00Z',
+      status: 'upcoming',
+    },
+    {
+      id: 'slot-4',
+      label: '16:00',
+      startsAt: '2026-02-01T16:00:00Z',
+      status: 'upcoming',
+    },
   ],
   items: [
     {

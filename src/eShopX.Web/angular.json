@@ -54,9 +54,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.css"
-            ],
+            "styles": ["src/styles.css"],
             "scripts": []
           },
           "configurations": {
@@ -89,12 +87,12 @@
           },
           "defaultConfiguration": "production"
         },
-      "serve": {
-        "builder": "@angular/build:dev-server",
-        "options": {
-          "proxyConfig": "proxy.conf.json"
-        },
-        "configurations": {
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          },
+          "configurations": {
             "production": {
               "buildTarget": "eShopX.Web:build:production"
             },
@@ -118,9 +116,7 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.css"
-            ],
+            "styles": ["src/styles.css"],
             "scripts": []
           }
         }

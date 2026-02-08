@@ -27,7 +27,7 @@ export class ProductDetailPageComponent {
     private readonly route: ActivatedRoute,
     private readonly productService: ProductService,
     private readonly cartService: CartService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
   ) {
     const productId = this.route.snapshot.paramMap.get('id') ?? '';
     void this.load(productId);

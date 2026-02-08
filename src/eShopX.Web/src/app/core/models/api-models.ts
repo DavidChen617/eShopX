@@ -237,3 +237,59 @@ export interface RejectSellerResponse {
   rejectedAt: string;
   reason: string;
 }
+
+export interface HomepageReviewItem {
+  reviewId: string;
+  userName?: string | null;
+  userAvatar?: string | null;
+  productId: string;
+  productName: string;
+  productImage?: string | null;
+  rating: number;
+  content?: string | null;
+  imageUrls: string[];
+  createdAt: string;
+}
+
+export interface GetProductReviewsResponse {
+  items: ReviewItem[];
+  totalCount: number;
+  averageRating: number;
+}
+
+export interface ReviewItem {
+  reviewId: string;
+  userName?: string | null;
+  rating: number;
+  content?: string | null;
+  imageUrls: string[];
+  createdAt: string;
+}
+
+export interface CreateReviewRequest {
+  orderItemId: string;
+  rating: number;
+  content?: string | null;
+  isAnonymous?: boolean;
+  imageUrls?: string[] | null;
+}
+
+export interface CreateReviewResponse {
+  reviewId: string;
+  productId: string;
+  rating: number;
+  createdAt: string;
+}
+
+export interface UpdateReviewRequest {
+  rating: number;
+  content?: string | null;
+  isAnonymous?: boolean;
+  imageUrls?: string[] | null;
+}
+
+export interface UpdateReviewResponse {
+  reviewId: string;
+  rating: number;
+  updatedAt: string;
+}

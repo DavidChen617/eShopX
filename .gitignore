@@ -492,3 +492,6 @@ $RECYCLE.BIN/
 *.swp
 
 trust-policy.json
+# Build outputs
+bin/
+obj/

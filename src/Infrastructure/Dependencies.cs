@@ -112,37 +112,18 @@ public static class Dependencies
         services
             .AddScoped<IPaymentService<PayPalCreateOrderRequest, PayPalCreateOrderResponse, PayPalCaptureRequest,
                 PayPalCaptureOrderResponse>, PayPalService>();
-
-        services.DecorateWithDispatchProxyFromAttributes(new[] { typeof(Dependencies).Assembly });
         
         // kafka
         services.Configure<KafkaOptions>(configuration.GetSection(KafkaOptions.OptionKey));
         services.AddSingleton<IProducer<string,string>>(sp =>
         {
             var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
-            
-            var config = new ProducerConfig                                                                                                        
-            {                                                                                                                                      
-                BootstrapServers = kafkaOptions.BootstrapServers,                                                                                 
-                Acks = Acks.All,  // Ensure message is acknowledged by all replicas                                                                                
-                EnableIdempotence = true  // Prevent duplicate sending                                                                                          
-            };  
-            
-            return new ProducerBuilder<string, string>(config).Build();
+            return new ProducerBuilder<string, string>(kafkaOptions.Producer).Build();
         });
         services.AddSingleton<IConsumer<string, string>>(sp =>
         {
             var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
-            
-            var config = new ConsumerConfig                                                                                                        
-            {                                                                                                                                      
-                BootstrapServers = kafkaOptions.BootstrapServers,                                                                                 
-                GroupId = kafkaOptions.GroupId,                                                                                            
-                AutoOffsetReset = AutoOffsetReset.Earliest,                                                                                        
-                EnableAutoCommit = false  // Manual commit, make sure the processing is successful before confirming                                                                       
-            };                                                                                                                                     
-                                                                                                                                                 
-            return new ConsumerBuilder<string, string>(config).Build();
+            return new ConsumerBuilder<string, string>(kafkaOptions.Consumer).Build();
         });
 
         services.AddSingleton<IFlashSaleOrderPublisher, FlashSaleOrderPublisher>();

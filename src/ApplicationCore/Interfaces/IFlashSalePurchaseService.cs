@@ -1,6 +1,9 @@
+using eShopX.Common.Proxy;
+
 namespace ApplicationCore.Interfaces;
 
-public interface IFlashSalePurchaseService
+[UseDispatchProxy(typeof(LoggingProxy<>))]
+public interface IFlashSalePurchaseService: IInterceptable
 {
     /// <summary>                                                                                                                              
     /// 嘗試預扣庫存                                                                                                                           

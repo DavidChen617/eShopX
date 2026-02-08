@@ -29,7 +29,6 @@ public class LineAuthService(
             throw new BadRequestException("LINE Auth Error: No id_token");
 
         var idTokenPayload = await VerifyIdTokenAsync(authResponse.IdToken, request.Nonce);
-        Console.WriteLine(idTokenPayload.Picture);
         var sub = idTokenPayload.Sub;
         var email = idTokenPayload.Email ?? string.Empty;
         var name = idTokenPayload.Name ?? string.Empty;

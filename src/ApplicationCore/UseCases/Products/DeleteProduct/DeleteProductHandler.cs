@@ -1,5 +1,3 @@
-using ApplicationCore.Interfaces;
-
 namespace ApplicationCore.UseCases.Products.DeleteProduct;
 
 public class DeleteProductHandler(

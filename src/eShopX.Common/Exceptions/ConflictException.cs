@@ -2,5 +2,5 @@
 
 namespace eShopX.Common.Exceptions;
 
-public sealed class ConflictException(string message) :
+public class ConflictException(string message) :
     AppException(message, HttpStatusCode.Conflict);

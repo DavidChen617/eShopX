@@ -1,5 +1,4 @@
 using System.Security.Claims;
-
 using ApplicationCore.UseCases.Sellers.GetPendingSellers;
 
 namespace eShopX.Endpoints.Sellers;

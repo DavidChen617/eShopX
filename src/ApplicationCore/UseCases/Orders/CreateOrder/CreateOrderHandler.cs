@@ -9,7 +9,7 @@ public class CreateOrderHandler(
     public async Task<CreateOrderResponse> Handle(CreateOrderCommand command,
         CancellationToken cancellationToken = default)
     {
-        const int maxRetries = 3;
+        const int maxRetries = 5;
         
         for (int attempt = 0; attempt < maxRetries; ++attempt)
         {

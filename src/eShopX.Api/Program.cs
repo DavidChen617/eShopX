@@ -5,6 +5,7 @@ using eShopX.Common.Exceptions.Handlers;
 using eShopX.Common.Logging;
 using eShopX.Common.Mapping;
 using eShopX.Common.Proxy;
+using Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,6 @@ builder.Services.AddMediator(typeof(IAssemblyMarker).Assembly)
     .AddLoggingBehavior();
 
 builder.Services.AddMapping(typeof(IAssemblyMarker).Assembly, typeof(Dependencies).Assembly);
-builder.Services.DecorateWithDispatchProxyFromAttributes(new[] { typeof(Dependencies).Assembly });
 
 builder.Services.AddProblemDetails();
 
@@ -28,6 +28,8 @@ builder.Services
     .AddExceptionHandler<ConflictExceptionHandler>()
     .AddExceptionHandler<ForbiddenExceptionHandler>()
     .AddExceptionHandler<GlobalExceptionHandler>();
+
+builder.Services.DecorateWithDispatchProxyFromAttributes(typeof(Dependencies).Assembly, typeof(IAssemblyMarker).Assembly);
 
 builder.Services.AddHttpClient();
 
@@ -78,13 +80,13 @@ builder.Services.AddCors(options =>
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    
+
     // Global current limit: 100 times per second per IP
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
-            factory: _ => new FixedWindowRateLimiterOptions{ PermitLimit = 100, Window = TimeSpan.FromSeconds(1) }));
-    
+            factory: _ => new FixedWindowRateLimiterOptions { PermitLimit = 100, Window = TimeSpan.FromSeconds(1) }));
+
     // Flash Sale only: 5 per second per user
     options.AddPolicy("FlashSale", context =>
         RateLimitPartition.GetFixedWindowLimiter(
@@ -96,16 +98,16 @@ builder.Services.AddOpenApi();
 
 builder.Logging.ClearProviders()
     .AddCustomLogger(options =>
-{
-    options.EnableConsole = true;
-    options.EnableFile = true;
-    options.EnableDb = false;
-    options.LogDirectory = "Logs";
-    options.FilePrefix = "app-";
-    options.MinLevel = LogLevel.Information;
-    options.IncludeThreadId = false;
-    options.IncludeSinkThreadId = false;
-});
+    {
+        options.EnableConsole = true;
+        options.EnableFile = true;
+        options.EnableDb = false;
+        options.LogDirectory = "Logs";
+        options.FilePrefix = "app-";
+        options.MinLevel = LogLevel.Information;
+        options.IncludeThreadId = false;
+        options.IncludeSinkThreadId = false;
+    });
 
 var app = builder.Build();
 
@@ -119,7 +121,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
-
 app.UseHttpsRedirection();
 app.UseScopeId();
 app.UseCors("MyPolicy");

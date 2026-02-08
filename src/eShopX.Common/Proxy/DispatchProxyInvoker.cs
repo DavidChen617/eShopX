@@ -21,6 +21,10 @@ internal static class DispatchProxyInvoker
 
         foreach (var method in interfaceType.GetMethods())
         {
+            // 跳過泛型方法，它們會在實際調用時編譯
+            if (method.IsGenericMethod || method.ContainsGenericParameters)
+                continue;
+
             Cache.GetOrAdd(method, BuildInvoker);
         }
     }

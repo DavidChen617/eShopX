@@ -508,6 +508,12 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("numeric(18,2)")
                         .HasComment("商品單價");
 
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
                     b.Property<Guid?>("SellerId")
                         .HasColumnType("uuid")
                         .HasComment("賣家 ID");

@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${SKIP_HOOKS:-}" == "1" ]]; then
+  exit 0
+fi
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+staged_files="$(git diff --cached --name-only --diff-filter=ACMR)"
+
+cs_files="$(echo "$staged_files" | grep -E '\\.cs$' || true)"
+ts_files="$(echo "$staged_files" | grep -E '\\.ts$' || true)"
+web_ts_files="$(echo "$ts_files" | grep -E '^src/eShopX\\.Web/' || true)"
+
+if [[ -n "$cs_files" ]]; then
+  echo "[pre-commit] dotnet format whitespace (.cs)"
+  dotnet format whitespace eShopX.slnx --include $cs_files
+  git add $cs_files
+fi
+
+if [[ -n "$web_ts_files" ]]; then
+  echo "[pre-commit] prettier (.ts) in src/eShopX.Web"
+  pnpm -C src/eShopX.Web prettier --write $web_ts_files
+  git add $web_ts_files
+fi

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 using eShopX.Common.Mapping;
 
@@ -76,6 +77,58 @@ public class MappingTests
         var dto = mapper.Map<UserDto>(new User { First = "A", Last = "B", Age = 20 });
 
         Assert.Equal("A B", dto.FullName);
+    }
+
+    [Fact]
+    public void Mapper_Maps_List_FromObject_Overload()
+    {
+        var config = new MapperConfiguration([new TestProfile()]);
+        var mapper = new Mapper(config);
+
+        var source = new List<User>
+        {
+            new() { First = "A", Last = "B", Age = 20 },
+            new() { First = "C", Last = "D", Age = 30 }
+        };
+
+        var dtos = mapper.Map<List<UserDto>>(source);
+
+        Assert.Equal(2, dtos.Count);
+        Assert.Equal("A B", dtos[0].FullName);
+        Assert.Equal("C D", dtos[1].FullName);
+    }
+
+    [Fact]
+    public void Mapper_Maps_Array_FromObject_Overload()
+    {
+        var config = new MapperConfiguration([new TestProfile()]);
+        var mapper = new Mapper(config);
+
+        var source = new[]
+        {
+            new User { First = "A", Last = "B", Age = 20 },
+            new User { First = "C", Last = "D", Age = 30 }
+        };
+
+        var dtos = mapper.Map<UserDto[]>(source);
+
+        Assert.Equal(2, dtos.Length);
+        Assert.Equal("A B", dtos[0].FullName);
+        Assert.Equal("C D", dtos[1].FullName);
+    }
+
+    [Fact]
+    public void Mapper_Throws_WhenCollectionDestinationIsNotSupported()
+    {
+        var config = new MapperConfiguration([new TestProfile()]);
+        var mapper = new Mapper(config);
+
+        var source = new List<User>
+        {
+            new() { First = "A", Last = "B", Age = 20 }
+        };
+
+        Assert.Throws<InvalidOperationException>(() => mapper.Map<HashSet<UserDto>>(source));
     }
 
     [Fact]

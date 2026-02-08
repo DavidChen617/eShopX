@@ -29,7 +29,8 @@ public class RedisCacheService(IConnectionMultiplexer multiplexer) : ICacheServi
 
         var value = await factory(cancellationToken);
         var payload = value.ToJson();
-        await _db.StringSetAsync(cacheKey, payload, ttl);
+        var jitter = TimeSpan.FromMilliseconds(ttl.TotalMilliseconds * (Random.Shared.NextDouble() * 0.2 - 0.1));
+        await _db.StringSetAsync(cacheKey, payload, ttl + jitter);
         return value;
     }
 

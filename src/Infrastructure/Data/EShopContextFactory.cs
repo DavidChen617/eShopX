@@ -13,6 +13,7 @@ public sealed class EShopContextFactory : IDesignTimeDbContextFactory<EShopConte
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: true)
             .AddJsonFile($"appsettings.{environment}.json", optional: true)
+            .AddUserSecrets<EShopContextFactory>(optional: true)
             .AddEnvironmentVariables()
             .Build();
 

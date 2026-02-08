@@ -60,3 +60,11 @@ The easiest way to start the entire stack (Database, Redis, API, Web) is via Doc
 ```bash
 docker-compose up -d
 ```
+
+## Git Hooks
+
+To enable the repository hooks, point Git to the versioned hooks directory:
+
+```bash
+git config core.hooksPath hooks
+```

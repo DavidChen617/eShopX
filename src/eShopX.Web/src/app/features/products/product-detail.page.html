@@ -36,6 +36,41 @@
         </div>
       </div>
       }
+      <div class="mt-6 rounded-2xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600">
+        <div class="flex items-center justify-between">
+          <div class="font-semibold text-neutral-900">Reviews</div>
+          <div class="text-xs text-neutral-500">
+            平均 {{ reviewAverage() }}/5 · 共 {{ reviewTotal() }} 則
+          </div>
+        </div>
+        @if (isReviewLoading()) {
+        <div class="mt-4 space-y-2">
+          <div class="h-4 w-1/3 rounded-lg border border-dashed border-neutral-200"></div>
+          <div class="h-4 w-full rounded-lg border border-dashed border-neutral-200"></div>
+          <div class="h-4 w-4/5 rounded-lg border border-dashed border-neutral-200"></div>
+        </div>
+        } @else if (reviews().length) {
+        <div class="mt-4 space-y-3">
+          @for (review of reviews(); track review.reviewId) {
+          <div class="rounded-xl border border-neutral-100 bg-neutral-50 p-3">
+            <div class="flex items-center justify-between">
+              <div class="text-sm font-semibold text-neutral-900">
+                {{ review.userName || '匿名買家' }}
+              </div>
+              <div class="text-xs font-semibold text-orange-500">{{ review.rating }}/5</div>
+            </div>
+            <div class="mt-2 text-xs text-neutral-600">
+              {{ review.content || '這則評價沒有文字內容。' }}
+            </div>
+          </div>
+          }
+        </div>
+        } @else {
+        <div class="mt-4 rounded-xl border border-dashed border-neutral-200 bg-neutral-50 p-3 text-xs text-neutral-500">
+          目前尚無評價，購買後可以留下第一則評論。
+        </div>
+        }
+      </div>
     </div>
     } @if (isLoading()) {
     <div>

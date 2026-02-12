@@ -13,8 +13,7 @@ public class LineAuthEndpoint : IGroupedEndpoint<AuthGroupEndpoint>
 
     public async Task<IResult> HandleAsync(
         [FromBody] LineAuthRequest request,
-        [FromKeyedServices("LineAuth")]
-        IThirdPartyAuthService<LineAuthRequest, LineAuthResponse> lineAuthService)
+        [FromServices] IThirdPartyAuthService<LineAuthRequest, LineAuthResponse> lineAuthService)
     {
         try
         {

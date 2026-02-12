@@ -13,8 +13,7 @@ public class GoogleAuthEndpoint : IGroupedEndpoint<AuthGroupEndpoint>
 
     public async Task<IResult> HandleAsync(
         [FromBody] GoogleAuthRequest request,
-        [FromKeyedServices("GoogleAuth")]
-        IThirdPartyAuthService<GoogleAuthRequest, GoogleAuthResponse> authService)
+        [FromServices] IThirdPartyAuthService<GoogleAuthRequest, GoogleAuthResponse> authService)
     {
         try
         {

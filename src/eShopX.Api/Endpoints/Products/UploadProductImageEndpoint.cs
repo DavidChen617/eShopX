@@ -9,7 +9,7 @@ public class UploadProductImageEndpoint : IGroupedEndpoint<ProductsGroupEndpoint
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("{id}/images", Handle)
+        group.MapPost("{productId}/images", Handle)
             .Accepts<UploadProductImageRequest>(MediaTypeNames.Multipart.FormData)
             .Produces<UploadProductImageResponse>()
             .DisableAntiforgery()
@@ -18,7 +18,7 @@ public class UploadProductImageEndpoint : IGroupedEndpoint<ProductsGroupEndpoint
 
     private static async Task<IResult> Handle(
         ClaimsPrincipal user,
-        [FromRoute] Guid id,
+        [FromRoute] Guid productId,
         [FromForm] UploadProductImageRequest request,
         ISender sender)
     {
@@ -39,7 +39,7 @@ public class UploadProductImageEndpoint : IGroupedEndpoint<ProductsGroupEndpoint
 
         var result = await sender.Send(new UploadProductImageCommand(
             userId,
-            id,
+            productId,
             imageRequest,
             request.IsPrimary,
             request.SortOrder));

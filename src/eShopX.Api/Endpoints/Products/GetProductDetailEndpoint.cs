@@ -6,15 +6,15 @@ public class GetProductDetailEndpoint : IGroupedEndpoint<ProductsGroupEndpoint>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapGet("{id}", Handle)
+        group.MapGet("{productId}", Handle)
             .Produces<GetProductDetailResponse>()
             .WithDescription("取得單一商品詳細資訊")
             .AllowAnonymous();
     }
 
-    private static async Task<IResult> Handle([FromRoute] Guid id, ISender sender)
+    private static async Task<IResult> Handle([FromRoute] Guid productId, ISender sender)
     {
-        var result = await sender.Send(new GetProductDetailQuery(id));
+        var result = await sender.Send(new GetProductDetailQuery(productId));
         return Results.Ok(ApiResponse<GetProductDetailResponse>.Success(result));
     }
 }

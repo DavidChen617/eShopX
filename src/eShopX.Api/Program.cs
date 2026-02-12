@@ -101,12 +101,11 @@ builder.Logging.ClearProviders()
     {
         options.EnableConsole = true;
         options.EnableFile = true;
-        options.EnableDb = true;
+        options.EnableDb = false;
         options.LogDirectory = "Logs";
         options.FilePrefix = "app-";
         options.MinLevel = LogLevel.Information;
         options.IncludeThreadId = false;
-        options.IncludeSinkThreadId = false;
     });
 
 var app = builder.Build();

@@ -1,5 +1,4 @@
 ﻿using System.Threading.Channels;
-
 using Microsoft.Extensions.Logging;
 
 namespace eShopX.Common.Logging;
@@ -16,5 +15,4 @@ public class CustomLoggerOptions
     public int ChannelCapacity { get; set; } = 1024;
     public BoundedChannelFullMode ChannelFullMode { get; set; } = BoundedChannelFullMode.DropOldest;
     public bool IncludeThreadId { get; set; } = false;
-    public bool IncludeSinkThreadId { get; set; } = false;
 }

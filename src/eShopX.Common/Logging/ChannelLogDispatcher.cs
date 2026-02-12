@@ -81,13 +81,6 @@ public sealed class ChannelLogDispatcher : ILogDispatcher, IDisposable
 
     private void Write(LogEntry entry)
     {
-        var options = _options.CurrentValue;
-        var message = options.IncludeSinkThreadId
-            ? $"[S:{Environment.CurrentManagedThreadId}] {entry.Message}"
-            : entry.Message;
-
-        var finalEntry = entry with { Message = message };
-
         IReadOnlyList<ILogSink> sinks;
         lock (_sinkLock)
         {
@@ -96,7 +89,7 @@ public sealed class ChannelLogDispatcher : ILogDispatcher, IDisposable
 
         foreach (var sink in sinks)
         {
-            sink.Emit(finalEntry);
+            sink.Emit(entry);
         }
     }
 

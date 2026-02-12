@@ -11,24 +11,35 @@ public static class JsonExtension
         Converters = { new StreamJsonConverter() }
     };
 
-    public static string ToJson(this object obj, JsonSerializerOptions? options = null)
+    extension(object obj)
     {
-        return JsonSerializer.Serialize(obj, options ?? SerializerOptions);
+        public string ToJson(JsonSerializerOptions? options = null)
+        {
+            return JsonSerializer.Serialize(obj, options ?? SerializerOptions);
+        }
     }
 
-    public static bool TryParseJson<T>(this string json, out T? obj, out string errMsg, JsonSerializerOptions? options = null) where T : class
+    extension(string json)
     {
-        errMsg = string.Empty;
-        try
+        public bool TryParseJson<T>(out T? obj, out string errMsg, JsonSerializerOptions? options = null) where T : class
         {
-            obj = JsonSerializer.Deserialize<T>(json, options);
-            return true;
+            errMsg = string.Empty;
+            try
+            {
+                obj = JsonSerializer.Deserialize<T>(json, options);
+                return true;
+            }
+            catch (Exception e)
+            {
+                obj = null;
+                errMsg = e.Message;
+                return false;
+            }
         }
-        catch (Exception e)
+
+        public T? ParseJson<T>(JsonSerializerOptions? options = null)
         {
-            obj = null;
-            errMsg = e.Message;
-            return false;
+            return JsonSerializer.Deserialize<T>(json, options ?? SerializerOptions);
         }
     }
 }
@@ -40,7 +51,7 @@ internal sealed class StreamJsonConverter : JsonConverter<Stream>
         return null;
     }
 
-    public override void Write(Utf8JsonWriter writer, Stream value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Stream? value, JsonSerializerOptions options)
     {
         if (value == null)
         {

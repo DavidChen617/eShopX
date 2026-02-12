@@ -44,12 +44,14 @@ public class UpdateBannerEndpoint : IGroupedEndpoint<HomepageGroupEndpoint>
     }
 }
 
-public record UpdateBannerRequest(
-    string Title,
-    string? ImageUrl,
-    IFormFile? File,
-    string Link,
-    int SortOrder,
-    bool IsActive,
-    DateTime? StartsAt,
-    DateTime? EndsAt);
+public class UpdateBannerRequest
+{
+    public string Title { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+    public IFormFile? File { get; set; }
+    public string Link { get; set; } = string.Empty;
+    public int SortOrder { get; set; }
+    public bool IsActive { get; set; }
+    public DateTime? StartsAt { get; set; }
+    public DateTime? EndsAt { get; set; }
+}

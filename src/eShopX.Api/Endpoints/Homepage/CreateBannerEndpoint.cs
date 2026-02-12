@@ -39,11 +39,13 @@ public class CreateBannerEndpoint : IGroupedEndpoint<HomepageGroupEndpoint>
     }
 }
 
-public record CreateBannerRequest(
-    string Title,
-    string? ImageUrl,
-    IFormFile? File,
-    string Link,
-    int SortOrder,
-    DateTime? StartsAt,
-    DateTime? EndsAt);
+public class CreateBannerRequest
+{
+    public string Title { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+    public IFormFile? File { get; set; }
+    public string Link { get; set; } = string.Empty;
+    public int SortOrder { get; set; }
+    public DateTime? StartsAt { get; set; }
+    public DateTime? EndsAt { get; set; }
+}

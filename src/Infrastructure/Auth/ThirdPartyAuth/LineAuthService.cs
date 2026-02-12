@@ -2,7 +2,7 @@ using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 
 using eShopX.Common.Exceptions;
-
+using eShopX.Common.Extensions;
 using Infrastructure.Options;
 
 using Microsoft.Extensions.Options;
@@ -29,6 +29,7 @@ public class LineAuthService(
             throw new BadRequestException("LINE Auth Error: No id_token");
 
         var idTokenPayload = await VerifyIdTokenAsync(authResponse.IdToken, request.Nonce);
+        Console.WriteLine(idTokenPayload.ToJson());
         var sub = idTokenPayload.Sub;
         var email = idTokenPayload.Email ?? string.Empty;
         var name = idTokenPayload.Name ?? string.Empty;

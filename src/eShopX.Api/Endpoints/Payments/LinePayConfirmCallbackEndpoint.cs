@@ -27,7 +27,8 @@ public class LinePayConfirmCallbackEndpoint : IGroupedEndpoint<LinePayCallbackGr
         [FromServices] IOptions<LinePayOptions> options,
         [FromServices] IMailSender mailSender,
         [FromServices] ISender sender,
-        [FromServices] IRepository<User> userRepository)
+        [FromServices] IRepository<User> userRepository,
+        [FromServices] IRepository<ExternalLogin> externalLoginRepository)
     {
         var frontBase = string.IsNullOrWhiteSpace(options.Value.FrontendBaseUrl)
             ? "http://localhost:4200"
@@ -47,14 +48,21 @@ public class LinePayConfirmCallbackEndpoint : IGroupedEndpoint<LinePayCallbackGr
         {
             if (userId.HasValue)
             {
-                var user = await userRepository.GetByIdAsync(userId.Value, default);
+                var user = await userRepository.GetByIdAsync(userId.Value);
                 if (user is not null)
                 {
-                    await mailSender.SendAsync(new MailSendRequest(
-                        ToEmail: user.Email,
-                        Subject: "Line Pay 付款成功",
-                        TextBody: $"交易成功。orderId={orderId ?? ""}, transactionId={transactionId.Value}"
-                    ));
+                    var email = user?.Email;
+                    if (string.IsNullOrEmpty(email))
+                    {
+                        var externalUser = await externalLoginRepository.FirstOrDefaultAsync(x => x.UserId == userId.Value);
+                        email = externalUser?.EmailAtLinkTime;
+                    }
+                    if(!string.IsNullOrEmpty(email))
+                        await mailSender.SendAsync(new MailSendRequest(
+                            ToEmail: email,
+                            Subject: "Line Pay 付款成功",
+                            TextBody: $"交易成功。orderId={orderId ?? ""}, transactionId={transactionId.Value}"
+                        ));
                 }
             }
 

@@ -1,15 +1,28 @@
 <div class="banner-carousel mx-2 sm:mx-0">
   <div
-    class="banner-frame relative overflow-hidden rounded-3xl border border-white/70 bg-bg-card shadow-[0_20px_50px_-40px_rgba(0,0,0,0.45)]"
+    class="banner-frame relative h-[78vh] max-h-[42rem] min-h-[22rem] overflow-hidden rounded-3xl border border-white/70 bg-bg-card shadow-[0_20px_50px_-40px_rgba(0,0,0,0.45)]"
   >
-    <nz-carousel class="block h-52 sm:h-64" nzAutoPlay [nzAutoPlaySpeed]="3500" nzEffect="scrollx">
+    <nz-carousel
+      class="block h-full"
+      nzAutoPlay
+      [nzAutoPlaySpeed]="3500"
+      nzEffect="scrollx"
+    >
       @for (slide of slides(); track slide.id; let first = $first) {
-        <div nz-carousel-content class="h-52 sm:h-64">
+        <div nz-carousel-content class="h-full">
           <a
-            [routerLink]="slide.link"
             class="block relative h-full"
+            href=""
             draggable="false"
             (dragstart)="$event.preventDefault()"
+            (mousedown)="onMouseDown($event)"
+            (mousemove)="onMouseMove($event)"
+            (mouseup)="onMouseUp()"
+            (mouseleave)="onMouseUp()"
+            (touchstart)="onTouchStart($event)"
+            (touchmove)="onTouchMove($event)"
+            (touchend)="onTouchEnd()"
+            (click)="onSlideClick($event, slide.link)"
           >
             <img
               [src]="slide.imageUrl"
@@ -23,12 +36,14 @@
               class="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/40 via-black/10 to-transparent"
             ></div>
             <div
-              class="pointer-events-none absolute bottom-4 left-4 right-4 rounded-2xl bg-white/85 p-4 backdrop-blur"
+              class="pointer-events-none absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary-hover/80"
             >
-              <div class="text-xs uppercase tracking-[0.3em] text-primary-hover/70">Hot pick</div>
-              <h3 class="mt-1 text-lg font-extrabold text-text-primary">
-                {{ slide.title }}
-              </h3>
+              Hot pick
+            </div>
+            <div
+              class="pointer-events-none absolute bottom-3 left-3 right-3 rounded-xl bg-black/35 px-3 py-2 backdrop-blur-[1px]"
+            >
+              <h3 class="truncate text-sm font-bold text-white">{{ slide.title }}</h3>
             </div>
           </a>
         </div>

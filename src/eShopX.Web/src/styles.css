@@ -152,14 +152,6 @@ a:hover {
   overflow: hidden;
 }
 
-.banner-frame .ant-carousel,
-.banner-frame .slick-list,
-.banner-frame .slick-track,
-.banner-frame .slick-slide,
-.banner-frame .slick-slide > div {
-  height: 100%;
-}
-
 .banner-frame .slick-list,
 .banner-frame .slick-track,
 .banner-frame .slick-slide > div,

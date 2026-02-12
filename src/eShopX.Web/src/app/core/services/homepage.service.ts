@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import { ApiService } from './api.service';
-import { BannerSlide, CategoryEntry, RecommendProduct } from '../models/home-models';
+import { BannerManageItem, BannerSlide, CategoryEntry, RecommendProduct } from '../models/home-models';
 import { FlashSaleData } from '../models/flash-sale-models';
 
 interface GetBannersResponse {
@@ -10,6 +10,10 @@ interface GetBannersResponse {
     title: string;
     imageUrl: string;
     link: string;
+    sortOrder?: number;
+    isActive?: boolean;
+    startsAt?: string | null;
+    endsAt?: string | null;
   }>;
 }
 
@@ -74,6 +78,69 @@ export class HomepageService {
       imageUrl: item.imageUrl,
       link: item.link,
     }));
+  }
+
+  async getBannersForAdmin(): Promise<BannerManageItem[]> {
+    const response = await this.api.get<GetBannersResponse>('/api/homepage/banners');
+    return response.items.map((item, index) => ({
+      id: item.id,
+      title: item.title,
+      imageUrl: item.imageUrl,
+      link: item.link,
+      sortOrder: item.sortOrder ?? index,
+      isActive: item.isActive ?? true,
+      startsAt: item.startsAt ?? null,
+      endsAt: item.endsAt ?? null,
+    }));
+  }
+
+  async createBanner(request: {
+    title: string;
+    imageUrl?: string | null;
+    file?: File | null;
+    link: string;
+    sortOrder: number;
+    startsAt?: string | null;
+    endsAt?: string | null;
+  }): Promise<{ id: string }> {
+    const form = new FormData();
+    form.append('title', request.title);
+    if (request.imageUrl) form.append('imageUrl', request.imageUrl);
+    if (request.file) form.append('file', request.file);
+    form.append('link', request.link);
+    form.append('sortOrder', String(request.sortOrder));
+    if (request.startsAt) form.append('startsAt', request.startsAt);
+    if (request.endsAt) form.append('endsAt', request.endsAt);
+    return this.api.post<{ id: string }, FormData>('/api/homepage/banners', form);
+  }
+
+  async updateBanner(
+    id: string,
+    request: {
+      title: string;
+      imageUrl?: string | null;
+      file?: File | null;
+      link: string;
+      sortOrder: number;
+      isActive: boolean;
+      startsAt?: string | null;
+      endsAt?: string | null;
+    },
+  ): Promise<{ success: boolean }> {
+    const form = new FormData();
+    form.append('title', request.title);
+    if (request.imageUrl) form.append('imageUrl', request.imageUrl);
+    if (request.file) form.append('file', request.file);
+    form.append('link', request.link);
+    form.append('sortOrder', String(request.sortOrder));
+    form.append('isActive', String(request.isActive));
+    if (request.startsAt) form.append('startsAt', request.startsAt);
+    if (request.endsAt) form.append('endsAt', request.endsAt);
+    return this.api.put<{ success: boolean }, FormData>(`/api/homepage/banners/${id}`, form);
+  }
+
+  async deleteBanner(id: string): Promise<{ success: boolean }> {
+    return this.api.delete<{ success: boolean }>(`/api/homepage/banners/${id}`);
   }
 
   async getCategories(): Promise<CategoryEntry[]> {

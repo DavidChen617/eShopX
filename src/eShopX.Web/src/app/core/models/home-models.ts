@@ -6,6 +6,17 @@ export interface BannerSlide {
   link: string;
 }
 
+export interface BannerManageItem {
+  id: string;
+  title: string;
+  imageUrl: string;
+  link: string;
+  sortOrder?: number;
+  isActive?: boolean;
+  startsAt?: string | null;
+  endsAt?: string | null;
+}
+
 // 分類入口
 export interface CategoryEntry {
   id: string;

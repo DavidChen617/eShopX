@@ -44,14 +44,15 @@ public class AddCartItemHandler(
         }
         else
         {
-            cart.Items.Add(new CartItem
+            await cartItemRepository.AddAsync(new CartItem
             {
+                CartId = cart.Id,
                 ProductId = command.ProductId,
                 Quantity = command.Quantity
-            });
+            }, cancellationToken);
         }
 
-        await cartRepository.SaveChangesAsync(cancellationToken);
+        await cartItemRepository.SaveChangesAsync(cancellationToken);
 
         var quantity = existingItem?.Quantity ?? command.Quantity;
         return new AddCartItemResponse(

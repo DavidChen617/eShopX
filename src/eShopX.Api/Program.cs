@@ -100,7 +100,7 @@ builder.Logging.ClearProviders()
     .AddCustomLogger<PostgresLogDbProvider>(options =>
     {
         options.EnableConsole = true;
-        options.EnableFile = true;
+        options.EnableFile = false;
         options.EnableDb = false;
         options.LogDirectory = "Logs";
         options.FilePrefix = "app-";

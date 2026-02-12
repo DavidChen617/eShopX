@@ -2,7 +2,6 @@
 using System.Text;
 using CloudinaryDotNet;
 using Confluent.Kafka;
-using eShopX.Common.Proxy;
 using Infrastructure.Auth;
 using Infrastructure.Auth.ThirdPartyAuth;
 using Infrastructure.Data;
@@ -62,10 +61,10 @@ public static class Dependencies
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtService, JwtService>();
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
+            .AddJwtBearer(jwtBearerOptions =>
             {
                 var jwtOptions = configuration.GetSection(JwtOptions.OptionKey).Get<JwtOptions>()!;
-                options.TokenValidationParameters = new TokenValidationParameters
+                jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
@@ -96,22 +95,26 @@ public static class Dependencies
         services.Configure<LineAuthOptions>(configuration.GetSection(LineAuthOptions.OptionKey));
 
         // Google Auth
-        services.AddKeyedScoped<IThirdPartyAuthService<GoogleAuthRequest, GoogleAuthResponse>, GoogleAuthService>(GoogleAuthOptions.OptionKey);
+        services.AddScoped<IThirdPartyAuthService<GoogleAuthRequest, GoogleAuthResponse>, GoogleAuthService>();
 
         // Line Auth
-        services.AddKeyedScoped<IThirdPartyAuthService<LineAuthRequest, LineAuthResponse>, LineAuthService>(LineAuthOptions.OptionKey);
+        services.AddScoped<IThirdPartyAuthService<LineAuthRequest, LineAuthResponse>, LineAuthService>();
 
         // LinePay
         services.Configure<LinePayOptions>(configuration.GetSection(LinePayOptions.OptionKey));
-        services
-            .AddScoped<IPaymentService<LinePayRequest, LinePayRequestResponse?, LinePayConfirmInput,
-                LinePayConfirmResponse?>, LinePayService>();
+        services.AddScoped<ICreatePaymentService<LinePayRequest, LinePayRequestResponse>, LinePayService>();
+        services.AddScoped<IConfirmPaymentService<LinePayConfirmInput, LinePayConfirmResponse>, LinePayService>();
 
         // PayPal
         services.Configure<PayPalOptions>(configuration.GetSection(PayPalOptions.OptionKey));
-        services
-            .AddScoped<IPaymentService<PayPalCreateOrderRequest, PayPalCreateOrderResponse, PayPalCaptureRequest,
-                PayPalCaptureOrderResponse>, PayPalService>();
+        services.AddHttpClient<PayPalClient>((sp, client) =>
+        {
+            var paypalOptions = sp.GetRequiredService<IOptions<PayPalOptions>>().Value;
+            client.BaseAddress = new Uri(paypalOptions.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+        services.AddScoped<ICreatePaymentService<PayPalCreateOrderRequest, PayPalCreateOrderResponse>, PayPalService>();
+        services.AddScoped<IConfirmPaymentService<PayPalCaptureRequest, PayPalCaptureOrderResponse>, PayPalService>();
         
         // kafka
         services.Configure<KafkaOptions>(configuration.GetSection(KafkaOptions.OptionKey));

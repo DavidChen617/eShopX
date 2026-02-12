@@ -1,6 +1,5 @@
 import { Component, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-
 import { AccountService } from '../../core/services/account.service';
 import { SellerAdminService } from '../../core/services/seller-admin.service';
 import { GetMeResponse, PendingSellerItem } from '../../core/models/api-models';

@@ -23,8 +23,7 @@ public class PayPalCreateOrderEndpoint : IGroupedEndpoint<PayPalGroupEndpoint>
 
     public async Task<IResult> HandleAsync(
         [FromBody] PayPalCreateOrderCommand cmd,
-        [FromServices]
-        IPaymentService<PayPalCreateOrderRequest, PayPalCreateOrderResponse, PayPalCaptureRequest, PayPalCaptureOrderResponse> payPalService,
+        [FromServices] ICreatePaymentService<PayPalCreateOrderRequest, PayPalCreateOrderResponse> payPalService,
         [FromServices] IOptions<PayPalOptions> options)
     {
         var publicBase = string.IsNullOrWhiteSpace(options.Value.PublicBaseUrl)

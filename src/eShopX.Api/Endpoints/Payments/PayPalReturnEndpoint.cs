@@ -21,8 +21,7 @@ public class PayPalReturnEndpoint : IGroupedEndpoint<PayPalCallbackGroupEndpoint
     public async Task<IResult> HandleAsync(
         [FromQuery] string token,
         [FromQuery] Guid? userId,
-        [FromServices]
-        IPaymentService<PayPalCreateOrderRequest, PayPalCreateOrderResponse, PayPalCaptureRequest, PayPalCaptureOrderResponse> payPalService,
+        [FromServices] IConfirmPaymentService<PayPalCaptureRequest, PayPalCaptureOrderResponse> payPalService,
         [FromServices] IOptions<PayPalOptions> options,
         [FromServices] IMailSender mailSender,
         [FromServices] ISender sender,

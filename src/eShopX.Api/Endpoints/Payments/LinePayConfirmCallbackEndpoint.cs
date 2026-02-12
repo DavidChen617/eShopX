@@ -1,7 +1,6 @@
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using ApplicationCore.UseCases.Orders.CreatePaidOrderFromCart;
-
 using Infrastructure.Options;
 using Infrastructure.Payments;
 using Infrastructure.Payments.Line.Models;
@@ -24,8 +23,7 @@ public class LinePayConfirmCallbackEndpoint : IGroupedEndpoint<LinePayCallbackGr
         [FromQuery] string? currency,
         [FromQuery] string? orderId,
         [FromQuery] Guid? userId,
-        [FromServices]
-        IPaymentService<LinePayRequest, LinePayRequestResponse?, LinePayConfirmInput, LinePayConfirmResponse?> linePayService,
+        [FromServices] IConfirmPaymentService<LinePayConfirmInput, LinePayConfirmResponse> linePayService,
         [FromServices] IOptions<LinePayOptions> options,
         [FromServices] IMailSender mailSender,
         [FromServices] ISender sender,
@@ -44,7 +42,7 @@ public class LinePayConfirmCallbackEndpoint : IGroupedEndpoint<LinePayCallbackGr
         var confirmRequest = new LinePayConfirmRequest(amount.Value, currency);
         var result = await linePayService.ConfirmAsync(new LinePayConfirmInput(transactionId.Value, confirmRequest));
 
-        var status = result?.ReturnCode == "0000" ? "success" : "fail";
+        var status = result.ReturnCode == "0000" ? "success" : "fail";
         if (status == "success")
         {
             if (userId.HasValue)

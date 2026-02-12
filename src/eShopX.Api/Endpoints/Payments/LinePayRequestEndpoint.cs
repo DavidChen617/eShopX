@@ -14,18 +14,9 @@ public class LinePayRequestEndpoint : IGroupedEndpoint<PaymentsGroupEndpoint>
 
     public async Task<IResult> HandleAsync(
         [FromBody] LinePayRequest request,
-        [FromServices]
-        IPaymentService<LinePayRequest, LinePayRequestResponse?, LinePayConfirmInput, LinePayConfirmResponse?> linePayService)
+        [FromServices] ICreatePaymentService<LinePayRequest, LinePayRequestResponse> linePayService)
     {
-        try
-        {
-            var result = await linePayService.CreateAsync(request);
-            return Results.Ok(ApiResponse<LinePayRequestResponse?>.Success(result));
-        }
-        catch (Exception e)
-        {
-            var message = e.InnerException is null ? e.Message : e.InnerException.Message;
-            return Results.BadRequest(ApiResponse.Error(StatusCodes.Status400BadRequest, message));
-        }
+        var result = await linePayService.CreateAsync(request);
+        return Results.Ok(ApiResponse<LinePayRequestResponse>.Success(result));
     }
 }

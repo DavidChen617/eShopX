@@ -1,5 +1,5 @@
 <!-- 頂部淘寶橙色 Header -->
-<header class="bg-gradient-to-r from-[#FF5000] to-[#FF6A1A] text-white">
+<header class="bg-gradient-to-r from-primary to-primary-hover text-white">
   <div class="mx-auto max-w-6xl px-4 py-3">
     <!-- 第一行：Logo + 搜索框 + 購物車 -->
     <div class="flex items-center justify-between gap-6">
@@ -24,7 +24,7 @@
           </nz-input-group>
           <ng-template #suffixIconSearch>
             <button
-              class="flex items-center justify-center bg-[#FF5000] text-white px-4 py-1 -mr-3 cursor-pointer hover:bg-[#FF2D54] transition-colors"
+              class="flex items-center justify-center bg-primary text-white px-4 py-1 -mr-3 cursor-pointer hover:bg-accent transition-colors"
               (click)="onSearch()"
             >
               <nz-icon nzType="search" nzTheme="outline"></nz-icon>
@@ -63,6 +63,7 @@
                   class="h-7 w-7 rounded-full border border-white/60 object-cover"
                   [src]="me()?.avatarUrl || '/user-default.png'"
                   alt="user avatar"
+                  loading="lazy"
                 />
               </a>
               <button (click)="logout()" class="text-white hover:text-yellow-200">登出</button>
@@ -74,7 +75,7 @@
   </div>
 
   <!-- 第二行：導航 Tab -->
-  <div class="bg-[#FF5000]/90">
+  <div class="bg-primary/90">
     <nav class="mx-auto max-w-6xl px-4">
       <ul class="flex items-center gap-6 text-sm py-2">
         <li>

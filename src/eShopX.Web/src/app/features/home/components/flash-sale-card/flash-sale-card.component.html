@@ -1,7 +1,7 @@
-<div class="flash-sale-card bg-white rounded-lg overflow-hidden shadow-sm w-32 flex-shrink-0">
+<div class="flash-sale-card bg-bg-card rounded-lg overflow-hidden shadow-sm w-32 flex-shrink-0">
   <!-- 商品圖片 -->
   <div class="relative">
-    <img [src]="item().imageUrl" [alt]="item().name" class="w-full h-32 object-cover" />
+    <img [src]="item().imageUrl" [alt]="item().name" class="w-full h-32 object-cover" loading="lazy" />
     @if (item().badge) {
       <nz-tag [nzColor]="isSoldOut() ? 'default' : 'red'" class="absolute top-1 left-1 text-xs">
         {{ item().badge }}
@@ -11,12 +11,12 @@
 
   <!-- 商品資訊 -->
   <div class="p-2">
-    <div class="text-xs text-gray-600 truncate">{{ item().name }}</div>
+    <div class="text-xs text-text-secondary truncate">{{ item().name }}</div>
 
     <!-- 價格 -->
     <div class="mt-1">
-      <span class="text-[#FF2D54] font-bold">¥{{ item().price }}</span>
-      <span class="text-xs text-gray-400 line-through ml-1">¥{{ item().originalPrice }}</span>
+      <span class="text-accent font-bold">¥{{ item().price }}</span>
+      <span class="text-xs text-text-muted line-through ml-1">¥{{ item().originalPrice }}</span>
     </div>
 
     <!-- 進度條 -->
@@ -25,9 +25,9 @@
         [nzPercent]="soldPercent()"
         [nzShowInfo]="false"
         nzSize="small"
-        [nzStrokeColor]="{ '0%': '#FF5000', '100%': '#FF2D54' }"
+        [nzStrokeColor]="{ '0%': 'var(--color-primary)', '100%': 'var(--color-accent)' }"
       ></nz-progress>
-      <div class="text-[10px] text-gray-500 text-center mt-1">
+      <div class="text-[10px] text-text-muted text-center mt-1">
         @if (isSoldOut()) {
           已售罄
         } @else {

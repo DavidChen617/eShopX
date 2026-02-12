@@ -18,7 +18,7 @@ public class GetRecommendProductsHandler(
         size = Math.Min(size, 50);
         var cacheKey = $"homepage:recommend:{query.RecommendType}:{page}:{size}";
 
-        return await cacheService.GetOrSetAsync(
+        return (await cacheService.GetOrSetAsync(
             cacheKey,
             async ct =>
             {
@@ -81,6 +81,6 @@ public class GetRecommendProductsHandler(
                 return new GetRecommendProductsResponse(page, size, totalCount, totalPages, items);
             },
             TimeSpan.FromMinutes(2),
-            cancellationToken);
+            cancellationToken))!;
     }
 }

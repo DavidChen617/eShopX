@@ -1,5 +1,3 @@
-using ApplicationCore.Interfaces;
-
 namespace ApplicationCore.UseCases.Homepage.GetBanners;
 
 public class GetBannersHandler(
@@ -9,7 +7,7 @@ public class GetBannersHandler(
 {
     public async Task<GetBannersResponse> Handle(GetBannersQuery query, CancellationToken cancellationToken = default)
     {
-        return await cacheService.GetOrSetAsync(
+        return (await cacheService.GetOrSetAsync(
             "homepage:banners",
             async ct =>
             {
@@ -26,6 +24,6 @@ public class GetBannersHandler(
                 return new GetBannersResponse(banners.ToList());
             },
             TimeSpan.FromMinutes(2),
-            cancellationToken);
+            cancellationToken))!;
     }
 }

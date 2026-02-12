@@ -10,7 +10,7 @@ public class GetCategoriesHandler(
     public async Task<GetCategoriesResponse> Handle(GetCategoriesQuery query, CancellationToken cancellationToken = default)
     {
         var parentKey = query.ParentId?.ToString() ?? "root";
-        return await cacheService.GetOrSetAsync(
+        return (await cacheService.GetOrSetAsync(
             $"homepage:categories:{parentKey}",
             async ct =>
             {
@@ -24,6 +24,6 @@ public class GetCategoriesHandler(
                 return new GetCategoriesResponse(categories.ToList());
             },
             TimeSpan.FromMinutes(2),
-            cancellationToken);
+            cancellationToken))!;
     }
 }

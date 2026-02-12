@@ -25,7 +25,7 @@ public class GetProductsHandler(
             query.SellerId?.ToString() ?? "",
             query.CategoryId?.ToString() ?? "");
 
-        return await cacheService.GetOrSetAsync(
+        return (await cacheService.GetOrSetAsync(
             cacheKey,
             async ct =>
             {
@@ -90,6 +90,6 @@ public class GetProductsHandler(
                 return new GetProductResponse(page, size, totalCount, totalPages, items);
             },
             TimeSpan.FromMinutes(2),
-            cancellationToken);
+            cancellationToken))!;
     }
 }

@@ -1,13 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './login.page.html',
 })
 export class LoginPageComponent {
@@ -49,13 +50,5 @@ export class LoginPageComponent {
 
   loginWithLine(): void {
     this.authService.loginWithLine();
-  }
-
-  async testPayPal(): Promise<void> {
-    try {
-      await this.authService.testPayPal();
-    } catch (err) {
-      this.error.set('PayPal 測試失敗，請檢查後端設定。');
-    }
   }
 }

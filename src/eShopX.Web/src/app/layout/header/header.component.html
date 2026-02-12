@@ -39,11 +39,11 @@
           <!-- 購物車 -->
           <a routerLink="/cart" class="text-white hover:text-yellow-200 transition-colors">
             <nz-badge [nzCount]="cartCount()">
-              <nz-icon
-                nzType="shopping-cart"
-                nzTheme="outline"
-                class="text-2xl text-white"
-              ></nz-icon>
+              <span
+                class="flex h-7 w-7 items-center justify-center rounded-full border border-white/60 bg-white/15"
+              >
+                <nz-icon nzType="shopping-cart" nzTheme="outline" class="text-base text-white"></nz-icon>
+              </span>
             </nz-badge>
           </a>
         }
@@ -59,14 +59,19 @@
           @if (isAuthenticated()) {
             <div class="flex items-center gap-3">
               <a routerLink="/account" class="flex items-center">
-                <img
-                  class="h-7 w-7 rounded-full border border-white/60 object-cover"
-                  [src]="me()?.avatarUrl || '/user-default.png'"
-                  alt="user avatar"
-                  loading="lazy"
-                />
+                <span
+                  class="flex h-7 w-7 items-center justify-center rounded-full border border-white/60 bg-white/15"
+                >
+                  <nz-icon nzType="user" nzTheme="outline" class="text-base text-white"></nz-icon>
+                </span>
               </a>
-              <button (click)="logout()" class="text-white hover:text-yellow-200">登出</button>
+              <button (click)="logout()" class="text-white hover:text-yellow-200 flex items-center">
+                <span
+                  class="flex h-7 w-7 items-center justify-center rounded-full border border-white/60 bg-white/15"
+                >
+                  <nz-icon nzType="logout" nzTheme="outline" class="-rotate-90 text-base text-white"></nz-icon>
+                </span>
+              </button>
             </div>
           }
         </div>

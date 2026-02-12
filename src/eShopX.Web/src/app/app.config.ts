@@ -22,6 +22,7 @@ import {
   FireOutline,
   ThunderboltOutline,
   RightOutline,
+  LogoutOutline,
 } from '@ant-design/icons-angular/icons';
 
 import { routes } from './app.routes';
@@ -37,6 +38,7 @@ const icons = [
   FireOutline,
   ThunderboltOutline,
   RightOutline,
+  LogoutOutline,
 ];
 
 export const appConfig: ApplicationConfig = {

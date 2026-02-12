@@ -1,3 +1,5 @@
+using eShopX.Common.Logging;
+
 namespace Infrastructure.Data;
 
 public class EShopContext(DbContextOptions<EShopContext> options) : DbContext(options)
@@ -19,6 +21,7 @@ public class EShopContext(DbContextOptions<EShopContext> options) : DbContext(op
     public virtual DbSet<ProductRecommend> ProductRecommends { get; set; }
     public virtual DbSet<Review> Reviews { get; set; }
     public virtual DbSet<ReviewImage> ReviewImages { get; set; }
+    public virtual DbSet<ApplicationLog> ApplicationLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

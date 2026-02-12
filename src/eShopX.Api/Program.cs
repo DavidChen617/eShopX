@@ -97,11 +97,11 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddOpenApi();
 
 builder.Logging.ClearProviders()
-    .AddCustomLogger(options =>
+    .AddCustomLogger<PostgresLogDbProvider>(options =>
     {
         options.EnableConsole = true;
         options.EnableFile = true;
-        options.EnableDb = false;
+        options.EnableDb = true;
         options.LogDirectory = "Logs";
         options.FilePrefix = "app-";
         options.MinLevel = LogLevel.Information;

@@ -1,9 +1,24 @@
-﻿namespace eShopX.Common.Logging.Sinks;
+﻿using Microsoft.Extensions.DependencyInjection;
 
-public sealed class DbSink : ILogSink
+namespace eShopX.Common.Logging.Sinks;
+
+public sealed class DbSink(IServiceProvider serviceProvider) : ILogSink
 {
-    public void Emit(string message)
+    public void Emit(LogEntry entry)
     {
-        // TODO written database
+        using var scope = serviceProvider.CreateScope();
+        var provider = scope.ServiceProvider.GetRequiredService<ILogDbProvider>();
+
+        provider.Add(new ApplicationLog
+        {
+            ScopeId = entry.ScopeId,                                                                                                              
+            Message = entry.Message,
+            CreatedAt = DateTime.UtcNow
+        });
     }
+}
+
+public interface ILogDbProvider
+{
+    void Add(ApplicationLog log);
 }

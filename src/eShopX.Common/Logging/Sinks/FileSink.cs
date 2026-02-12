@@ -15,12 +15,12 @@ public sealed class FileSink : ILogSink
         Directory.CreateDirectory(_directory);
     }
 
-    public void Emit(string message)
+    public void Emit(LogEntry entry)
     {
         var path = Path.Combine(_directory, _filePrefix + DateTime.Now.ToString("yyyyMMdd") + ".log");
         lock (_lock)
         {
-            File.AppendAllText(path, message + Environment.NewLine + Environment.NewLine, Encoding.UTF8);
+            File.AppendAllText(path, entry.Message + Environment.NewLine + Environment.NewLine, Encoding.UTF8);
         }
     }
 }

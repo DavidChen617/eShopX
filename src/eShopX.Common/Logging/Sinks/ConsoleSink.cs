@@ -2,16 +2,18 @@
 
 public sealed class ConsoleSink : ILogSink
 {
-    public void Emit(string message)
+    public void Emit(LogEntry entry)
     {
-        Console.WriteLine(message);
-    }
-
-    public void Emit(string message, ConsoleColor color)
-    {
-        var original = Console.ForegroundColor;
-        Console.ForegroundColor = color;
-        Console.WriteLine(message);
-        Console.ForegroundColor = original;
+        if (entry.Color.HasValue)
+        {
+            var original = Console.ForegroundColor;
+            Console.ForegroundColor = entry.Color.Value;
+            Console.WriteLine(entry.Message);
+            Console.ForegroundColor = original;
+        }
+        else
+        {
+            Console.WriteLine(entry.Message);
+        }
     }
 }

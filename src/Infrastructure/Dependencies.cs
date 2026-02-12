@@ -24,7 +24,8 @@ public static class Dependencies
 {
     public static void ConfigureInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<EShopContext>((_, options) =>
+        services.Configure<ConnectionStrings>(configuration.GetSection(nameof(ConnectionStrings)));
+        services.AddDbContext<EShopContext>((sp, options) =>
         {
             options.UseNpgsql(
                     configuration.GetConnectionString(nameof(ConnectionStrings.PostgreSQL)),

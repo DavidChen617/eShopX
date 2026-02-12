@@ -2,5 +2,5 @@
 
 public interface ILogSink
 {
-    void Emit(string message);
+    void Emit(LogEntry logEntry);
 }

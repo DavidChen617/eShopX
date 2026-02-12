@@ -5,4 +5,5 @@ namespace eShopX.Common.Logging;
 public readonly record struct LogEntry(
     string Message,
     LogLevel Level,
-    ConsoleColor? Color);
+    ConsoleColor? Color,
+    string? ScopeId);

@@ -1,6 +1,4 @@
 ﻿using System.Text;
-using System.Threading;
-
 using Microsoft.Extensions.Logging;
 
 namespace eShopX.Common.Logging;
@@ -9,7 +7,8 @@ public sealed class CustomLogger(
     string category,
     Func<CustomLoggerOptions> getOptions,
     ILogDispatcher dispatcher,
-    IExternalScopeProvider? scopeProvider)
+    IExternalScopeProvider? scopeProvider,
+    IScopeIdAccessor? scopeIdAccessor)
     : ILogger
 {
     public IDisposable? BeginScope<TState>(TState state) where TState : notnull
@@ -23,7 +22,7 @@ public sealed class CustomLogger(
         return logLevel != LogLevel.None && logLevel >= options.MinLevel;
     }
 
-    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,                                                            
         Func<TState, Exception?, string>? formatter)
     {
         if (!IsEnabled(logLevel) || formatter is null)
@@ -45,7 +44,8 @@ public sealed class CustomLogger(
         {
             sb.Append("[T:").Append(Environment.CurrentManagedThreadId).Append("] ");
         }
-        sb.AppendLine();
+
+        sb.Append(" [");
         sb.Append(category).Append(": ").Append(message);
 
         if (exception is not null)
@@ -62,7 +62,7 @@ public sealed class CustomLogger(
         }
 
         var line = sb.ToString();
-        var entry = new LogEntry(line, logLevel, GetColor(logLevel));
+        var entry = new LogEntry(line, logLevel, GetColor(logLevel), scopeIdAccessor?.ScopeId);
         dispatcher.TryEnqueue(entry);
     }
 

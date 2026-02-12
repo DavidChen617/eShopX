@@ -1,9 +1,12 @@
+using ApplicationCore.Interfaces;
+
 namespace ApplicationCore.UseCases.Homepage.UpdateBanner;
 
 public record UpdateBannerCommand(
     Guid Id,
     string Title,
-    string ImageUrl,
+    string? ImageUrl,
+    ImageUploadRequest? Image,
     string Link,
     int SortOrder,
     bool IsActive,

@@ -4,6 +4,7 @@ namespace ApplicationCore.UseCases.Homepage.DeleteBanner;
 
 public class DeleteBannerHandler(
     IRepository<Banner> bannerRepository,
+    IImageStorage imageStorage,
     ICacheService cacheService)
     : IRequestHandler<DeleteBannerCommand, DeleteBannerResponse>
 {
@@ -11,6 +12,12 @@ public class DeleteBannerHandler(
     {
         var banner = await bannerRepository.GetByIdAsync(command.Id, cancellationToken)
             ?? throw new NotFoundException("Banner", command.Id);
+
+        var publicId = banner.ImagePublicId;
+        if (!string.IsNullOrWhiteSpace(publicId))
+        {
+            await imageStorage.DeleteAsync(publicId, cancellationToken);
+        }
 
         bannerRepository.Remove(banner);
         await bannerRepository.SaveChangesAsync(cancellationToken);

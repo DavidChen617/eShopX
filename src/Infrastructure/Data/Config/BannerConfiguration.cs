@@ -40,5 +40,22 @@ public class BannerConfiguration : IEntityTypeConfiguration<Banner>
             .HasComment("生效結束時間");
 
         builder.HasIndex(x => new { x.IsActive, x.SortOrder });
+        
+        builder.Property(x => x.ImagePublicId)
+            .HasMaxLength(200)
+            .HasComment("圖片 PublicId");
+
+        builder.Property(x => x.ImageFormat)
+            .HasMaxLength(20)
+            .HasComment("圖片格式");
+
+        builder.Property(x => x.ImageWidth)
+            .HasComment("圖片寬度");
+
+        builder.Property(x => x.ImageHeight)
+            .HasComment("圖片高度");
+
+        builder.Property(x => x.ImageBytes)
+            .HasComment("圖片大小(Byte)");
     }
 }

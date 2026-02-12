@@ -1,20 +1,20 @@
 <div class="banner-carousel mx-2 sm:mx-0">
   <div
-    class="relative overflow-hidden rounded-3xl border border-white/70 bg-bg-card shadow-[0_20px_50px_-40px_rgba(0,0,0,0.45)]"
+    class="banner-frame relative overflow-hidden rounded-3xl border border-white/70 bg-bg-card shadow-[0_20px_50px_-40px_rgba(0,0,0,0.45)]"
   >
-    <nz-carousel nzAutoPlay [nzAutoPlaySpeed]="3500" nzEffect="scrollx">
+    <nz-carousel class="block h-52 sm:h-64" nzAutoPlay [nzAutoPlaySpeed]="3500" nzEffect="scrollx">
       @for (slide of slides(); track slide.id; let first = $first) {
-        <div nz-carousel-content>
+        <div nz-carousel-content class="h-52 sm:h-64">
           <a
             [routerLink]="slide.link"
-            class="block relative"
+            class="block relative h-full"
             draggable="false"
             (dragstart)="$event.preventDefault()"
           >
             <img
               [src]="slide.imageUrl"
               [alt]="slide.title"
-              class="w-full h-52 sm:h-64 object-cover select-none"
+              class="w-full h-full object-cover select-none"
               [loading]="first ? 'eager' : 'lazy'"
               draggable="false"
               (dragstart)="$event.preventDefault()"

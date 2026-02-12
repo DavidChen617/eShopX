@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { AppShellComponent } from './layout/app-shell/app-shell.component';
+import { AdminBannersPageComponent } from './features/admin/admin-banners.page';
 
 export const routes: Routes = [
   {
@@ -79,6 +80,10 @@ export const routes: Routes = [
         path: 'admin/sellers',
         loadComponent: () =>
           import('./features/admin/admin-sellers.page').then((m) => m.AdminSellersPageComponent),
+      },
+      {
+        path: 'admin/banners',
+        component: AdminBannersPageComponent,
       },
     ],
   },

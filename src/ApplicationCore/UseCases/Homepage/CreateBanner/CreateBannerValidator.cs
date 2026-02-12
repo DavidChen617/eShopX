@@ -9,8 +9,11 @@ public class CreateBannerValidator : AbstractValidator<CreateBannerCommand>
             .MaxLength(100).WithMessage("標題最多 100 字");
 
         RuleFor(x => x.ImageUrl)
-            .NotEmpty().WithMessage("圖片網址不能為空")
             .MaxLength(500).WithMessage("圖片網址最多 500 字");
+
+        RuleFor(x => x)
+            .Must(x => x.Image is not null || !string.IsNullOrWhiteSpace(x.ImageUrl))
+            .WithMessage("請提供圖片網址或上傳圖片");
 
         RuleFor(x => x.Link)
             .NotEmpty().WithMessage("連結不能為空")

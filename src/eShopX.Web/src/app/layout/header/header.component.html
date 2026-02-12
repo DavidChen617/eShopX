@@ -90,29 +90,10 @@
         <li>
           <a
             routerLink="/products"
-            [queryParams]="{ flash: 'true' }"
-            class="text-yellow-200 font-bold flex items-center gap-1"
-          >
-            <nz-icon nzType="thunderbolt" nzTheme="outline"></nz-icon>
-            限時秒殺
-          </a>
-        </li>
-        <li>
-          <a
-            routerLink="/products"
             class="text-white hover:text-yellow-200 flex items-center gap-1"
           >
             <nz-icon nzType="appstore" nzTheme="outline"></nz-icon>
             全部商品
-          </a>
-        </li>
-        <li>
-          <a
-            routerLink="/products"
-            class="text-white hover:text-yellow-200 flex items-center gap-1"
-          >
-            <nz-icon nzType="appstore" nzTheme="outline"></nz-icon>
-            分類
           </a>
         </li>
         @if (isAuthenticated()) {
@@ -128,6 +109,17 @@
             >
               <nz-icon nzType="appstore" nzTheme="outline"></nz-icon>
               上架商品
+            </a>
+          </li>
+        }
+        @if (isAuthenticated() && me()?.isAdmin) {
+          <li>
+            <a
+              routerLink="/admin/banners"
+              class="text-white hover:text-yellow-200 flex items-center gap-1"
+            >
+              <nz-icon nzType="appstore" nzTheme="outline"></nz-icon>
+              Banner 設定
             </a>
           </li>
         }

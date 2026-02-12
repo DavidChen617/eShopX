@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnDestroy, signal } from '@angular/core';
 
 import { SellerProductService } from '../../../core/services/seller-product.service';
 import { GetProductItems, ProductImageDto } from '../../../core/models/api-models';
@@ -13,7 +13,7 @@ import { ButtonComponent } from '../../../shared/ui/button/button.component';
   imports: [SectionComponent, ButtonComponent],
   templateUrl: './dashboard-products.page.html',
 })
-export class DashboardProductsPageComponent {
+export class DashboardProductsPageComponent implements OnDestroy {
   items = signal<GetProductItems[]>([]);
   isLoading = signal(true);
   listError = signal<string | null>(null);
@@ -47,6 +47,7 @@ export class DashboardProductsPageComponent {
   uploadPrimary = signal(false);
   uploadSortOrder = signal(0);
   pendingImages = signal<File[]>([]);
+  pendingImagePreviews = signal<string[]>([]);
   pendingPrimaryIndex = signal(0);
 
   constructor(
@@ -83,7 +84,9 @@ export class DashboardProductsPageComponent {
     this.createStockQuantity.set(0);
     this.createIsActive.set(true);
     this.createCategoryId.set(null);
+    this.clearPendingImagePreviews();
     this.pendingImages.set([]);
+    this.pendingImagePreviews.set([]);
     this.pendingPrimaryIndex.set(0);
     this.createError.set(null);
   }
@@ -257,6 +260,8 @@ export class DashboardProductsPageComponent {
       return;
     }
     const combined = [...this.pendingImages(), ...files];
+    const previewUrls = files.map((file) => URL.createObjectURL(file));
+    this.pendingImagePreviews.update((current) => [...current, ...previewUrls]);
     this.pendingImages.set(combined);
     if (this.pendingPrimaryIndex() >= combined.length) {
       this.pendingPrimaryIndex.set(0);
@@ -267,11 +272,20 @@ export class DashboardProductsPageComponent {
   }
 
   removePendingImage(index: number): void {
+    const previewToRemove = this.pendingImagePreviews()[index];
+    if (previewToRemove) {
+      URL.revokeObjectURL(previewToRemove);
+    }
+    this.pendingImagePreviews.update((list) => list.filter((_, i) => i !== index));
     const next = this.pendingImages().filter((_, i) => i !== index);
     this.pendingImages.set(next);
     if (this.pendingPrimaryIndex() >= next.length) {
       this.pendingPrimaryIndex.set(0);
     }
+  }
+
+  getPendingImagePreview(index: number): string | null {
+    return this.pendingImagePreviews()[index] ?? null;
   }
 
   parseNumber(value: unknown, fallback = 0): number {
@@ -358,5 +372,13 @@ export class DashboardProductsPageComponent {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.clearPendingImagePreviews();
+  }
+
+  private clearPendingImagePreviews(): void {
+    this.pendingImagePreviews().forEach((url) => URL.revokeObjectURL(url));
   }
 }

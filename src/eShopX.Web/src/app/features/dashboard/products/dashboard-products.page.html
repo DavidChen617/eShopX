@@ -113,6 +113,13 @@
                 移除
               </button>
             </div>
+            @if (getPendingImagePreview($index); as previewUrl) {
+            <img
+              [src]="previewUrl"
+              alt="pending upload preview"
+              class="mt-2 h-28 w-full rounded-lg border border-neutral-200 object-cover"
+            />
+            }
             <div class="mt-2 text-xs text-neutral-500">{{ img.name }}</div>
             <div class="mt-2 flex items-center gap-2 text-xs text-neutral-600">
               <input

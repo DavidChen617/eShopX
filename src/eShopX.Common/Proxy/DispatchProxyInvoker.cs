@@ -21,7 +21,7 @@ internal static class DispatchProxyInvoker
 
         foreach (var method in interfaceType.GetMethods())
         {
-            // 跳過泛型方法，它們會在實際調用時編譯
+            // Skip generic methods, they compile when actually called
             if (method.IsGenericMethod || method.ContainsGenericParameters)
                 continue;
 

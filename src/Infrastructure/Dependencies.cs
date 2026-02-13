@@ -149,7 +149,6 @@ public static class Dependencies
             
             return new ElasticsearchClient(settings);
         });
-        services.AddHostedService<ElasticsearchStartupValidationService>();
         services.AddScoped<IProductSearchService, ElasticsearchProductSearchService>();
         services.AddScoped<IProductSearchIndexService, ReindexProductsService>();
     }

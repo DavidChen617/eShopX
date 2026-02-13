@@ -2,6 +2,8 @@
 using System.Text;
 using CloudinaryDotNet;
 using Confluent.Kafka;
+using Elastic.Clients.Elasticsearch;
+using Elastic.Transport;
 using Infrastructure.Auth;
 using Infrastructure.Auth.ThirdPartyAuth;
 using Infrastructure.Data;
@@ -132,5 +134,23 @@ public static class Dependencies
 
         services.AddSingleton<IFlashSaleOrderPublisher, FlashSaleOrderPublisher>();
         services.AddHostedService<FlashSaleOrderConsumer>();
+        
+        // ElasticSearch
+        services.Configure<ElasticsearchOptions>(configuration.GetSection(ElasticsearchOptions.OptionKey));
+        services.AddSingleton(sp =>
+        {
+            var opt = sp.GetRequiredService<IOptions<ElasticsearchOptions>>().Value;
+            var settings = new ElasticsearchClientSettings(new Uri(opt.Url));
+
+            if (!string.IsNullOrWhiteSpace(opt.Username))
+            {
+                settings.Authentication(new BasicAuthentication(opt.Username, opt.Password ?? string.Empty));
+            }
+            
+            return new ElasticsearchClient(settings);
+        });
+        services.AddHostedService<ElasticsearchStartupValidationService>();
+        services.AddScoped<IProductSearchService, ElasticsearchProductSearchService>();
+        services.AddScoped<IProductSearchIndexService, ReindexProductsService>();
     }
 }

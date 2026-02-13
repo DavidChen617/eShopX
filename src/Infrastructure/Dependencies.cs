@@ -4,17 +4,6 @@ using CloudinaryDotNet;
 using Confluent.Kafka;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
-using Infrastructure.Auth;
-using Infrastructure.Auth.ThirdPartyAuth;
-using Infrastructure.Data;
-using Infrastructure.Data.Repositories;
-using Infrastructure.Messaging;
-using Infrastructure.Options;
-using Infrastructure.Payments;
-using Infrastructure.Payments.Line;
-using Infrastructure.Payments.Line.Models;
-using Infrastructure.Payments.PayPal;
-using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -151,5 +140,7 @@ public static class Dependencies
         });
         services.AddScoped<IProductSearchService, ElasticsearchProductSearchService>();
         services.AddScoped<IProductSearchIndexService, ReindexProductsService>();
+        services.AddScoped<IProductSearchIndexSyncService, ProductSearchIndexSyncService>();
+        services.AddHostedService<OutboxProcessorHostedService>();
     }
 }

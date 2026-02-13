@@ -1,7 +1,10 @@
+using ApplicationCore.UseCases.Outbox;
+
 namespace ApplicationCore.UseCases.Products.DeleteProduct;
 
 public class DeleteProductHandler(
     IRepository<Product> productRepository,
+    IRepository<OutboxEvent> outboxEventRepository,
     ICacheService cacheService)
     : IRequestHandler<DeleteProductCommand>
 {
@@ -16,6 +19,7 @@ public class DeleteProductHandler(
             throw new ForbiddenException("You do not have permission to delete this product");
 
         productRepository.Remove(product);
+        await outboxEventRepository.AddAsync(OutboxEventFactory.CreateProductDelete(product.Id), cancellationToken);
         await productRepository.SaveChangesAsync(cancellationToken);
         await cacheService.RemoveByPrefixAsync("products:list", cancellationToken);
         await cacheService.RemoveByPrefixAsync("homepage:recommend", cancellationToken);

@@ -13,11 +13,11 @@ public class LinePayConfirmCallbackEndpoint : IGroupedEndpoint<LinePayCallbackGr
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapGet("/confirm", HandleAsync)
+        group.MapGet("/confirm", Handle)
             .AllowAnonymous();
     }
 
-    public async Task<IResult> HandleAsync(
+    private static async Task<IResult> Handle(
         [FromQuery] long? transactionId,
         [FromQuery] decimal? amount,
         [FromQuery] string? currency,

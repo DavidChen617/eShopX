@@ -4,6 +4,9 @@ using CloudinaryDotNet;
 using Confluent.Kafka;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
+using Infrastructure.Caches;
+using Infrastructure.Email;
+using Infrastructure.Messaging.Products;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -46,7 +49,6 @@ public static class Dependencies
         services.AddSingleton<IConnectionMultiplexer>(_ =>
             ConnectionMultiplexer.Connect(options));
         services.AddScoped<ICacheService, RedisCacheService>();
-        services.AddScoped<IFlashSalePurchaseService, FlashSalePurchaseService>();
 
         // Jwt
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.OptionKey));
@@ -115,14 +117,15 @@ public static class Dependencies
             var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
             return new ProducerBuilder<string, string>(kafkaOptions.Producer).Build();
         });
-        services.AddSingleton<IConsumer<string, string>>(sp =>
+        services.AddScoped<IConsumer<string, string>>(sp =>
         {
             var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
             return new ConsumerBuilder<string, string>(kafkaOptions.Consumer).Build();
         });
         services.AddSingleton<IOutboxEventPublisher, ProductIndexOutboxEventPublisher>();
-        services.AddHostedService<OutboxPublisherHostedService>();
-        services.AddHostedService<ProductIndexSyncConsumer>();
+        services.AddScoped<IProcessedEventStore, ProcessedEventStore>();
+        services.AddHostedService<OutboxPublisherHostedService>()
+            .AddHostedService<OutboxConsumerHostedService>();
         
         // ElasticSearch
         services.Configure<ElasticsearchOptions>(configuration.GetSection(ElasticsearchOptions.OptionKey));
@@ -141,5 +144,6 @@ public static class Dependencies
         services.AddScoped<IProductSearchService, ElasticsearchProductSearchService>();
         services.AddScoped<IProductSearchIndexService, ReindexProductsService>();
         services.AddScoped<IProductSearchIndexSyncService, ProductSearchIndexSyncService>();
+        services.AddScoped<IOutboxEventHandler, ProductIndexOutboxEventHandler>();
     }
 }

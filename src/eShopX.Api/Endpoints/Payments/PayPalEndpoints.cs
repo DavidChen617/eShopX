@@ -16,12 +16,12 @@ public class PayPalCreateOrderEndpoint : IGroupedEndpoint<PayPalGroupEndpoint>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/paypal/create-order", HandleAsync)
+        group.MapPost("/paypal/create-order", Handle)
             .Accepts<PayPalCreateOrderCommand>(MediaTypeNames.Application.Json)
             .Produces<ApiResponse<PayPalCreateOrderResult>>();
     }
 
-    public async Task<IResult> HandleAsync(
+    private static async Task<IResult> Handle(
         [FromBody] PayPalCreateOrderCommand cmd,
         [FromServices] ICreatePaymentService<PayPalCreateOrderRequest, PayPalCreateOrderResponse> payPalService,
         [FromServices] IOptions<PayPalOptions> options)

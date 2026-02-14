@@ -1,15 +1,13 @@
 using ApplicationCore.UseCases.Outbox;
 using Confluent.Kafka;
 using eShopX.Common.Extensions;
-using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Messaging.Products;
 
 public class ProductIndexOutboxEventPublisher(
-    IProducer<string, string> producer,
-    IOptions<KafkaOptions> options) : IOutboxEventPublisher
+    IProducer<string, string> producer) : IOutboxEventPublisher
 {
-    private readonly string _topic = options.Value.ProductIndexTopic;
+    private const string Topic = "outbox-events";
 
     public bool CanHandle(string eventType)
     {
@@ -18,13 +16,18 @@ public class ProductIndexOutboxEventPublisher(
 
     public async Task PublishAsync(OutboxEvent @event, CancellationToken ct = default)
     {
-        var message = new ProductIndexSyncMessage(@event.Id, @event.EventType, @event.PayloadJson);
+        var envelope = new OutboxEventEnvelope(
+            @event.Id,
+            @event.EventType,
+            @event.PayloadJson,
+            DateTime.UtcNow);
+
         var kafkaMessage = new Message<string, string>
         {
             Key = @event.Id.ToString(),
-            Value = message.ToJson()
+            Value = envelope.ToJson()
         };
 
-        await producer.ProduceAsync(_topic, kafkaMessage, ct);
+        await producer.ProduceAsync(Topic, kafkaMessage, ct);
     }
 }

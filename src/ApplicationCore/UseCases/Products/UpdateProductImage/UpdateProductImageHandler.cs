@@ -1,4 +1,5 @@
 using ApplicationCore.Interfaces;
+using ApplicationCore.UseCases.Outbox;
 using ApplicationCore.UseCases.Products.UploadProductImage;
 
 namespace ApplicationCore.UseCases.Products.UpdateProductImage;
@@ -6,6 +7,7 @@ namespace ApplicationCore.UseCases.Products.UpdateProductImage;
 public class UpdateProductImageHandler(
     IRepository<Product> productRepository,
     IRepository<ProductImage> productImageRepository,
+    IRepository<OutboxEvent> outboxEventRepository,
     ICacheService cacheService)
     : IRequestHandler<UpdateProductImageCommand, UpdateProductImageResponse>
 {
@@ -54,6 +56,7 @@ public class UpdateProductImageHandler(
         }
 
         productImageRepository.Update(image);
+        await outboxEventRepository.AddAsync(OutboxEventFactory.CreateProductUpsert(product.Id), cancellationToken);
         await productImageRepository.SaveChangesAsync(cancellationToken);
         await cacheService.RemoveByPrefixAsync("products:list", cancellationToken);
         await cacheService.RemoveByPrefixAsync("homepage:recommend", cancellationToken);

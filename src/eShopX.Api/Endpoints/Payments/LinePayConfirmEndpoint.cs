@@ -7,12 +7,12 @@ public class LinePayConfirmEndpoint : IGroupedEndpoint<PaymentsGroupEndpoint>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/line/{transactionId}/confirm", HandleAsync)
+        group.MapPost("/line/{transactionId}/confirm", Handle)
             .Accepts<LinePayConfirmRequest>(MediaTypeNames.Application.Json)
             .Produces<ApiResponse<LinePayConfirmResponse>>();
     }
 
-    public async Task<IResult> HandleAsync(
+    private static async Task<IResult> Handle(
         [FromRoute] long transactionId,
         [FromBody] LinePayConfirmRequest request,
         [FromServices] IConfirmPaymentService<LinePayConfirmInput, LinePayConfirmResponse> linePayService)

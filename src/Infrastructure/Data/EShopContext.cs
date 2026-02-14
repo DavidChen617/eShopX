@@ -22,6 +22,7 @@ public class EShopContext(DbContextOptions<EShopContext> options) : DbContext(op
     public virtual DbSet<Review> Reviews { get; set; }
     public virtual DbSet<ReviewImage> ReviewImages { get; set; }
     public virtual DbSet<ApplicationLog> ApplicationLogs { get; set; }
+    public virtual DbSet<ProcessedEvent>  ProcessedEvents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

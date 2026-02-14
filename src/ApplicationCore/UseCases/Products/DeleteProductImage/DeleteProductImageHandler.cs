@@ -1,10 +1,12 @@
 using ApplicationCore.Interfaces;
+using ApplicationCore.UseCases.Outbox;
 
 namespace ApplicationCore.UseCases.Products.DeleteProductImage;
 
 public class DeleteProductImageHandler(
     IRepository<Product> productRepository,
     IRepository<ProductImage> productImageRepository,
+    IRepository<OutboxEvent> outboxEventRepository,
     IImageStorage imageStorage,
     ICacheService cacheService)
     : IRequestHandler<DeleteProductImageCommand>
@@ -30,6 +32,7 @@ public class DeleteProductImageHandler(
         await imageStorage.DeleteAsync(image.PublicId, cancellationToken);
 
         productImageRepository.Remove(image);
+        await outboxEventRepository.AddAsync(OutboxEventFactory.CreateProductUpsert(product.Id), cancellationToken);
         await productImageRepository.SaveChangesAsync(cancellationToken);
         await cacheService.RemoveByPrefixAsync("products:list", cancellationToken);
         await cacheService.RemoveByPrefixAsync("homepage:recommend", cancellationToken);

@@ -1,6 +1,5 @@
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.Core.Bulk;
-using Infrastructure.Options;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services;

@@ -3,16 +3,16 @@ using Microsoft.Extensions.Options;
 
 namespace eShopX.Endpoints.Payments;
 
-public class LinePayCancelCallbackEndpoint(IOptions<LinePayOptions> options)
+public class LinePayCancelCallbackEndpoint
     : IGroupedEndpoint<LinePayCallbackGroupEndpoint>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapGet("/cancel", HandleAsync)
+        group.MapGet("/cancel", Handle)
             .AllowAnonymous();
     }
 
-    public Task<IResult> HandleAsync()
+    private static Task<IResult> Handle(IOptions<LinePayOptions> options)
     {
         var frontBase = string.IsNullOrWhiteSpace(options.Value.FrontendBaseUrl)
             ? "http://localhost:4200"

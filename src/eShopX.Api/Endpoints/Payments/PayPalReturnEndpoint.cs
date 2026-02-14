@@ -14,11 +14,11 @@ public class PayPalReturnEndpoint : IGroupedEndpoint<PayPalCallbackGroupEndpoint
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapGet("/return", HandleAsync)
+        group.MapGet("/return", Handle)
             .AllowAnonymous();
     }
 
-    public async Task<IResult> HandleAsync(
+    private static async Task<IResult> Handle(
         [FromQuery] string token,
         [FromQuery] Guid? userId,
         [FromServices] IConfirmPaymentService<PayPalCaptureRequest, PayPalCaptureOrderResponse> payPalService,

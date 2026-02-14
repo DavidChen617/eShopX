@@ -7,12 +7,12 @@ public class LinePayRequestEndpoint : IGroupedEndpoint<PaymentsGroupEndpoint>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/line/request", HandleAsync)
+        group.MapPost("/line/request", Handle)
             .Accepts<LinePayRequest>(MediaTypeNames.Application.Json)
             .Produces<ApiResponse<LinePayRequestResponse>>();
     }
 
-    public async Task<IResult> HandleAsync(
+    private static async Task<IResult> Handle(
         [FromBody] LinePayRequest request,
         [FromServices] ICreatePaymentService<LinePayRequest, LinePayRequestResponse> linePayService)
     {

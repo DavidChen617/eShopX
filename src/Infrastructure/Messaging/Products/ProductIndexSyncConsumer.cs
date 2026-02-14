@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Messaging;
+namespace Infrastructure.Messaging.Products;
 
 public class ProductIndexSyncConsumer(
     IServiceScopeFactory scopeFactory,

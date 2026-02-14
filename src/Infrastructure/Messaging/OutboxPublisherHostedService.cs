@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Messaging;
 
 public class OutboxPublisherHostedService(
     ILogger<OutboxPublisherHostedService> logger,

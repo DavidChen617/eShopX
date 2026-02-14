@@ -5,7 +5,7 @@ using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Email;
 
 public class MailKitEmailSender(IOptions<MailOptions> options) : IMailSender
 {

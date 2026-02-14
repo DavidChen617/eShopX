@@ -1,6 +1,5 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-
 using eShopX.Common.Exceptions;
 using eShopX.Common.Mapping;
 

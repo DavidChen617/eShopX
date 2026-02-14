@@ -2,7 +2,6 @@ using ApplicationCore.UseCases.Products.GetProducts;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using eShopX.Common.Exceptions;
-using Infrastructure.Options;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services;

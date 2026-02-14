@@ -3,13 +3,7 @@ using Confluent.Kafka;
 using eShopX.Common.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Messaging;
-
-public interface IOutboxEventPublisher
-{
-    bool CanHandle(string eventType);
-    Task PublishAsync(OutboxEvent @event, CancellationToken ct = default);
-}
+namespace Infrastructure.Messaging.Products;
 
 public class ProductIndexOutboxEventPublisher(
     IProducer<string, string> producer,

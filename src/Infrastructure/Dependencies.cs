@@ -120,12 +120,7 @@ public static class Dependencies
             var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
             return new ConsumerBuilder<string, string>(kafkaOptions.Consumer).Build();
         });
-
-        services.AddSingleton<FlashSaleOrderPublisher>();
-        services.AddSingleton<IFlashSaleOrderPublisher>(sp => sp.GetRequiredService<FlashSaleOrderPublisher>());
-        services.AddSingleton<IOutboxEventPublisher>(sp => sp.GetRequiredService<FlashSaleOrderPublisher>());
         services.AddSingleton<IOutboxEventPublisher, ProductIndexOutboxEventPublisher>();
-        services.AddHostedService<FlashSaleOrderConsumer>();
         services.AddHostedService<OutboxPublisherHostedService>();
         services.AddHostedService<ProductIndexSyncConsumer>();
         

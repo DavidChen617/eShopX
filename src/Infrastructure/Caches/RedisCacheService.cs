@@ -2,7 +2,7 @@ using eShopX.Common.Extensions;
 
 using StackExchange.Redis;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Caches;
 
 public class RedisCacheService(IConnectionMultiplexer multiplexer) : ICacheService
 {

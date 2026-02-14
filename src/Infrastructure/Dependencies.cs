@@ -39,9 +39,10 @@ public static class Dependencies
                 .EnableDetailedErrors();
         });
 
-        services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-        services.AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>));
-
+        services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
+            .AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>))
+            .AddScoped<IUnitOfWork, EfUnitOfWork>();
+        
         // Redis
         var options = ConfigurationOptions.Parse(
             configuration.GetConnectionString(nameof(ConnectionStrings.Redis))!);

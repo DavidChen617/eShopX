@@ -1,8 +1,11 @@
 using ApplicationCore.Entities;
+using ApplicationCore.Interfaces;
 using ApplicationCore.UseCases.Orders;
 using ApplicationCore.UseCases.Orders.CreatePaidOrderFromCart;
 
 using eShopX.Common.Exceptions;
+
+using Moq;
 
 using UnitTests.Helpers;
 
@@ -19,13 +22,15 @@ public class CreatePaidOrderFromCartHandlerTests
         var cartItemRepo = new InMemoryRepository<CartItem>();
         var productRepo = new InMemoryRepository<Product>();
         var userRepo = new InMemoryRepository<User>([new User { Id = userId }]);
+        var unitOfWork = CreateUnitOfWorkMock();
 
         var handler = new CreatePaidOrderFromCartHandler(
             orderRepo,
             cartRepo,
             cartItemRepo,
             productRepo,
-            userRepo);
+            userRepo,
+            unitOfWork.Object);
 
         await Assert.ThrowsAsync<ValidationException>(() =>
             handler.Handle(new CreatePaidOrderFromCartCommand(userId, "Card"), CancellationToken.None));
@@ -43,13 +48,15 @@ public class CreatePaidOrderFromCartHandlerTests
         var cartItemRepo = new InMemoryRepository<CartItem>([cartItem]);
         var productRepo = new InMemoryRepository<Product>();
         var userRepo = new InMemoryRepository<User>([new User { Id = userId }]);
+        var unitOfWork = CreateUnitOfWorkMock();
 
         var handler = new CreatePaidOrderFromCartHandler(
             orderRepo,
             cartRepo,
             cartItemRepo,
             productRepo,
-            userRepo);
+            userRepo,
+            unitOfWork.Object);
 
         await Assert.ThrowsAsync<NotFoundException>(() =>
             handler.Handle(new CreatePaidOrderFromCartCommand(userId, "Card"), CancellationToken.None));
@@ -68,13 +75,15 @@ public class CreatePaidOrderFromCartHandlerTests
         var cartItemRepo = new InMemoryRepository<CartItem>([cartItem]);
         var productRepo = new InMemoryRepository<Product>([product]);
         var userRepo = new InMemoryRepository<User>([user]);
+        var unitOfWork = CreateUnitOfWorkMock();
 
         var handler = new CreatePaidOrderFromCartHandler(
             orderRepo,
             cartRepo,
             cartItemRepo,
             productRepo,
-            userRepo);
+            userRepo,
+            unitOfWork.Object);
 
         var response = await handler.Handle(new CreatePaidOrderFromCartCommand(user.Id, "Card"), CancellationToken.None);
 
@@ -83,5 +92,15 @@ public class CreatePaidOrderFromCartHandlerTests
         Assert.Equal(3, product.StockQuantity);
         Assert.Empty(cartItemRepo.Data);
         Assert.Single(orderRepo.Data);
+    }
+
+    private static Mock<IUnitOfWork> CreateUnitOfWorkMock()
+    {
+        var unitOfWork = new Mock<IUnitOfWork>();
+        unitOfWork.Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        unitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+        unitOfWork.Setup(x => x.CommitTransactionAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        unitOfWork.Setup(x => x.RollbackTransactionAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        return unitOfWork;
     }
 }

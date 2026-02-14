@@ -1,4 +1,5 @@
 using ApplicationCore.Entities;
+using ApplicationCore.Interfaces;
 using ApplicationCore.UseCases.Orders;
 using ApplicationCore.UseCases.Orders.CreateOrder;
 
@@ -19,8 +20,9 @@ public class CreateOrderHandlerTests
         var orderRepo = new InMemoryRepository<Order>();
         var productRepo = new InMemoryRepository<Product>();
         var userRepo = new InMemoryRepository<User>();
+        var unitOfWork = CreateUnitOfWorkMock();
         var mapper = new Mock<IMapper>();
-        var handler = new CreateOrderHandler(orderRepo, productRepo, userRepo, mapper.Object);
+        var handler = new CreateOrderHandler(orderRepo, productRepo, userRepo, unitOfWork.Object, mapper.Object);
 
         var command = new CreateOrderCommand(Guid.NewGuid(), "Name", "Addr", "Phone", []);
 
@@ -34,8 +36,9 @@ public class CreateOrderHandlerTests
         var orderRepo = new InMemoryRepository<Order>();
         var productRepo = new InMemoryRepository<Product>();
         var userRepo = new InMemoryRepository<User>([new User { Id = userId }]);
+        var unitOfWork = CreateUnitOfWorkMock();
         var mapper = new Mock<IMapper>();
-        var handler = new CreateOrderHandler(orderRepo, productRepo, userRepo, mapper.Object);
+        var handler = new CreateOrderHandler(orderRepo, productRepo, userRepo, unitOfWork.Object, mapper.Object);
 
         var itemId = Guid.NewGuid();
         var command = new CreateOrderCommand(userId, "Name", "Addr", "Phone",
@@ -55,8 +58,9 @@ public class CreateOrderHandlerTests
         var orderRepo = new InMemoryRepository<Order>();
         var productRepo = new InMemoryRepository<Product>([product]);
         var userRepo = new InMemoryRepository<User>([new User { Id = userId }]);
+        var unitOfWork = CreateUnitOfWorkMock();
         var mapper = new Mock<IMapper>();
-        var handler = new CreateOrderHandler(orderRepo, productRepo, userRepo, mapper.Object);
+        var handler = new CreateOrderHandler(orderRepo, productRepo, userRepo, unitOfWork.Object, mapper.Object);
 
         var command = new CreateOrderCommand(userId, "Name", "Addr", "Phone",
             [new OrderItemDto(product.Id, 1)]);
@@ -72,11 +76,12 @@ public class CreateOrderHandlerTests
         var orderRepo = new InMemoryRepository<Order>();
         var productRepo = new InMemoryRepository<Product>([product]);
         var userRepo = new InMemoryRepository<User>([new User { Id = userId }]);
+        var unitOfWork = CreateUnitOfWorkMock();
         var mapper = new Mock<IMapper>();
         mapper.Setup(m => m.Map<Order, CreateOrderResponse>(It.IsAny<Order>()))
             .Returns((Order o) => new CreateOrderResponse(o.Id, o.TotalAmount, o.Status, o.CreatedAt, o.PaymentMethod, o.PaidAt));
 
-        var handler = new CreateOrderHandler(orderRepo, productRepo, userRepo, mapper.Object);
+        var handler = new CreateOrderHandler(orderRepo, productRepo, userRepo, unitOfWork.Object, mapper.Object);
 
         var response = await handler.Handle(new CreateOrderCommand(userId, "Name", "Addr", "Phone",
             [new OrderItemDto(product.Id, 2)]), CancellationToken.None);
@@ -85,5 +90,15 @@ public class CreateOrderHandlerTests
         Assert.Equal(20, response.TotalAmount);
         Assert.Equal(3, product.StockQuantity);
         Assert.Single(orderRepo.Data);
+    }
+
+    private static Mock<IUnitOfWork> CreateUnitOfWorkMock()
+    {
+        var unitOfWork = new Mock<IUnitOfWork>();
+        unitOfWork.Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        unitOfWork.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
+        unitOfWork.Setup(x => x.CommitTransactionAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        unitOfWork.Setup(x => x.RollbackTransactionAsync(It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        return unitOfWork;
     }
 }

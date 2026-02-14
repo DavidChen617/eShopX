@@ -26,7 +26,6 @@ public static class DbInitializer
         await SeedBannersAsync(context);
         await SeedCategoriesAsync(context);
         await SeedProductsAsync(context);
-        await SeedFlashSaleAsync(context);
         await SeedProductRecommendsAsync(context);
     }
 
@@ -206,97 +205,11 @@ public static class DbInitializer
         context.Carts.RemoveRange(await context.Carts.ToListAsync());
         context.OrderItems.RemoveRange(await context.OrderItems.ToListAsync());
         context.Orders.RemoveRange(await context.Orders.ToListAsync());
-        context.FlashSaleItems.RemoveRange(await context.FlashSaleItems.ToListAsync());
-        context.FlashSaleSlots.RemoveRange(await context.FlashSaleSlots.ToListAsync());
-        context.FlashSales.RemoveRange(await context.FlashSales.ToListAsync());
         context.ProductRecommends.RemoveRange(await context.ProductRecommends.ToListAsync());
         context.ProductImages.RemoveRange(await context.ProductImages.ToListAsync());
         context.Products.RemoveRange(await context.Products.ToListAsync());
         context.Categories.RemoveRange(await context.Categories.ToListAsync());
 
-        await context.SaveChangesAsync();
-    }
-
-    private static async Task SeedFlashSaleAsync(EShopContext context)
-    {
-        if (await context.FlashSales.AnyAsync())
-            return;
-
-        var products = await context.Products.Take(4).ToListAsync();
-        if (products.Count < 4)
-            return;
-
-        var now = DateTime.UtcNow;
-        var flashSale = new FlashSale
-        {
-            Id = Guid.NewGuid(),
-            Title = "限時秒殺",
-            Subtitle = "高併發搶購體驗，需登入才能參與。",
-            StartsAt = now.Date,
-            EndsAt = now.Date.AddDays(1),
-            IsActive = true
-        };
-
-        context.FlashSales.Add(flashSale);
-
-        var slots = new List<FlashSaleSlot>
-        {
-            new()
-            {
-                Id = Guid.NewGuid(),
-                FlashSaleId = flashSale.Id,
-                Label = "10:00",
-                StartsAt = now.Date.AddHours(2),
-                EndsAt = now.Date.AddHours(4),
-                SortOrder = 1
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                FlashSaleId = flashSale.Id,
-                Label = "12:00",
-                StartsAt = now.Date.AddHours(4),
-                EndsAt = now.Date.AddHours(6),
-                SortOrder = 2
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                FlashSaleId = flashSale.Id,
-                Label = "14:00",
-                StartsAt = now.Date.AddHours(6),
-                EndsAt = now.Date.AddHours(8),
-                SortOrder = 3
-            },
-            new()
-            {
-                Id = Guid.NewGuid(),
-                FlashSaleId = flashSale.Id,
-                Label = "16:00",
-                StartsAt = now.Date.AddHours(8),
-                EndsAt = now.Date.AddHours(10),
-                SortOrder = 4
-            }
-        };
-
-        context.FlashSaleSlots.AddRange(slots);
-
-        var badges = new[] { "Hot", "限量", "售罄", "新品" };
-        var items = products.Select((p, i) => new FlashSaleItem
-        {
-            Id = Guid.NewGuid(),
-            FlashSaleId = flashSale.Id,
-            SlotId = slots[i % slots.Count].Id,
-            ProductId = p.Id,
-            FlashPrice = Math.Round(p.Price * 0.6m, 2),
-            StockTotal = 500 - i * 100,
-            StockRemaining = i == 2 ? 0 : 500 - i * 100 - i * 50,
-            Badge = badges[i],
-            SortOrder = i + 1,
-            PurchaseLimit = 1
-        }).ToList();
-
-        context.FlashSaleItems.AddRange(items);
         await context.SaveChangesAsync();
     }
 

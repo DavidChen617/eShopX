@@ -15,9 +15,6 @@ public class EShopContext(DbContextOptions<EShopContext> options) : DbContext(op
     public virtual DbSet<CartItem> CartItems { get; set; }
     public virtual DbSet<Banner> Banners { get; set; }
     public virtual DbSet<Category> Categories { get; set; }
-    public virtual DbSet<FlashSale> FlashSales { get; set; }
-    public virtual DbSet<FlashSaleSlot> FlashSaleSlots { get; set; }
-    public virtual DbSet<FlashSaleItem> FlashSaleItems { get; set; }
     public virtual DbSet<ProductRecommend> ProductRecommends { get; set; }
     public virtual DbSet<Review> Reviews { get; set; }
     public virtual DbSet<ReviewImage> ReviewImages { get; set; }

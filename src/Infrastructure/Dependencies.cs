@@ -121,8 +121,13 @@ public static class Dependencies
             return new ConsumerBuilder<string, string>(kafkaOptions.Consumer).Build();
         });
 
-        services.AddSingleton<IFlashSaleOrderPublisher, FlashSaleOrderPublisher>();
+        services.AddSingleton<FlashSaleOrderPublisher>();
+        services.AddSingleton<IFlashSaleOrderPublisher>(sp => sp.GetRequiredService<FlashSaleOrderPublisher>());
+        services.AddSingleton<IOutboxEventPublisher>(sp => sp.GetRequiredService<FlashSaleOrderPublisher>());
+        services.AddSingleton<IOutboxEventPublisher, ProductIndexOutboxEventPublisher>();
         services.AddHostedService<FlashSaleOrderConsumer>();
+        services.AddHostedService<OutboxPublisherHostedService>();
+        services.AddHostedService<ProductIndexSyncConsumer>();
         
         // ElasticSearch
         services.Configure<ElasticsearchOptions>(configuration.GetSection(ElasticsearchOptions.OptionKey));
@@ -141,6 +146,5 @@ public static class Dependencies
         services.AddScoped<IProductSearchService, ElasticsearchProductSearchService>();
         services.AddScoped<IProductSearchIndexService, ReindexProductsService>();
         services.AddScoped<IProductSearchIndexSyncService, ProductSearchIndexSyncService>();
-        services.AddHostedService<OutboxProcessorHostedService>();
     }
 }

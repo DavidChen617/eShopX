@@ -43,11 +43,12 @@ resource "aws_instance" "worker" {
   vpc_security_group_ids = [aws_security_group.worker.id]
   associate_public_ip_address = true
   key_name = aws_key_pair.generated.key_name
+  iam_instance_profile = aws_iam_instance_profile.ebs_csi.name
   root_block_device {
     volume_type = var.root_volume_type
     volume_size = var.root_volume_size
   }
-  
+
   tags = merge(local.tags, {
     Name = "${var.project_name}-worker-${count.index + 1}"
   })

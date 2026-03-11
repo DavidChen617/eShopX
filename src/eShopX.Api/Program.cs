@@ -29,7 +29,9 @@ builder.Services
     .AddExceptionHandler<ForbiddenExceptionHandler>()
     .AddExceptionHandler<GlobalExceptionHandler>();
 
-builder.Services.DecorateWithDispatchProxyFromAttributes([typeof(Dependencies).Assembly, typeof(IAssemblyMarker).Assembly]);
+builder.Services.DecorateWithDispatchProxyFromAttributes([
+    typeof(Dependencies).Assembly, typeof(IAssemblyMarker).Assembly
+]);
 
 builder.Services.AddHttpClient();
 
@@ -110,12 +112,12 @@ builder.Logging.ClearProviders()
 
 var app = builder.Build();
 
+using var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<EShopContext>();
+await DbInitializer.SeedAsync(db);
+
 if (app.Environment.IsDevelopment())
 {
-    // using var scope = app.Services.CreateScope();
-    // var db = scope.ServiceProvider.GetRequiredService<EShopContext>();
-    // await DbInitializer.SeedAsync(db);
-
     app.MapOpenApi();
 }
 

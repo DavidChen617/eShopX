@@ -1,5 +1,3 @@
-using eShopX.Common.Extensions;
-using Infrastructure.Options;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
@@ -13,7 +11,6 @@ public class MailKitEmailSender(IOptions<MailOptions> options) : IMailSender
 
     public async Task SendAsync(MailSendRequest request, CancellationToken cancellationToken = default)
     {
-        Console.WriteLine(request.ToJson());
         var message = new MimeMessage();
         var fromName = string.IsNullOrWhiteSpace(_options.FromName) ? _options.FromEmail : _options.FromName;
         message.From.Add(new MailboxAddress(fromName, _options.FromEmail));

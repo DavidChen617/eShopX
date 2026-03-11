@@ -151,6 +151,7 @@ export interface GetUserOrderResponse {
 }
 
 export interface QueryOrderItem {
+  orderItemId: string;
   productId: string;
   productName: string;
   unitPrice: number;

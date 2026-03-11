@@ -14,6 +14,7 @@ public record GetOrderResponse(
     List<QueryOrderItem>? Items);
 
 public record QueryOrderItem(
+    Guid OrderItemId,
     Guid ProductId,
     string ProductName,
     decimal UnitPrice,

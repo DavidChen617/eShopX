@@ -163,6 +163,7 @@ export const mockOrderDetail: GetOrderResponse = {
   createdAt: '2026-01-12T14:20:00Z',
   items: [
     {
+      orderItemId: '8f1e2c11-1111-4444-9999-a11111111111',
       productId: '9f8b6e36-8d34-4c14-8e5b-6d7c2b46f001',
       productName: 'Everyday Tee',
       unitPrice: 48,
@@ -170,6 +171,7 @@ export const mockOrderDetail: GetOrderResponse = {
       subTotal: 96,
     },
     {
+      orderItemId: '8f1e2c11-2222-4444-9999-a22222222222',
       productId: '9f8b6e36-8d34-4c14-8e5b-6d7c2b46f003',
       productName: 'Cloud Jogger',
       unitPrice: 78,

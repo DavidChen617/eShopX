@@ -64,6 +64,16 @@ resource "aws_security_group_rule" "master_https" {
   security_group_id = aws_security_group.master.id
 }
 
+resource "aws_security_group_rule" "master_nodeport_range" {
+  type              = "ingress"
+  description       = "Kubernetes NodePort range"
+  from_port         = 30000
+  to_port           = 32767
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.master.id
+}
+
 resource "aws_security_group_rule" "master_k8s_api_from_workers" {
   type                     = "ingress"
   description              = "K8s API from workers"

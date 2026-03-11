@@ -15,12 +15,19 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: k8s-work1
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       initContainers:
-        - name: fix-vm-max-map-count
+        - name: init-es-data
           image: busybox
-          command: ["sysctl", "-w", "vm.max_map_count=262144"]
+          command: ["sh", "-c", "mkdir -p /usr/share/elasticsearch/data && chown -R 1000:1000 /usr/share/elasticsearch/data && chmod -R 0777 /usr/share/elasticsearch/data"]
           securityContext:
-            privileged: true
+            runAsUser: 0
+          volumeMounts:
+            - name: es-data
+              mountPath: /usr/share/elasticsearch/data
       containers:
         - name: elasticsearch
           image: docker.elastic.co/elasticsearch/elasticsearch:9.3.0

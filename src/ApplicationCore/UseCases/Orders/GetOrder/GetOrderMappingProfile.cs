@@ -14,7 +14,7 @@ public class GetOrderMappingProfile : Profile
                 src.UnitPrice * src.Quantity));
 
         CreateMap<Order, GetOrderResponse>()
-            .ConstructUsing((src, ctx) => new GetOrderResponse(
+            .ConstructUsing(src => new GetOrderResponse(
                 src.Id,
                 src.UserId,
                 src.Status,
@@ -25,6 +25,12 @@ public class GetOrderMappingProfile : Profile
                 src.ShippingAddress,
                 src.ShippingPhone,
                 src.CreatedAt,
-                src.Items.Select(ctx.Mapper.Map<QueryOrderItem>).ToList()));
+                src.Items.Select(item => new QueryOrderItem(
+                    item.Id,
+                    item.ProductId,
+                    item.ProductName,
+                    item.UnitPrice,
+                    item.Quantity,
+                    item.UnitPrice * item.Quantity)).ToList()));
     }
 }

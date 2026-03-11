@@ -24,6 +24,7 @@ resource "aws_instance" "master" {
   subnet_id = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.master.id]
   associate_public_ip_address = true
+  source_dest_check = false
   key_name = aws_key_pair.generated.key_name
   root_block_device {
     volume_type = var.root_volume_type
@@ -42,6 +43,7 @@ resource "aws_instance" "worker" {
   subnet_id = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.worker.id]
   associate_public_ip_address = true
+  source_dest_check = false
   key_name = aws_key_pair.generated.key_name
   iam_instance_profile = aws_iam_instance_profile.ebs_csi.name
   root_block_device {

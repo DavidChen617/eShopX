@@ -133,3 +133,23 @@ resource "aws_security_group_rule" "worker_vxlan_from_workers" {
   source_security_group_id = aws_security_group.worker.id
   security_group_id        = aws_security_group.worker.id
 }
+
+resource "aws_security_group_rule" "worker_typha_from_workers" {
+  type                     = "ingress"
+  description              = "Calico Typha from workers"
+  from_port                = 5473
+  to_port                  = 5473
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.worker.id
+  security_group_id        = aws_security_group.worker.id
+}
+
+resource "aws_security_group_rule" "worker_typha_from_master" {
+  type                     = "ingress"
+  description              = "Calico Typha from master"
+  from_port                = 5473
+  to_port                  = 5473
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.master.id
+  security_group_id        = aws_security_group.worker.id
+}

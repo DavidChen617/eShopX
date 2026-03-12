@@ -29,6 +29,7 @@ public class CreateReviewHandler(
                 new ReviewImage{ ReviewId = review.Id, Url = url, SortOrder = index }).ToList();
 
         await reviewRepository.AddAsync(review, cancellationToken);
+        await reviewRepository.SaveChangesAsync(cancellationToken);
     
         return mapper.Map<Review, CreateReviewResponse>(review);
     }

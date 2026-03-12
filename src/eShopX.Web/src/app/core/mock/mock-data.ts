@@ -196,7 +196,7 @@ export const mockMe: GetMeResponse = {
   avatarBytes: null,
   isSeller: true,
   isAdmin: false,
-  sellerStatus: 1,
+  sellerStatus: 'Approved',
   sellerAppliedAt: '2025-08-01T10:00:00Z',
   sellerApprovedAt: '2025-08-02T12:30:00Z',
   sellerRejectionReason: null,

@@ -134,7 +134,9 @@
               routerLink="/admin/sellers"
               class="text-white hover:text-yellow-200 flex items-center gap-1"
             >
-              <nz-icon nzType="safety-certificate" nzTheme="outline"></nz-icon>
+              <nz-badge [nzCount]="pendingSellerCount()" [nzOverflowCount]="99" nzSize="small">
+                <nz-icon nzType="safety-certificate" nzTheme="outline"></nz-icon>
+              </nz-badge>
               賣家審核
             </a>
           </li>

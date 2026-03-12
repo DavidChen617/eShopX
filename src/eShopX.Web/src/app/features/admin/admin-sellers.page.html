@@ -1,4 +1,10 @@
 <ui-section title="賣家審核" subtitle="管理員核准或拒絕賣家申請。">
+  <div
+    class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"
+  >
+    <nz-icon nzType="safety-certificate" nzTheme="outline"></nz-icon>
+    賣家審核
+  </div>
   @if (isLoading()) {
   <div class="h-32 rounded-2xl border border-dashed border-neutral-200 bg-neutral-50"></div>
   } @if (!isLoading() && !isAdmin()) {

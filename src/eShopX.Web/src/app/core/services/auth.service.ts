@@ -290,10 +290,10 @@ export class AuthService {
         },
       ],
       redirectUrls: {
-        confirmUrl: `/pay/line/confirm?amount=${amount}&currency=${currency}&orderId=${finalOrderId}${
+        confirmUrl: `/api/payments/line/callback/confirm?amount=${amount}&currency=${currency}&orderId=${finalOrderId}${
           userId ? `&userId=${userId}` : ''
         }`,
-        cancelUrl: '/pay/line/cancel',
+        cancelUrl: '/api/payments/line/callback/cancel',
       },
     };
 

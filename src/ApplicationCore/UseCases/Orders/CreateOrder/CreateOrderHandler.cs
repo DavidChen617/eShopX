@@ -32,8 +32,7 @@ public class CreateOrderHandler(
         CreateOrderCommand command,                                                                                                                            
         CancellationToken cancellationToken)                                                                                                                   
     {                                                                                                                                                          
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
-        try
+        return await unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
             var (userId, shippingName, shippingAddress, shippingPhone, items) =
                 command;
@@ -43,7 +42,7 @@ public class CreateOrderHandler(
                 throw new ValidationException("items", "Order items must have at least one item");
             }
 
-            var user = await userRepository.GetByIdAsync(userId, cancellationToken);
+            var user = await userRepository.GetByIdAsync(userId, ct);
 
             if (user is null)
             {
@@ -66,7 +65,7 @@ public class CreateOrderHandler(
             }
 
             var products =
-                await productRepository.ListAsync(p => productHasSet.Contains(p.Id), cancellationToken);
+                await productRepository.ListAsync(p => productHasSet.Contains(p.Id), ct);
 
             if (products.Count != items.Count)
             {
@@ -114,18 +113,12 @@ public class CreateOrderHandler(
                     Items = orderItems,
                     PaymentMethod = "Manual",
                     PaidAt = DateTime.UtcNow
-                }, cancellationToken);
+                }, ct);
 
             productRepository.UpdateRange(products);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-            await unitOfWork.CommitTransactionAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(ct);
 
             return mapper.Map<Order, CreateOrderResponse>(order);
-        }
-        catch
-        {
-            await unitOfWork.RollbackTransactionAsync(cancellationToken);
-            throw;
-        }
+        }, cancellationToken);
     }
 }

@@ -37,8 +37,8 @@ public class PayPalCreateOrderEndpoint : IGroupedEndpoint<PayPalGroupEndpoint>
             ? amountValue.ToString("0")
             : amountValue.ToString("0.##");
 
-        var returnUrl = $"{publicBase.TrimEnd('/')}/pay/paypal/return";
-        var cancelUrl = $"{publicBase.TrimEnd('/')}/pay/paypal/cancel";
+        var returnUrl = $"{publicBase.TrimEnd('/')}/api/payments/paypal/callback/return";
+        var cancelUrl = $"{publicBase.TrimEnd('/')}/api/payments/paypal/callback/cancel";
         if (cmd.UserId.HasValue)
         {
             var userIdValue = Uri.EscapeDataString(cmd.UserId.Value.ToString());

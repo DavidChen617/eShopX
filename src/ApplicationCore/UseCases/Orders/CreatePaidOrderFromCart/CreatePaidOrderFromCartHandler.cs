@@ -13,23 +13,22 @@ public class CreatePaidOrderFromCartHandler(
         CreatePaidOrderFromCartCommand command,
         CancellationToken cancellationToken = default)
     {
-        await unitOfWork.BeginTransactionAsync(cancellationToken);
-        try
+        return await unitOfWork.ExecuteInTransactionAsync(async ct =>
         {
-            var user = await userRepository.GetByIdAsync(command.UserId, cancellationToken)
+            var user = await userRepository.GetByIdAsync(command.UserId, ct)
                 ?? throw new NotFoundException("User", command.UserId);
 
-            var cart = await cartRepository.FirstOrDefaultAsync(c => c.UserId == command.UserId, cancellationToken)
+            var cart = await cartRepository.FirstOrDefaultAsync(c => c.UserId == command.UserId, ct)
                 ?? throw new NotFoundException(nameof(Cart), command.UserId);
 
-            var cartItems = await cartItemRepository.ListAsync(i => i.CartId == cart.Id, cancellationToken);
+            var cartItems = await cartItemRepository.ListAsync(i => i.CartId == cart.Id, ct);
             if (cartItems.Count == 0)
             {
                 throw new ValidationException("Cart", "Cart is empty");
             }
 
             var productIds = cartItems.Select(i => i.ProductId).ToHashSet();
-            var products = await productRepository.ListAsync(p => productIds.Contains(p.Id), cancellationToken);
+            var products = await productRepository.ListAsync(p => productIds.Contains(p.Id), ct);
 
             if (products.Count != cartItems.Count)
             {
@@ -82,12 +81,11 @@ public class CreatePaidOrderFromCartHandler(
                     PaymentMethod = command.PaymentMethod,
                     PaidAt = paidAt
                 },
-                cancellationToken);
+                ct);
 
             productRepository.UpdateRange(products);
             cartItemRepository.RemoveRange(cartItems);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-            await unitOfWork.CommitTransactionAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(ct);
 
             return new CreatePaidOrderFromCartResponse(
                 order.Id,
@@ -95,11 +93,6 @@ public class CreatePaidOrderFromCartHandler(
                 order.TotalAmount,
                 order.PaymentMethod,
                 paidAt);
-        }
-        catch
-        {
-            await unitOfWork.RollbackTransactionAsync(cancellationToken);
-            throw;
-        }
+        }, cancellationToken);
     }
 }

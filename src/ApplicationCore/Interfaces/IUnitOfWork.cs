@@ -6,4 +6,6 @@ public interface IUnitOfWork
     Task CommitTransactionAsync(CancellationToken cancellationToken = default);
     Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
     Task<int>  SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task<T> ExecuteInTransactionAsync<T>(Func<CancellationToken, Task<T>> operation,
+        CancellationToken cancellationToken = default);
 }

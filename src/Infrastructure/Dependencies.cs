@@ -2,6 +2,7 @@
 using System.Text;
 using CloudinaryDotNet;
 using Confluent.Kafka;
+using Confluent.Kafka.Admin;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using Infrastructure.Caches;
@@ -28,7 +29,7 @@ public static class Dependencies
                         // Connection pool optimization
                         npgsqlOptions.MinBatchSize(1);
                         npgsqlOptions.MaxBatchSize(100);
-                        
+
                         // Enable connection retries
                         npgsqlOptions.EnableRetryOnFailure(
                             maxRetryCount: 3,
@@ -42,7 +43,7 @@ public static class Dependencies
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
             .AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>))
             .AddScoped<IUnitOfWork, EfUnitOfWork>();
-        
+
         // Redis
         var options = ConfigurationOptions.Parse(
             configuration.GetConnectionString(nameof(ConnectionStrings.Redis))!);
@@ -78,7 +79,7 @@ public static class Dependencies
         services.AddSingleton<Cloudinary>(_ =>
         {
             var opt = configuration.GetSection(CloudinaryOptions.OptionKey).Get<CloudinaryOptions>()
-                ?? throw new InvalidOperationException("Cloudinary configuration is missing.");
+                      ?? throw new InvalidOperationException("Cloudinary configuration is missing.");
             return new Cloudinary(new Account(opt.CloudName, opt.ApiKey, opt.ApiSecret));
         });
         services.AddScoped<IImageStorage, ImageStorageService>();
@@ -110,10 +111,10 @@ public static class Dependencies
         });
         services.AddScoped<ICreatePaymentService<PayPalCreateOrderRequest, PayPalCreateOrderResponse>, PayPalService>();
         services.AddScoped<IConfirmPaymentService<PayPalCaptureRequest, PayPalCaptureOrderResponse>, PayPalService>();
-        
+
         // kafka
         services.Configure<KafkaOptions>(configuration.GetSection(KafkaOptions.OptionKey));
-        services.AddSingleton<IProducer<string,string>>(sp =>
+        services.AddSingleton<IProducer<string, string>>(sp =>
         {
             var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
             return new ProducerBuilder<string, string>(kafkaOptions.Producer).Build();
@@ -125,9 +126,31 @@ public static class Dependencies
         });
         services.AddSingleton<IOutboxEventPublisher, ProductIndexOutboxEventPublisher>();
         services.AddScoped<IProcessedEventStore, ProcessedEventStore>();
-        services.AddHostedService<OutboxPublisherHostedService>()
+        services.AddSingleton<AdminClientConfig>(sp =>
+            {
+                var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+                return new AdminClientConfig { BootstrapServers = kafkaOptions.Producer.BootstrapServers };
+            })
+            .AddSingleton<List<TopicSpecification>>(sp =>
+            {
+                var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+                var topics = new List<TopicSpecification>();
+                topics.Add(
+                    new TopicSpecification { Name = kafkaOptions.OutboxEventTopic, NumPartitions = 3, ReplicationFactor = 1 }
+                );
+                return topics;
+            })
+            .AddSingleton<IAdminClient>(sp =>
+            {
+                var config = sp.GetRequiredService<AdminClientConfig>();
+                return new AdminClientBuilder(config).Build();
+            });
+
+        services
+            .AddHostedService<MessageTopicInitializer>()
+            .AddHostedService<OutboxPublisherHostedService>()
             .AddHostedService<OutboxConsumerHostedService>();
-        
+
         // ElasticSearch
         services.Configure<ElasticsearchOptions>(configuration.GetSection(ElasticsearchOptions.OptionKey));
         services.AddSingleton(sp =>
@@ -139,7 +162,7 @@ public static class Dependencies
             {
                 settings.Authentication(new BasicAuthentication(opt.Username, opt.Password ?? string.Empty));
             }
-            
+
             return new ElasticsearchClient(settings);
         });
         services.AddScoped<IProductSearchService, ElasticsearchProductSearchService>();

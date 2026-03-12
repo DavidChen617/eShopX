@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 import { AccountService } from '../../core/services/account.service';
 import { SellerAdminService } from '../../core/services/seller-admin.service';
 import { GetMeResponse, PendingSellerItem } from '../../core/models/api-models';
@@ -9,7 +10,7 @@ import { ButtonComponent } from '../../shared/ui/button/button.component';
 @Component({
   selector: 'app-admin-sellers-page',
   standalone: true,
-  imports: [SectionComponent, ButtonComponent, DatePipe],
+  imports: [SectionComponent, ButtonComponent, DatePipe, NzIconModule],
   templateUrl: './admin-sellers.page.html',
 })
 export class AdminSellersPageComponent {
@@ -47,6 +48,7 @@ export class AdminSellersPageComponent {
     try {
       await this.sellerAdminService.approve(userId);
       this.items.update((list) => list.filter((item) => item.userId !== userId));
+      this.sellerAdminService.decrementPendingCount();
     } catch (err) {
       this.error.set(err instanceof Error ? err.message : '核准失敗，請稍後再試。');
     } finally {
@@ -67,6 +69,7 @@ export class AdminSellersPageComponent {
     try {
       await this.sellerAdminService.reject(userId, reason);
       this.items.update((list) => list.filter((item) => item.userId !== userId));
+      this.sellerAdminService.decrementPendingCount();
     } catch (err) {
       this.error.set(err instanceof Error ? err.message : '拒絕失敗，請稍後再試。');
     } finally {

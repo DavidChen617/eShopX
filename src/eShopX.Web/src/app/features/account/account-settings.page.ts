@@ -67,24 +67,24 @@ export class AccountSettingsPageComponent {
     }
   }
 
-  private resolveSellerStatus(me: GetMeResponse | null): number | null {
+  private resolveSellerStatus(me: GetMeResponse | null): 'Pending' | 'Approved' | 'Rejected' | null {
     if (!me) return null;
-    if (me.isSeller || me.sellerApprovedAt || me.sellerStatus === 1) return 1;
-    if (me.sellerStatus === 0) return 0;
-    if (me.sellerStatus === 2) return 2;
+    if (me.isSeller || me.sellerApprovedAt || me.sellerStatus === 'Approved') return 'Approved';
+    if (me.sellerStatus === 'Pending') return 'Pending';
+    if (me.sellerStatus === 'Rejected') return 'Rejected';
     return null;
   }
 
   sellerStatusLabel(me: GetMeResponse | null): string {
     const status = this.resolveSellerStatus(me);
     if (me?.isAdmin) return '管理員';
-    if (status === 0) return '申請中';
-    if (status === 1) return '已通過';
-    if (status === 2) return '已拒絕';
+    if (status === 'Pending') return '申請中';
+    if (status === 'Approved') return '已通過';
+    if (status === 'Rejected') return '已拒絕';
     return '尚未申請';
   }
 
-  sellerStatusValue(me: GetMeResponse | null): number | null {
+  sellerStatusValue(me: GetMeResponse | null): 'Pending' | 'Approved' | 'Rejected' | null {
     return this.resolveSellerStatus(me);
   }
 

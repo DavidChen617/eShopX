@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 import { ApiService } from './api.service';
 import {
@@ -9,10 +9,14 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class SellerAdminService {
+  pendingCount = signal(0);
+
   constructor(private readonly api: ApiService) {}
 
-  getPending(): Promise<GetPendingSellersResponse> {
-    return this.api.get<GetPendingSellersResponse>('/api/sellers/pending');
+  async getPending(): Promise<GetPendingSellersResponse> {
+    const result = await this.api.get<GetPendingSellersResponse>('/api/sellers/pending');
+    this.pendingCount.set(result.items?.length ?? 0);
+    return result;
   }
 
   approve(userId: string): Promise<ApproveSellerResponse> {
@@ -27,5 +31,13 @@ export class SellerAdminService {
       `/api/sellers/${userId}/reject`,
       { reason },
     );
+  }
+
+  decrementPendingCount(): void {
+    this.pendingCount.update((count) => Math.max(0, count - 1));
+  }
+
+  resetPendingCount(): void {
+    this.pendingCount.set(0);
   }
 }

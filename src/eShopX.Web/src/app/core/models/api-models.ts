@@ -131,6 +131,7 @@ export interface CheckoutPreviewResponse {
 }
 
 export type OrderStatus = 'Paid' | 'Completed' | 'Cancelled';
+export type SellerStatus = 'Pending' | 'Approved' | 'Rejected';
 
 export interface QueryUserOrderItem {
   orderId: string;
@@ -188,7 +189,7 @@ export interface GetMeResponse {
   avatarBytes?: number | null;
   isSeller: boolean;
   isAdmin: boolean;
-  sellerStatus?: number | null;
+  sellerStatus?: SellerStatus | null;
   sellerAppliedAt?: string | null;
   sellerApprovedAt?: string | null;
   sellerRejectionReason?: string | null;
@@ -196,7 +197,7 @@ export interface GetMeResponse {
 
 export interface ApplyForSellerResponse {
   userId: string;
-  status: number;
+  status: SellerStatus;
   appliedAt: string;
 }
 

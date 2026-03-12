@@ -8,6 +8,7 @@ import { NzBadgeModule } from 'ng-zorro-antd/badge';
 import { AuthService } from '../../core/services/auth.service';
 import { AccountService } from '../../core/services/account.service';
 import { CartService } from '../../core/services/cart.service';
+import { SellerAdminService } from '../../core/services/seller-admin.service';
 import { GetMeResponse } from '../../core/models/api-models';
 
 @Component({
@@ -19,15 +20,18 @@ import { GetMeResponse } from '../../core/models/api-models';
 export class HeaderComponent {
   searchKeyword = signal('');
   cartCount = signal(0);
+  pendingSellerCount = signal(0);
   me = signal<GetMeResponse | null>(null);
 
   constructor(
     private readonly authService: AuthService,
     private readonly accountService: AccountService,
     private readonly cartService: CartService,
+    private readonly sellerAdminService: SellerAdminService,
     private readonly router: Router,
   ) {
     this.cartCount = this.cartService.cartCount;
+    this.pendingSellerCount = this.sellerAdminService.pendingCount;
     effect(() => {
       if (this.authService.authState()) {
         void this.loadMe();
@@ -35,6 +39,7 @@ export class HeaderComponent {
       } else {
         this.me.set(null);
         this.cartService.cartCount.set(0);
+        this.sellerAdminService.resetPendingCount();
       }
     });
   }
@@ -65,8 +70,14 @@ export class HeaderComponent {
     try {
       const me = await this.accountService.getMe();
       this.me.set(me);
+      if (me.isAdmin) {
+        void this.sellerAdminService.getPending();
+      } else {
+        this.sellerAdminService.resetPendingCount();
+      }
     } catch {
       this.me.set(null);
+      this.sellerAdminService.resetPendingCount();
     }
   }
 
@@ -82,4 +93,5 @@ export class HeaderComponent {
       this.cartService.cartCount.set(0);
     }
   }
+
 }

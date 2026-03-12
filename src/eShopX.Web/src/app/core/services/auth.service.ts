@@ -72,10 +72,8 @@ export class AuthService {
   readonly authState = this.authenticatedSignal.asReadonly();
   private readonly clientId =
     '81840048967-d6k4331ks8sllq08qac4morq5877t843.apps.googleusercontent.com';
-  private readonly redirectUri = 'http://localhost:4200/auth/google/callback';
   private readonly scope = 'openid email profile';
   private readonly lineChannelId = '2009031910';
-  private readonly lineRedirectUri = 'http://localhost:4200/auth/line/callback';
   private readonly lineScope = 'openid profile email';
   constructor(
     private readonly storage: LocalStorageService,
@@ -154,6 +152,14 @@ export class AuthService {
     return Array.from(bytes, (b) => charset[b % charset.length]).join('');
   }
 
+  private buildCallbackUrl(path: string): string {
+    if (typeof window === 'undefined') {
+      return path;
+    }
+
+    return new URL(path, window.location.origin).toString();
+  }
+
   exchangeGoogleCode(code: string, state: string) {
     const savedState = sessionStorage.getItem('google_oauth_state');
     const codeVerifier = sessionStorage.getItem('google_pkce_verifier');
@@ -230,7 +236,7 @@ export class AuthService {
 
     const params = new URLSearchParams({
       client_id: this.clientId,
-      redirect_uri: this.redirectUri,
+      redirect_uri: this.buildCallbackUrl('/auth/google/callback'),
       response_type: 'code',
       scope: this.scope,
       code_challenge: codeChallenge,
@@ -254,7 +260,7 @@ export class AuthService {
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: this.lineChannelId,
-      redirect_uri: this.lineRedirectUri,
+      redirect_uri: this.buildCallbackUrl('/auth/line/callback'),
       state,
       scope: this.lineScope,
       nonce,

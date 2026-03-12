@@ -24,6 +24,7 @@ public class UploadUserAvatarHandler(
         user.AvatarHeight = uploadResult.Height;
         user.AvatarBytes = uploadResult.Bytes;
 
+        userRepository.Update(user);
         await userRepository.SaveChangesAsync(cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(oldPublicId))

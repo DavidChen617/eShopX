@@ -1,69 +1,184 @@
 # eShopX
 
-eShopX is a modern, scalable e-commerce platform engineered with a focus on clean architecture, performance, and cloud-native principles. It features a robust .NET backend employing Vertical Slice Architecture and a responsive Angular frontend, all streamlined for deployment using Docker and Kubernetes.
+eShopX is a full-stack e-commerce system built with Angular, ASP.NET Core, PostgreSQL, Redis, Kafka, and Elasticsearch. The project is structured as a modular monolith with strong Vertical Slice and Clean Architecture / DDD-style boundaries, and includes Docker, Kubernetes, Terraform, and GitHub Actions for delivery.
 
 ## Architecture
 
-The project follows a **Vertical Slice Architecture**, moving away from traditional horizontal layering. This approach groups code by feature (e.g., "Add to Cart", "Checkout") rather than technical concern (Controller, Service, Repository), resulting in highly cohesive and maintainable codebases.
+The backend is organized around feature-oriented slices rather than traditional controller/service/repository folders. Each use case keeps its command or query, handler, validator, and mapping logic close together.
 
-### Key Architectural Patterns:
-*   **Vertical Slices:** Business logic is encapsulated in `UseCases` (e.g., `src/ApplicationCore/UseCases/`), containing everything needed to perform a specific action.
-*   **CQRS (Command Query Responsibility Segregation):** Separation of read and write operations for optimized performance and scalability.
-*   **Modular Endpoints:** API endpoints are defined close to their feature logic, adhering to the Minimal API paradigm for reduced boilerplate.
-*   **Domain-Driven Design (DDD):** Core business entities and logic reside in `ApplicationCore`, isolated from external concerns.
+### Core Architectural Concepts
+
+- **Vertical Slice Architecture**
+  - Feature code is grouped under `src/ApplicationCore/UseCases/`
+- **CQRS**
+  - Read and write flows are split into dedicated queries and commands
+- **Clean Architecture / DDD-style layering**
+  - `ApplicationCore` contains business logic and abstractions
+  - `Infrastructure` contains EF Core, external services, caching, messaging, and persistence implementations
+  - `eShopX.Api` exposes Minimal API endpoints and composition root wiring
+- **Repository + Unit of Work**
+  - Repositories encapsulate persistence access
+  - `EfUnitOfWork` coordinates transactions and execution strategy handling
+- **Outbox Pattern**
+  - Domain changes are persisted first
+  - Background services publish outbox events to Kafka
+  - Downstream consumers process those events asynchronously
 
 ## Technology Stack
 
-### Backend (.NET)
-*   **Framework:** .NET 10
-*   **Data Access:** Entity Framework Core
-*   **Database:** PostgreSQL
-*   **Caching:** Redis
-*   **Communication:** Mediator (In-process messaging), Custom Result Pattern
-*   **Utilities:** Custom high-performance Logging (`ChannelLogDispatcher`)
+### Backend
 
-### Frontend (Web)
-*   **Framework:** Angular
-*   **Styling:** Tailwind CSS
-*   **State Management:** RxJS
-*   **Server:** Nginx (for production serving)
+- **Framework:** .NET 10
+- **API Style:** ASP.NET Core Minimal API
+- **ORM:** Entity Framework Core
+- **Database:** PostgreSQL
+- **Cache:** Redis
+- **Messaging:** Kafka
+- **Search:** Elasticsearch
+- **Cross-cutting:** custom mediator, mapping, logging, exception handling
+
+### Frontend
+
+- **Framework:** Angular
+- **Styling:** Tailwind CSS
+- **UI / Icons:** ng-zorro / Ant Design icons
+- **Reactive layer:** RxJS
+- **Production hosting:** Nginx
+
+### External Integrations
+
+- Google Login
+- LINE Login
+- LINE Pay
+- PayPal
+- Cloudinary
+- Gmail SMTP
 
 ### DevOps & Infrastructure
-*   **Containerization:** Docker & Docker Compose
-*   **Orchestration:** Kubernetes (K8s)
-*   **IaC (Infrastructure as Code):** Terraform
-*   **CI/CD:** GitHub Actions
+
+- Docker / Docker Compose
+- Kubernetes
+- ingress-nginx
+- cert-manager + Let's Encrypt
+- Terraform
+- GitHub Actions
 
 ## Project Structure
 
 ```text
-/src
-├── ApplicationCore   # Domain Entities, Interfaces, and Use Cases (Vertical Slices)
-├── Infrastructure    # DB Context (EF Core), External Services, Migrations
-├── eShopX.Api        # API Entry point, Endpoint configurations, DI setup
-├── eShopX.Common     # Shared utilities, Exceptions, Custom Logging, Validator
-└── eShopX.Web        # Angular Frontend Application
-/k8s                  # Kubernetes manifest files for deployment
-/terraform            # Terraform scripts for infrastructure provisioning
+.
+├── docker.compose.yaml
+├── infra
+│   ├── k8s
+│   └── terraform
+├── src
+│   ├── ApplicationCore
+│   ├── Infrastructure
+│   ├── eShopX.Api
+│   ├── eShopX.Common
+│   └── eShopX.Web
+└── tests
 ```
 
-## Getting Started
+### Layer Responsibilities
+
+- `src/ApplicationCore`
+  - entities, interfaces, use cases, commands, queries, validators
+- `src/Infrastructure`
+  - EF Core context, repositories, cache, messaging, search, third-party integrations
+- `src/eShopX.Api`
+  - HTTP endpoints, app startup, DI wiring, environment configuration
+- `src/eShopX.Common`
+  - shared mediator, mapping, logging, exception handling
+- `src/eShopX.Web`
+  - Angular frontend
+
+## Local Development
 
 ### Prerequisites
-*   Docker Desktop
-*   .NET SDK
-*   Node.js & pnpm/npm
 
-### Running Locally (Docker Compose)
-The easiest way to start the entire stack (Database, Redis, API, Web) is via Docker Compose:
+- Docker / Docker Desktop
+- .NET SDK
+- Node.js
+- pnpm
+
+### Start the full stack with Docker Compose
 
 ```bash
-docker-compose up -d
+docker compose -f docker.compose.yaml up -d
 ```
+
+This starts the main local dependencies and services, including:
+
+- PostgreSQL
+- Redis
+- Kafka
+- Elasticsearch
+- API
+- Web
+
+### Frontend development
+
+```bash
+cd src/eShopX.Web
+pnpm install
+pnpm start
+```
+
+### Backend development
+
+```bash
+dotnet run --project src/eShopX.Api/
+```
+
+## Deployment
+
+### Docker Compose
+
+Useful for local and single-VM environments:
+
+```bash
+docker compose -f docker.compose.yaml up -d --build
+```
+
+### Kubernetes
+
+Kubernetes manifests live under:
+
+- `infra/k8s`
+
+They cover:
+
+- PostgreSQL
+- Redis
+- Kafka
+- Elasticsearch
+- API / Web Deployments
+- Ingress
+- cert-manager ClusterIssuer
+
+### Terraform
+
+AWS infrastructure definitions live under:
+
+- `infra/terraform`
+
+## CI/CD
+
+The GitHub Actions workflow performs four major stages:
+
+1. Generate EF migration SQL
+2. Build and push API / Web Docker images
+3. Run database migration on the self-hosted runner
+4. Apply Kubernetes manifests to the cluster
+
+Workflow file:
+
+- `.github/workflows/build-push.yml`
 
 ## Git Hooks
 
-To enable the repository hooks, point Git to the versioned hooks directory:
+To enable repository-managed hooks:
 
 ```bash
 git config core.hooksPath hooks

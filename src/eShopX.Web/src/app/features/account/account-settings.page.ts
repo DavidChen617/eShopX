@@ -117,9 +117,20 @@ export class AccountSettingsPageComponent {
     this.avatarUploading.set(true);
     this.avatarError.set(null);
     try {
-      await this.accountService.uploadAvatar(file);
-      const me = await this.accountService.getMe();
-      this.me.set(me);
+      const avatar = await this.accountService.uploadAvatar(file);
+      this.me.update((current) =>
+        current
+          ? {
+              ...current,
+              avatarUrl: avatar.url,
+              avatarPublicId: avatar.publicId,
+              avatarFormat: avatar.format,
+              avatarWidth: avatar.width,
+              avatarHeight: avatar.height,
+              avatarBytes: avatar.bytes,
+            }
+          : current,
+      );
     } catch (err) {
       this.avatarError.set(err instanceof Error ? err.message : '上傳失敗，請稍後再試。');
     } finally {

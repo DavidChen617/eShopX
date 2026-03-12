@@ -22,6 +22,7 @@ public class DeleteUserAvatarHandler(
         user.AvatarHeight = null;
         user.AvatarBytes = null;
 
+        userRepository.Update(user);
         await userRepository.SaveChangesAsync(cancellationToken);
     }
 }

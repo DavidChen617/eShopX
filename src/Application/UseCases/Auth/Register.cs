@@ -6,6 +6,7 @@ using CoreMesh.Result.Extensions;
 using CoreMesh.Validation.Abstractions;
 using CoreMesh.Validation.Abstractions.Extensions;
 using eShopX.Application.Interfaces;
+using eShopX.Application.Interfaces.Repositories;
 using eShopX.Domain.Aggregates.Users;
 
 namespace eShopX.Application.UseCases.Auth;

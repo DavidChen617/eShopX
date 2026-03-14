@@ -1,0 +1,74 @@
+using System.Text.RegularExpressions;
+using CoreMesh.Dispatching.Abstractions;
+using CoreMesh.Mapper;
+using CoreMesh.Result;
+using CoreMesh.Result.Extensions;
+using CoreMesh.Validation.Abstractions;
+using CoreMesh.Validation.Abstractions.Extensions;
+using eShopX.Application.Interfaces;
+using eShopX.Domain.Aggregates.Users;
+
+namespace eShopX.Application.UseCases.Auth;
+
+public record RegisterUserCommand(
+    string Name,
+    string Email,
+    string? Phone,
+    string Password) : IRequest<Result<RegisterUserResponse>>, IValidatable<RegisterUserCommand>
+{
+    public void ConfigureValidateRules(IValidationBuilder<RegisterUserCommand> builder)
+    {
+        builder.For(x => x.Name)
+            .NotEmpty("Name is required.")
+            .MaxLength(100, "Name must be at most 100 characters.");
+
+        builder.For(x => x.Email)
+            .NotEmpty("Email is required.")
+            .EmailAddress("Email format is invalid.");
+
+        builder.For(x => x.Phone)
+            .Must(x => x is null || Regex.IsMatch(x, @"^09\d{8}$"),
+                "Phone must be a 10-digit number starting with 09.");
+
+        builder.For(x => x.Password)
+            .NotEmpty("Password is required.")
+            .MinLength(8, "Password must be at least 8 characters.");
+    }
+}
+
+public record RegisterUserResponse(Guid UserId, string Email, DateTime CreatedAt)
+    : IMapFrom<User, RegisterUserResponse>
+{
+    public RegisterUserResponse MapFrom(User source) =>
+        new(source.Id, source.Email, source.CreatedAt);
+}
+
+public class RegisterUserHandler(
+    IUserRepository userRepository,
+    IPasswordHasher passwordHasher,
+    IUnitOfWork unitOfWork,
+    IMapper mapper,
+    IValidator validator) : IRequestHandler<RegisterUserCommand, Result<RegisterUserResponse>>
+{
+    public async Task<Result<RegisterUserResponse>> Handle(
+        RegisterUserCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        var validation = validator.Validate(command);
+        if (!validation.IsValid)
+            return Result<RegisterUserResponse>.Invalid(validation.Errors);
+
+        var existing = await userRepository.FindByEmailAsync(command.Email, cancellationToken);
+        if (existing is not null)
+            return Result<RegisterUserResponse>.BadRequest(
+                new Error("email_conflict", $"Email {command.Email} is already registered."));
+
+        var user = User.Create(command.Name, command.Email, command.Phone);
+        user.AddAuthProvider(Provider.Local, null, passwordHasher.HashPassword(command.Password));
+
+        await userRepository.AddAsync(user, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result<RegisterUserResponse>.Ok(mapper.Map<User, RegisterUserResponse>(user));
+    }
+}

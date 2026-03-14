@@ -1,0 +1,40 @@
+@startuml
+
+package "Cart Aggregate" {
+
+    class Cart <<AggregateRoot>> {
+        + Id : Guid <<PK>>
+        + UserId : Guid <<FK>> <<unique>>
+        + CreatedAt : DateTime
+        --
+        + {static} Create(userId) : Cart
+        + AddItem(skuId, quantity) : void
+        + RemoveItem(skuId) : void
+        + UpdateQuantity(skuId, quantity) : void
+        + Clear() : void
+    }
+
+    class CartItem <<Entity>> {
+        + Id : Guid <<PK>>
+        + CartId : Guid <<FK>>
+        + SkuId : Guid <<FK>>
+        + Quantity : int
+        --
+        + {static} Create(cartId, skuId, quantity) : CartItem
+        + UpdateQuantity(quantity) : void
+    }
+
+    Cart "1" *-- "0..*" CartItem
+}
+
+note right of Cart
+    UserId unique，一個 User 只有一個 Cart
+    結帳後 Cart 清空（不刪除）
+end note
+
+note right of CartItem
+    SkuId → Product Aggregate
+    商品資訊即時從 ProductSku 查詢
+end note
+
+@enduml

@@ -1,0 +1,21 @@
+@startuml
+
+package "Category Aggregate" {
+
+    class Category <<AggregateRoot>> {
+        + Id : Guid <<PK>>
+        + Name : string
+        + CreatedAt : DateTime
+        + UpdatedAt : DateTime
+        --
+        + {static} Create(name) : Category
+        + Rename(name) : void
+    }
+}
+
+note right of Category
+    固定一層分類：衣服、褲子、包包、鞋子、帽子
+    不支援層級結構
+end note
+
+@enduml

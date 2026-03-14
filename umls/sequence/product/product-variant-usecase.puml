@@ -1,0 +1,87 @@
+@startuml
+
+title Product Variant / Sku / Image UseCase Flow
+
+actor Admin
+participant "API" as API
+participant "ProductRepository" as ProductRepo
+participant "ImageStorage" as Storage
+
+== 新增顏色 ==
+
+Admin -> API : POST /products/{id}/variants\n{ color }
+API -> ProductRepo : GetById(id)
+alt Product 不存在
+    API --> Admin : 404 Not Found
+end
+API -> API : product.AddVariant(color)
+API -> ProductRepo : Save()
+API --> Admin : 201 { variantId }
+
+== 刪除顏色 ==
+
+Admin -> API : DELETE /products/{id}/variants/{variantId}
+API -> ProductRepo : GetById(id)
+alt Product 不存在
+    API --> Admin : 404 Not Found
+end
+API -> API : product.RemoveVariant(variantId)
+note right : 底下的 Sku 跟 Image 一起刪除
+API -> ProductRepo : Save()
+API --> Admin : 200 OK
+
+== 新增 SKU ==
+
+Admin -> API : POST /products/{id}/variants/{variantId}/skus\n{ sizeId, price, stock }
+API -> ProductRepo : GetById(id)
+API -> API : variant.AddSku(sizeId, price, stock)
+API -> ProductRepo : Save()
+API --> Admin : 201 { skuId }
+
+== 更新價格 ==
+
+Admin -> API : PATCH /products/{id}/variants/{variantId}/skus/{skuId}/price\n{ price }
+API -> ProductRepo : GetById(id)
+API -> API : sku.UpdatePrice(price)
+API -> ProductRepo : Save()
+API --> Admin : 200 OK
+
+== 加庫存 / 扣庫存 ==
+
+Admin -> API : PATCH /products/{id}/variants/{variantId}/skus/{skuId}/stock\n{ quantity, action }
+API -> ProductRepo : GetById(id)
+alt action = add
+    API -> API : sku.AddStock(quantity)
+else action = deduct
+    API -> API : sku.DeductStock(quantity)
+end
+API -> ProductRepo : Save()
+API --> Admin : 200 OK
+
+== 新增圖片 ==
+
+Admin -> API : POST /products/{id}/variants/{variantId}/images\n{ image file } (multipart/form-data)
+API -> Storage : UploadAsync(image)
+API -> ProductRepo : GetById(id)
+API -> API : variant.AddImage(url, publicId, isPrimary, sortOrder)
+API -> ProductRepo : Save()
+API --> Admin : 201 { imageId }
+
+== 刪除圖片 ==
+
+Admin -> API : DELETE /products/{id}/variants/{variantId}/images/{imageId}
+API -> ProductRepo : GetById(id)
+API -> Storage : DeleteAsync(publicId)
+API -> API : variant.RemoveImage(imageId)
+API -> ProductRepo : Save()
+API --> Admin : 200 OK
+
+== 設定主圖 ==
+
+Admin -> API : PATCH /products/{id}/variants/{variantId}/images/{imageId}/primary
+API -> ProductRepo : GetById(id)
+API -> API : variant.SetPrimaryImage(imageId)
+API -> ProductRepo : Save()
+API --> Admin : 200 OK
+
+@enduml

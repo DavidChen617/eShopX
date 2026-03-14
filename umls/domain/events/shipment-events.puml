@@ -1,0 +1,28 @@
+@startuml
+
+title Shipment Domain Events
+
+package "Shipment Events" {
+
+    class ShipmentCompletedEvent <<DomainEvent>> {
+        + ShipmentId : Guid
+        + OrderId : Guid
+    }
+}
+
+note right of ShipmentCompletedEvent
+    Raised by: shipment.MarkAsCompleted()
+    Handler: ShipmentCompletedEventHandler
+      → OutboxEvent.Create("ShipmentCompleted", payload)
+
+    Payload:
+    {
+      "orderId": "...",
+      "shipmentId": "..."
+    }
+
+    Background Job:
+      → order.MarkAsCompleted()
+end note
+
+@enduml

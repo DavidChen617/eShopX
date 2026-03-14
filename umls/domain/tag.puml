@@ -1,0 +1,32 @@
+@startuml
+
+package "Tag Aggregate" {
+
+    class Tag <<AggregateRoot>> {
+        + Id : Guid <<PK>>
+        + Name : string
+        + Type : TagType
+        + CreatedAt : DateTime
+        + UpdatedAt : DateTime
+        --
+        + {static} Create(name, type) : Tag
+        + Rename(name) : void
+    }
+
+    enum TagType {
+        Season
+        Style
+        Feature
+    }
+
+    Tag --> TagType
+}
+
+note right of Tag
+    由 Admin 管理
+    Season: 春夏、秋冬
+    Style: 休閒、正式
+    Feature: 百搭、顯瘦
+end note
+
+@enduml

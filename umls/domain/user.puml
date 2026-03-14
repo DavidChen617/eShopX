@@ -1,0 +1,61 @@
+@startuml
+
+package "User Aggregate" {
+
+    class User <<AggregateRoot>> {
+        + Id : Guid <<PK>>
+        + Name : string
+        + Email : string <<unique>>
+        + Phone : string?
+        + Roles : Role ' Flags
+        + Address : Address?
+        + Avatar : Avatar?
+        + CreatedAt : DateTime
+        --
+        + {static} Create(name, email, phone) : User
+        + UpdateProfile(name, phone) : void
+        + UpdateAvatar(url, publicId) : void
+        + UpdateAddress(city, district, street, postalCode) : void
+        + AddAuthProvider(provider, providerUserId, passwordHash) : void
+    }
+
+    class UserAuthProvider <<Entity>> {
+        + Id : Guid <<PK>>
+        + UserId : Guid <<FK>>
+        + Provider : Provider
+        + ProviderUserId : string?
+        + PasswordHash : string?
+        + CreatedAt : DateTime
+    }
+
+    class Address <<ValueObject>> {
+        + City : string        ' 縣市
+        + District : string    ' 鄉鎮市區
+        + Street : string      ' 路段門牌
+        + PostalCode : string  ' 郵遞區號
+    }
+
+    class Avatar <<ValueObject>> {
+        + Url : string
+        + PublicId : string
+    }
+
+    enum Role <<Flags>> {
+        Customer = 1
+        Admin    = 2
+    }
+
+    enum Provider {
+        Local
+        Google
+        Line
+    }
+    
+    User "1" *-- "0..*" UserAuthProvider
+    User "1" *-- "0..1" Address
+    User "1" *-- "0..1" Avatar
+    User --> Role
+    UserAuthProvider --> Provider
+}
+
+@enduml

@@ -1,0 +1,33 @@
+@startuml
+
+title Refresh Token Flow
+
+actor User
+participant "Frontend" as FE
+participant "API" as API
+participant "RefreshTokenRepository" as TokenRepo
+participant "JwtService" as JWT
+
+== Refresh Token ==
+
+User -> FE : 偵測 accessToken 過期
+FE -> API : POST /auth/refresh\n{ refreshToken }
+
+API -> TokenRepo : FindByToken(refreshToken)
+
+alt refreshToken 不存在
+    API --> FE : 401 Unauthorized
+    FE -> User : 導向登入頁
+end
+
+alt refreshToken 過期
+    API --> FE : 401 Unauthorized
+    FE -> User : 導向登入頁
+end
+
+API -> TokenRepo : Delete(refreshToken)
+API -> JWT : GenerateTokens(userId)
+API -> TokenRepo : Save(newRefreshToken)
+API --> FE : 200 { accessToken, refreshToken }
+
+@enduml

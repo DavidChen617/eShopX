@@ -1,0 +1,57 @@
+@startuml
+
+package "Order Aggregate" {
+
+    class Order <<AggregateRoot>> {
+        + Id : Guid <<PK>>
+        + UserId : Guid <<FK>>
+        + Status : OrderStatus
+        + TotalAmount : decimal
+        + CreatedAt : DateTime
+        --
+        + {static} Create(userId, items) : Order
+        + MarkAsPaid() : void
+        + MarkAsShipped() : void
+        .. raises OrderShippedEvent ..
+        + MarkAsCompleted() : void
+    }
+
+    class OrderItem <<Entity>> {
+        + Id : Guid <<PK>>
+        + OrderId : Guid <<FK>>
+        + SkuId : Guid <<FK>>
+        + ProductName : string
+        + Color : string
+        + Size : string?
+        + UnitPrice : decimal
+        + Quantity : int
+        + TotalPrice : decimal
+        --
+        + {static} Create(orderId, skuId, productName, color, size, unitPrice, quantity) : OrderItem
+    }
+
+    enum OrderStatus {
+        PendingPayment
+        Paid
+        Shipped
+        Completed
+    }
+
+    Order "1" *-- "1..*" OrderItem
+    Order --> OrderStatus
+}
+
+note right of Order
+    UserId → User Aggregate
+    付款資訊由 Payment Aggregate 管理
+    物流資訊由 Shipment Aggregate 管理
+    付款失敗 → 刪除 Order + Payment
+end note
+
+note right of OrderItem
+    SkuId → Product Aggregate
+    商品資訊為下單當下快照
+    TotalPrice = UnitPrice x Quantity
+end note
+
+@enduml

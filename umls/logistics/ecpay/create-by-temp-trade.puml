@@ -1,0 +1,27 @@
+@startuml
+
+title ECPay - CreateByTempTrade
+
+class CreateByTempTradeRequest {
+    + MerchantID : string
+    + TempLogisticsID : string  ' 從 ClientReply 拿到的
+    + MerchantTradeNo : string  ' 我們的 OrderId（唯一）
+}
+
+class CreateByTempTradeResponse {
+    + RtnCode : int     ' 1 = 成功
+    + RtnMsg : string
+    + LogisticsID : string  ' 綠界物流編號，存入 Shipment
+}
+
+note top of CreateByTempTradeRequest
+    POST /Express/v2/CreateByTempTrade
+    將暫存訂單轉為正式物流訂單
+end note
+
+note top of CreateByTempTradeResponse
+    成功後立刻觸發第一筆 ServerReply
+    LogisticsStatus = 300（訂單處理中）
+end note
+
+@enduml

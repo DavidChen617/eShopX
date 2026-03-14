@@ -1,0 +1,49 @@
+@startuml
+
+title LINE OAuth Flow
+
+actor User
+participant "Frontend" as FE
+participant "LINE" as LINE
+participant "API" as API
+participant "LineAuthService" as LAS
+participant "UserAuthProvider" as UAP
+participant "UserRepository" as UserRepo
+participant "JwtService" as JWT
+participant "RefreshTokenRepository" as TokenRepo
+
+== LINE 登入 ==
+
+User -> FE : 點擊 LINE 登入
+FE -> LINE : 導向 LINE 登入頁
+User -> LINE : 授權
+LINE -> FE : callback with code
+FE -> API : POST /auth/line/callback\n{ code, codeVerifier, nonce }
+
+API -> LAS : AuthAsync(code, codeVerifier, nonce)
+LAS -> LINE : POST api.line.me/oauth2/v2.1/token\n{ code, codeVerifier, ... }
+LINE --> LAS : { idToken, accessToken }
+LAS -> LINE : POST api.line.me/oauth2/v2.1/verify\n{ idToken, nonce }
+LINE --> LAS : { sub, email, name, picture }
+
+LAS -> UAP : FindByProvider(Provider.Line, sub)
+
+alt UserAuthProvider 存在
+    LAS -> UserRepo : GetById(userId)
+    LAS -> UAP : UpdateLastLoginAt()
+else UserAuthProvider 不存在
+    LAS -> UserRepo : FindByEmail(email)
+
+    alt User 不存在
+        LAS -> UserRepo : Create(name, email)
+    end
+
+    LAS -> UAP : AddAuthProvider(Provider.Line, sub)
+end
+
+LAS -> JWT : GenerateTokens(userId)
+LAS -> TokenRepo : Save(refreshToken)
+LAS --> API : { accessToken, refreshToken }
+API --> FE : 200 { accessToken, refreshToken }
+
+@enduml

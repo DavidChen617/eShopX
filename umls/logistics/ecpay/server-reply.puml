@@ -1,0 +1,57 @@
+@startuml
+
+title ECPay - ServerReply (貨態通知)
+
+class ServerReplyRequest {
+    + LogisticsID : string
+    + LogisticsType : string      ' CVS / HOME
+    + LogisticsSubType : string   ' UNIMART / FAMI / HILIFE / TCAT / POST
+    + LogisticsStatus : string    ' 貨態代碼
+    + LogisticsStatusName : string
+    + MerchantTradeNo : string
+    + GoodsAmount : string
+    + UpdateStatusDate : string
+    + ReceiverName : string
+    + ReceiverCellPhone : string
+    ' 超商才有值
+    + CVSPaymentNo : string?      ' 包裹到門市後才有值
+    + CVSValidationNo : string?
+    ' 宅配才有值
+    + ReceiverAddress : string?
+    + BookingNote : string?       ' 黑貓/郵局托運單號
+}
+
+class ServerReplyResponse {
+    + RtnCode : int   ' 必須回 1，否則綠界重送
+    + RtnMsg : string
+}
+
+note top of ServerReplyRequest
+    綠界主動 POST 到 ServerReplyURL
+    貨態變更時觸發
+
+    貨態代碼由各物流商定義，會不定時更新
+    完整代碼參考綠界後台：物流管理 > 物流貨態代碼查詢
+
+    對系統有意義的代碼（需特別處理）：
+    取件成功代碼 → MarkAsCompleted()
+      FAMI:   3022（買家已到店取貨）
+      TCAT:   3003（配完）
+      POST:   3307（i郵箱取件成功）
+    未取件代碼 → 標記逾期
+      FAMI:   3020
+      UNIMART: 2074
+
+    其餘代碼 → 僅更新 LogisticsStatus / LogisticsStatusName 顯示用
+
+    [Sandbox 限制]
+    測試環境只會推送初始狀態，不模擬後續貨態
+    → 背景 Job 30 分鐘後自動 MarkAsCompleted()
+end note
+
+note top of ServerReplyResponse
+    未正確回應則綠界每 60 分鐘重送
+    當天最多重送 3 次
+end note
+
+@enduml

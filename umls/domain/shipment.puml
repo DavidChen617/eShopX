@@ -1,0 +1,75 @@
+@startuml
+
+package "Shipment Aggregate" {
+
+    abstract class Shipment <<AggregateRoot>> {
+        + Id : Guid <<PK>>
+        + OrderId : Guid <<FK>>
+        + LogisticsId : string
+        + LogisticsSubType : LogisticsSubType
+        + LogisticsStatus : string
+        + LogisticsStatusName : string
+        + UpdateStatusDate : DateTime
+        + CreatedAt : DateTime
+        --
+        + UpdateStatus(logisticsStatus, logisticsStatusName, updateStatusDate) : void
+        + MarkAsCompleted() : void
+        .. raises ShipmentCompletedEvent ..
+    }
+
+    class CVSShipment <<Entity>> {
+        + ReceiverName : string
+        + ReceiverCellPhone : string
+        + StoreId : string
+        + StoreName : string
+        + CVSPaymentNo : string?
+        --
+        + {static} Create(orderId, logisticsId, logisticsSubType, receiverName, receiverCellPhone, storeId, storeName) : CVSShipment
+        + UpdateCVSPaymentNo(cvsPaymentNo) : void
+    }
+
+    class HomeShipment <<Entity>> {
+        + ReceiverName : string
+        + ReceiverCellPhone : string
+        + ZipCode : string
+        + Address : string
+        + BookingNote : string?
+        --
+        + {static} Create(orderId, logisticsId, logisticsSubType, receiverName, receiverCellPhone, zipCode, address, bookingNote) : HomeShipment
+    }
+
+    enum LogisticsSubType {
+        ' 超商
+        UNIMART
+        FAMI
+        HILIFE
+        ' 宅配
+        TCAT
+        POST
+    }
+
+    CVSShipment --|> Shipment
+    HomeShipment --|> Shipment
+    Shipment --> LogisticsSubType
+}
+
+note right of Shipment
+    OrderId → Order Aggregate（1 對 1）
+    由 ECPay ServerReplyURL Webhook 驅動狀態更新
+    [Sandbox] ECPay 不推送後續貨態
+    → 背景 Job 30 分鐘後自動呼叫 MarkAsCompleted()
+end note
+
+note right of CVSShipment
+    CVSPaymentNo 在包裹送達門市後才有值
+    取件成功代碼：
+      FAMI:   3022
+      UNIMART: 2067
+end note
+
+note right of HomeShipment
+    BookingNote = 黑貓/郵局托運單號
+    由 CreateByTempTrade 後的 ServerReply 帶入
+end note
+
+@enduml

@@ -1,0 +1,49 @@
+@startuml
+
+title Google OAuth Flow
+
+actor User
+participant "Frontend" as FE
+participant "Google" as Google
+participant "API" as API
+participant "GoogleAuthService" as GAS
+participant "UserAuthProvider" as UAP
+participant "UserRepository" as UserRepo
+participant "JwtService" as JWT
+participant "RefreshTokenRepository" as TokenRepo
+
+== Google 登入 ==
+
+User -> FE : 點擊 Google 登入
+FE -> Google : 導向 Google 登入頁
+User -> Google : 授權
+Google -> FE : callback with code
+FE -> API : POST /auth/google/callback\n{ code, codeVerifier, state }
+
+API -> GAS : AuthAsync(code, codeVerifier)
+GAS -> Google : 用 code 換 token
+Google --> GAS : { idToken, accessToken }
+GAS -> Google : 驗證 idToken
+Google --> GAS : { email, name, googleSub, picture }
+
+GAS -> UAP : FindByProvider("google", googleSub)
+
+alt UserAuthProvider 存在
+    GAS -> UserRepo : GetById(userId)
+    GAS -> UAP : UpdateLastLoginAt()
+else UserAuthProvider 不存在
+    GAS -> UserRepo : FindByEmail(email)
+
+    alt User 不存在
+        GAS -> UserRepo : Create(name, email)
+    end
+
+    GAS -> UAP : AddAuthProvider("google", googleSub)
+end
+
+GAS -> JWT : GenerateTokens(userId)
+GAS -> TokenRepo : Save(refreshToken)
+GAS --> API : { accessToken, refreshToken }
+API --> FE : 200 { accessToken, refreshToken }
+
+@enduml

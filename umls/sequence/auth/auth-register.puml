@@ -1,0 +1,48 @@
+@startuml
+
+title Auth Register Flow
+
+actor User
+participant "API" as API
+participant "Redis" as Redis
+participant "MailService" as Mail
+participant "UserRepository" as UserRepo
+participant "JwtService" as JWT
+
+== 檢查 Email ==
+
+User -> API : POST /auth/check-email\n{ email }
+API -> UserRepo : ExistsByEmail(email)
+
+alt Email 已存在
+    API --> User : 400 此 Email 已註冊過
+end
+
+API --> User : 200 OK
+
+== 發送 OTP ==
+
+User -> API : POST /auth/send-otp\n{ email }
+API -> API : 產生 6 位數 OTP
+API -> Redis : SET otp:{email} {otp} EX 300
+note right : TTL 5 分鐘，重複發送會覆蓋舊的
+API -> Mail : SendOtp(email, otp)
+API --> User : 200 OK
+
+== 註冊 ==
+
+User -> API : POST /auth/register\n{ email, otp, password, name, phone }
+API -> Redis : GET otp:{email}
+
+alt key 不存在（OTP 過期或未發送）
+    API --> User : 400 OTP 已過期，請重新發送
+else OTP 不正確
+    API --> User : 400 OTP 不正確
+end
+
+API -> Redis : DEL otp:{email}
+API -> UserRepo : Create(name, email, phone, passwordHash)
+API -> JWT : GenerateTokens(userId)
+API --> User : 200 { accessToken, refreshToken }
+
+@enduml

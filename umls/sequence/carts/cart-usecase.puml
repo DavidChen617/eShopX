@@ -1,0 +1,56 @@
+@startuml
+
+title Cart UseCase Flow
+
+actor User
+participant "API" as API
+participant "CartRepository" as CartRepo
+participant "ProductRepository" as ProductRepo
+
+== 查看購物車 ==
+
+User -> API : GET /cart\n[Authorization: Bearer accessToken]
+API -> CartRepo : GetByUserId(userId)
+API --> User : 200 { items: [{ skuId, productName, color, size, price, quantity }] }
+
+== 加入購物車 ==
+
+User -> API : POST /cart/items\n{ skuId, quantity }
+API -> ProductRepo : GetSkuById(skuId)
+alt SKU 不存在
+    API --> User : 404 Not Found
+end
+alt StockQuantity < quantity
+    API --> User : 400 庫存不足
+end
+API -> CartRepo : GetByUserId(userId)
+alt CartItem 已存在（同 skuId）
+    API -> API : cartItem.UpdateQuantity(quantity + existing)
+    note right : 累加數量，再次檢查庫存
+else
+    API -> API : cart.AddItem(skuId, quantity)
+end
+API -> CartRepo : Save()
+API --> User : 200 OK
+
+== 更新數量 ==
+
+User -> API : PATCH /cart/items/{skuId}\n{ quantity }
+API -> ProductRepo : GetSkuById(skuId)
+alt StockQuantity < quantity
+    API --> User : 400 庫存不足
+end
+API -> CartRepo : GetByUserId(userId)
+API -> API : cart.UpdateQuantity(skuId, quantity)
+API -> CartRepo : Save()
+API --> User : 200 OK
+
+== 移除商品 ==
+
+User -> API : DELETE /cart/items/{skuId}
+API -> CartRepo : GetByUserId(userId)
+API -> API : cart.RemoveItem(skuId)
+API -> CartRepo : Save()
+API --> User : 200 OK
+
+@enduml

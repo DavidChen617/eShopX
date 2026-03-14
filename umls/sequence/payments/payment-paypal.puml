@@ -1,0 +1,69 @@
+@startuml
+
+title PayPal 付款流程
+
+actor User
+participant "API" as API
+participant "PaymentRepository" as PaymentRepo
+participant "OutboxRepo" as OutboxRepo
+participant "PayPalService" as PayPal
+participant "PayPal" as PayPalExternal
+
+== 建立付款請求 ==
+
+note over API
+    建立訂單流程已在 order-usecase.puml 定義
+    此流程從 User 點擊 paymentUrl 開始
+end note
+
+User -> PayPalExternal : 點 paymentUrl 付款
+PayPalExternal --> User : 付款完成，redirect 到 returnUrl\n?token=paypalOrderId&orderId=xxx
+
+== 確認付款（Capture）==
+
+User -> API : GET /payments/paypal/return\n?token=paypalOrderId&orderId=xxx
+API -> PayPal : CaptureOrder(token)
+PayPal -> PayPalExternal : POST /v2/checkout/orders/{token}/capture
+PayPalExternal --> PayPal : { id, status }
+
+alt status = "COMPLETED"（付款成功）
+    note over API, OutboxRepo
+        以下在同一個 DB transaction 內執行
+    end note
+    API -> PaymentRepo : payment.MarkAsPaid(token)
+    note right : raises PaymentPaidEvent
+    API -> OutboxRepo : OutboxEvent.Create("PaymentPaid",\n{ orderId, transactionId: token })
+    API --> User : Redirect /pay/paypal/success
+else 付款失敗
+    API -> PaymentRepo : payment.MarkAsFailed()
+    note right : raises PaymentFailedEvent
+    API -> OutboxRepo : OutboxEvent.Create("PaymentFailed",\n{ orderId, paymentId })
+    API --> User : Redirect /pay/paypal/fail
+end
+
+== 取消付款 ==
+
+User -> API : GET /payments/paypal/cancel?orderId=xxx
+API -> PaymentRepo : payment.MarkAsFailed()
+note right : raises PaymentFailedEvent
+API -> OutboxRepo : OutboxEvent.Create("PaymentFailed",\n{ orderId, paymentId })
+API --> User : Redirect /pay/paypal/fail?reason=cancelled
+
+== BackgroundJob：處理付款事件 ==
+
+participant "BackgroundJob" as BgJob
+participant "OrderRepository" as OrderRepo
+
+BgJob -> OutboxRepo : GetPendingEvents()
+
+loop 每筆 Pending 事件
+    alt EventType = "PaymentPaid"
+        BgJob -> OrderRepo : order.MarkAsPaid()
+        BgJob -> OutboxRepo : event.MarkAsProcessed()
+    else EventType = "PaymentFailed"
+        BgJob -> OrderRepo : 刪除 Order
+        BgJob -> OutboxRepo : event.MarkAsProcessed()
+    end
+end
+
+@enduml

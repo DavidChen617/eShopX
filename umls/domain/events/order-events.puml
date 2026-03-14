@@ -1,0 +1,32 @@
+@startuml
+
+title Order Domain Events
+
+package "Order Events" {
+
+    class OrderShippedEvent <<DomainEvent>> {
+        + OrderId : Guid
+        + UserId : Guid
+    }
+}
+
+note right of OrderShippedEvent
+    Raised by: order.MarkAsShipped()
+    Handler: OrderShippedEventHandler
+      → OutboxEvent.Create("OrderShipped", payload)
+
+    Payload:
+    {
+      "orderId": "...",
+      "userId": "...",
+      "shipmentType": "CVS | HOME",
+      "storeName": "...",
+      "cvsPaymentNo": "...",
+      "bookingNote": "..."
+    }
+
+    Background Job:
+      → 寄出貨通知 email 給使用者
+end note
+
+@enduml

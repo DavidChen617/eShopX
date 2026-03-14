@@ -1,0 +1,45 @@
+@startuml
+
+title ECPay - RedirectToLogisticsSelection
+
+class RedirectToLogisticsSelectionRequest {
+    + MerchantID : string
+    + TempLogisticsID : string ' 新建填 "0"
+    + GoodsAmount : int        ' 1 ~ 20000
+    + GoodsName : string
+    + SenderName : string
+    + SenderZipCode : string
+    + SenderAddress : string
+    + ServerReplyURL : string  ' 貨態通知端點
+    + ClientReplyURL : string  ' 選店完成端點
+}
+
+class ClientReplyResponse {
+    + TempLogisticsID : string
+    + LogisticsType : string       ' CVS / HOME
+    + LogisticsSubType : string    ' UNIMART / FAMI / HILIFE / TCAT / POST
+    + ReceiverName : string
+    + ReceiverCellPhone : string
+    ' 超商才有值
+    + ReceiverStoreID : string?
+    + ReceiverStoreName : string?
+    ' 宅配才有值
+    + ReceiverZipCode : string?
+    + ReceiverAddress : string?
+    + RtnCode : int    ' 1 = 成功
+    + RtnMsg : string
+}
+
+note top of RedirectToLogisticsSelectionRequest
+    POST /Express/v2/RedirectToLogisticsSelection
+    回傳 HTML (auto-submit form)
+    前端渲染後自動跳轉到綠界選店頁面
+end note
+
+note top of ClientReplyResponse
+    User 選完門市後
+    綠界 POST 到 ClientReplyURL
+    需立刻用 TempLogisticsID 呼叫 CreateByTempTrade
+end note
+
+@enduml

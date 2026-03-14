@@ -1,0 +1,45 @@
+@startuml
+
+package "Payment Aggregate" {
+
+    class Payment <<AggregateRoot>> {
+        + Id : Guid <<PK>>
+        + OrderId : Guid <<FK>>
+        + Method : PaymentMethod
+        + Status : PaymentStatus
+        + Amount : decimal
+        + TransactionId : string?
+        + PaymentUrl : string?
+        + PaidAt : DateTime?
+        + CreatedAt : DateTime
+        --
+        + {static} Create(orderId, method, amount, paymentUrl) : Payment
+        + MarkAsPaid(transactionId) : void
+        .. raises PaymentPaidEvent ..
+        + MarkAsFailed() : void
+        .. raises PaymentFailedEvent ..
+    }
+
+    enum PaymentMethod {
+        LinePay
+        PayPal
+    }
+
+    enum PaymentStatus {
+        Pending
+        Paid
+        Failed
+    }
+
+    Payment --> PaymentMethod
+    Payment --> PaymentStatus
+}
+
+note right of Payment
+    OrderId → Order Aggregate（1 對 1）
+    PaymentUrl 由第三方金流回傳，導頁給 User 付款
+    TransactionId 由第三方金流 Webhook 帶入
+    付款失敗 → 刪除 Order + Payment
+end note
+
+@enduml

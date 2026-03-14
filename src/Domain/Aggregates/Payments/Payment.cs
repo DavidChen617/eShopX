@@ -1,5 +1,6 @@
 using eShopX.Domain.Aggregates.Payments.Events;
 using eShopX.Domain.Exceptions;
+using eShopX.Domain.ValueObjects;
 
 namespace eShopX.Domain.Aggregates.Payments;
 
@@ -8,7 +9,7 @@ public sealed class Payment : AggregateRoot
     public Guid OrderId { get; private set; }
     public PaymentMethod Method { get; private set; }
     public PaymentStatus Status { get; private set; }
-    public decimal Amount { get; private set; }
+    public Money Amount { get; private set; } = default!;
     public string? TransactionId { get; private set; }
     public string? PaymentUrl { get; private set; }
     public DateTime? PaidAt { get; private set; }
@@ -16,7 +17,7 @@ public sealed class Payment : AggregateRoot
 
     private Payment() { }
 
-    public static Payment Create(Guid orderId, PaymentMethod method, decimal amount, string? paymentUrl)
+    public static Payment Create(Guid orderId, PaymentMethod method, Money amount, string? paymentUrl)
     {
         return new Payment
         {

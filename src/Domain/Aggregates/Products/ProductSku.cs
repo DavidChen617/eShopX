@@ -1,4 +1,5 @@
 using eShopX.Domain.Exceptions;
+using eShopX.Domain.ValueObjects;
 
 namespace eShopX.Domain.Aggregates.Products;
 
@@ -6,15 +7,13 @@ public sealed class ProductSku : Entity
 {
     public Guid ProductVariantId { get; private set; }
     public Guid? SizeId { get; private set; }
-    public decimal Price { get; private set; }
+    public Money Price { get; private set; } = default!;
     public int StockQuantity { get; private set; }
 
     private ProductSku() { }
 
-    public static ProductSku Create(Guid variantId, Guid? sizeId, decimal price, int stock)
+    public static ProductSku Create(Guid variantId, Guid? sizeId, Money price, int stock)
     {
-        if (price <= 0)
-            throw new ArgumentInvalidException("Price must be greater than zero.");
         if (stock < 0)
             throw new ArgumentInvalidException("Stock quantity cannot be negative.");
 
@@ -28,12 +27,7 @@ public sealed class ProductSku : Entity
         };
     }
 
-    public void UpdatePrice(decimal price)
-    {
-        if (price <= 0)
-            throw new ArgumentInvalidException("Price must be greater than zero.");
-        Price = price;
-    }
+    public void UpdatePrice(Money price) => Price = price;
 
     public void AddStock(int quantity)
     {

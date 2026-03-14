@@ -1,9 +1,10 @@
+using eShopX.Domain.ValueObjects;
+
 namespace eShopX.Domain.Aggregates.Shipments;
 
 public sealed class HomeShipment : Shipment
 {
-    public string ReceiverName { get; private set; } = default!;
-    public string ReceiverCellPhone { get; private set; } = default!;
+    public ReceiverInfo Receiver { get; private set; } = default!;
     public string ZipCode { get; private set; } = default!;
     public string Address { get; private set; } = default!;
     public string? BookingNote { get; private set; }
@@ -11,7 +12,7 @@ public sealed class HomeShipment : Shipment
     private HomeShipment() { }
 
     public static HomeShipment Create(Guid orderId, string logisticsId, LogisticsSubType logisticsSubType,
-        string receiverName, string receiverCellPhone, string zipCode, string address, string? bookingNote)
+        ReceiverInfo receiver, string zipCode, string address, string? bookingNote)
     {
         return new HomeShipment
         {
@@ -22,8 +23,7 @@ public sealed class HomeShipment : Shipment
             LogisticsStatus = string.Empty,
             LogisticsStatusName = string.Empty,
             UpdateStatusDate = DateTime.UtcNow,
-            ReceiverName = receiverName,
-            ReceiverCellPhone = receiverCellPhone,
+            Receiver = receiver,
             ZipCode = zipCode,
             Address = address,
             BookingNote = bookingNote,

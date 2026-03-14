@@ -1,5 +1,6 @@
 using eShopX.Domain.Aggregates.Orders.Events;
 using eShopX.Domain.Exceptions;
+using eShopX.Domain.ValueObjects;
 
 namespace eShopX.Domain.Aggregates.Orders;
 
@@ -9,14 +10,14 @@ public sealed class Order : AggregateRoot
 
     public Guid UserId { get; private set; }
     public OrderStatus Status { get; private set; }
-    public decimal TotalAmount { get; private set; }
+    public Money TotalAmount { get; private set; } = default!;
     public DateTime CreatedAt { get; private set; }
 
     public IReadOnlyList<OrderItem> Items => _items;
 
     private Order() { }
 
-    public static Order Create(Guid userId, IEnumerable<(Guid SkuId, string ProductName, string Color, string? Size, decimal UnitPrice, int Quantity)> items)
+    public static Order Create(Guid userId, IEnumerable<(Guid SkuId, ProductSnapshot Snapshot, Money UnitPrice, int Quantity)> items)
     {
         var order = new Order
         {
@@ -27,9 +28,9 @@ public sealed class Order : AggregateRoot
         };
 
         foreach (var item in items)
-            order._items.Add(OrderItem.Create(order.Id, item.SkuId, item.ProductName, item.Color, item.Size, item.UnitPrice, item.Quantity));
+            order._items.Add(OrderItem.Create(order.Id, item.SkuId, item.Snapshot, item.UnitPrice, item.Quantity));
 
-        order.TotalAmount = order._items.Sum(i => i.TotalPrice);
+        order.TotalAmount = order._items.Aggregate(Money.Of(0), (sum, i) => sum + i.TotalPrice);
 
         return order;
     }

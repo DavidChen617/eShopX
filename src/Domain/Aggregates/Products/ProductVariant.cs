@@ -1,3 +1,5 @@
+using eShopX.Domain.ValueObjects;
+
 namespace eShopX.Domain.Aggregates.Products;
 
 public sealed class ProductVariant : Entity
@@ -23,7 +25,7 @@ public sealed class ProductVariant : Entity
         };
     }
 
-    public ProductSku AddSku(Guid? sizeId, decimal price, int stock)
+    public ProductSku AddSku(Guid? sizeId, Money price, int stock)
     {
         var sku = ProductSku.Create(Id, sizeId, price, stock);
         _skus.Add(sku);

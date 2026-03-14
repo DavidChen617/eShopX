@@ -1,9 +1,10 @@
+using eShopX.Domain.ValueObjects;
+
 namespace eShopX.Domain.Aggregates.Shipments;
 
 public sealed class CVSShipment : Shipment
 {
-    public string ReceiverName { get; private set; } = default!;
-    public string ReceiverCellPhone { get; private set; } = default!;
+    public ReceiverInfo Receiver { get; private set; } = default!;
     public string StoreId { get; private set; } = default!;
     public string StoreName { get; private set; } = default!;
     public string? CVSPaymentNo { get; private set; }
@@ -11,7 +12,7 @@ public sealed class CVSShipment : Shipment
     private CVSShipment() { }
 
     public static CVSShipment Create(Guid orderId, string logisticsId, LogisticsSubType logisticsSubType,
-        string receiverName, string receiverCellPhone, string storeId, string storeName)
+        ReceiverInfo receiver, string storeId, string storeName)
     {
         return new CVSShipment
         {
@@ -22,8 +23,7 @@ public sealed class CVSShipment : Shipment
             LogisticsStatus = string.Empty,
             LogisticsStatusName = string.Empty,
             UpdateStatusDate = DateTime.UtcNow,
-            ReceiverName = receiverName,
-            ReceiverCellPhone = receiverCellPhone,
+            Receiver = receiver,
             StoreId = storeId,
             StoreName = storeName,
             CreatedAt = DateTime.UtcNow

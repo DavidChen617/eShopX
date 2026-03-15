@@ -1,13 +1,25 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Text;
 using CloudinaryDotNet;
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
+using eShopX.Application.Interfaces;
+using eShopX.Application.Interfaces.Repositories;
+using Infrastructure.Auth;
+using Infrastructure.Auth.ThirdPartyAuth;
 using Infrastructure.Caches;
+using Infrastructure.Data;
+using Infrastructure.Data.Repositories;
+using eShopX.Application.Interfaces.Repositories;
 using Infrastructure.Email;
+using Infrastructure.Logistics;
+using Infrastructure.Messaging;
 using Infrastructure.Messaging.Products;
+using Infrastructure.Payments.Line;
+using Infrastructure.Payments.PayPal;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -19,48 +31,53 @@ public static class Dependencies
 {
     public static void ConfigureInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<ConnectionStrings>(configuration.GetSection(nameof(ConnectionStrings)));
-        services.AddDbContext<EShopContext>((sp, options) =>
+        // Database
+        services.AddDbContext<EShopContext>((_, options) =>
         {
             options.UseNpgsql(
-                    configuration.GetConnectionString(nameof(ConnectionStrings.PostgreSQL)),
-                    npgsqlOptions =>
-                    {
-                        // Connection pool optimization
-                        npgsqlOptions.MinBatchSize(1);
-                        npgsqlOptions.MaxBatchSize(100);
-
-                        // Enable connection retries
-                        npgsqlOptions.EnableRetryOnFailure(
-                            maxRetryCount: 3,
-                            maxRetryDelay: TimeSpan.FromSeconds(5),
-                            errorCodesToAdd: null);
-                    })
+                configuration.GetConnectionString(nameof(ConnectionStrings.PostgreSQL)),
+                npgsql =>
+                {
+                    npgsql.MinBatchSize(1);
+                    npgsql.MaxBatchSize(100);
+                    npgsql.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(5),
+                        errorCodesToAdd: null);
+                })
                 .EnableSensitiveDataLogging()
                 .EnableDetailedErrors();
         });
 
-        services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
-            .AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>))
-            .AddScoped<IUnitOfWork, EfUnitOfWork>();
+        services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+
+        // Repositories
+        services.AddScoped<IOutboxEventRepository, OutboxEventRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<ICartRepository, CartRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IPaymentRepository, PaymentRepository>();
+        services.AddScoped<IShipmentRepository, ShipmentRepository>();
+        services.AddScoped<ISizeRepository, SizeRepository>();
 
         // Redis
-        var options = ConfigurationOptions.Parse(
+        var redisOptions = ConfigurationOptions.Parse(
             configuration.GetConnectionString(nameof(ConnectionStrings.Redis))!);
-        options.AbortOnConnectFail = false;
-        services.AddSingleton<IConnectionMultiplexer>(_ =>
-            ConnectionMultiplexer.Connect(options));
-        services.AddScoped<ICacheService, RedisCacheService>();
+        redisOptions.AbortOnConnectFail = false;
+        services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(redisOptions));
+        services.AddScoped<ICacher, RedisCacher>();
 
-        // Jwt
+        // JWT
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.OptionKey));
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
-        services.AddSingleton<IJwtService, JwtService>();
+        services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(jwtBearerOptions =>
+            .AddJwtBearer(opt =>
             {
                 var jwtOptions = configuration.GetSection(JwtOptions.OptionKey).Get<JwtOptions>()!;
-                jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
+                opt.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
@@ -68,8 +85,7 @@ public static class Dependencies
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtOptions.Issuer,
                     ValidAudience = jwtOptions.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
                     RoleClaimType = ClaimTypes.Role
                 };
             });
@@ -82,37 +98,38 @@ public static class Dependencies
                       ?? throw new InvalidOperationException("Cloudinary configuration is missing.");
             return new Cloudinary(new Account(opt.CloudName, opt.ApiKey, opt.ApiSecret));
         });
-        services.AddScoped<IImageStorage, ImageStorageService>();
+        services.AddScoped<IImageStorage, ImageStorage>();
 
         // Email
         services.Configure<MailOptions>(configuration.GetSection(MailOptions.OptionKey));
         services.AddScoped<IMailSender, MailKitEmailSender>();
-        services.Configure<GoogleAuthOptions>(configuration.GetSection(GoogleAuthOptions.OptionKey));
-        services.Configure<LineAuthOptions>(configuration.GetSection(LineAuthOptions.OptionKey));
 
         // Google Auth
+        services.Configure<GoogleAuthOptions>(configuration.GetSection(GoogleAuthOptions.OptionKey));
         services.AddScoped<IThirdPartyAuthService<GoogleAuthRequest, GoogleAuthResponse>, GoogleAuthService>();
 
-        // Line Auth
+        // LINE Auth
+        services.Configure<LineAuthOptions>(configuration.GetSection(LineAuthOptions.OptionKey));
         services.AddScoped<IThirdPartyAuthService<LineAuthRequest, LineAuthResponse>, LineAuthService>();
 
         // LinePay
         services.Configure<LinePayOptions>(configuration.GetSection(LinePayOptions.OptionKey));
-        services.AddScoped<ICreatePaymentService<LinePayRequest, LinePayRequestResponse>, LinePayService>();
-        services.AddScoped<IConfirmPaymentService<LinePayConfirmInput, LinePayConfirmResponse>, LinePayService>();
+        services.AddScoped<LinePayService>();
 
         // PayPal
         services.Configure<PayPalOptions>(configuration.GetSection(PayPalOptions.OptionKey));
         services.AddHttpClient<PayPalClient>((sp, client) =>
         {
-            var paypalOptions = sp.GetRequiredService<IOptions<PayPalOptions>>().Value;
-            client.BaseAddress = new Uri(paypalOptions.BaseUrl);
-            client.Timeout = TimeSpan.FromSeconds(30);
+            var opt = sp.GetRequiredService<IOptions<PayPalOptions>>().Value;
+            client.BaseAddress = new Uri(opt.BaseUrl);
         });
-        services.AddScoped<ICreatePaymentService<PayPalCreateOrderRequest, PayPalCreateOrderResponse>, PayPalService>();
-        services.AddScoped<IConfirmPaymentService<PayPalCaptureRequest, PayPalCaptureOrderResponse>, PayPalService>();
+        services.AddScoped<PayPalService>();
 
-        // kafka
+        // ECPay
+        services.Configure<ECPayOptions>(configuration.GetSection(ECPayOptions.OptionKey));
+        services.AddScoped<IECPayLogisticsService, ECPayLogisticsService>();
+
+        // Kafka
         services.Configure<KafkaOptions>(configuration.GetSection(KafkaOptions.OptionKey));
         services.AddSingleton<IProducer<string, string>>(sp =>
         {
@@ -125,44 +142,32 @@ public static class Dependencies
             return new ConsumerBuilder<string, string>(kafkaOptions.Consumer).Build();
         });
         services.AddSingleton<IOutboxEventPublisher, ProductIndexOutboxEventPublisher>();
-        services.AddScoped<IProcessedEventStore, ProcessedEventStore>();
         services.AddSingleton<AdminClientConfig>(sp =>
-            {
-                var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
-                return new AdminClientConfig { BootstrapServers = kafkaOptions.Producer.BootstrapServers };
-            })
-            .AddSingleton<List<TopicSpecification>>(sp =>
-            {
-                var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
-                var topics = new List<TopicSpecification>();
-                topics.Add(
-                    new TopicSpecification { Name = kafkaOptions.OutboxEventTopic, NumPartitions = 3, ReplicationFactor = 1 }
-                );
-                return topics;
-            })
-            .AddSingleton<IAdminClient>(sp =>
-            {
-                var config = sp.GetRequiredService<AdminClientConfig>();
-                return new AdminClientBuilder(config).Build();
-            });
+        {
+            var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+            return new AdminClientConfig { BootstrapServers = kafkaOptions.Producer.BootstrapServers };
+        });
+        services.AddSingleton<List<TopicSpecification>>(sp =>
+        {
+            var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+            return [new TopicSpecification { Name = kafkaOptions.OutboxEventTopic, NumPartitions = 3, ReplicationFactor = 1 }];
+        });
+        services.AddSingleton<IAdminClient>(sp =>
+            new AdminClientBuilder(sp.GetRequiredService<AdminClientConfig>()).Build());
 
         services
             .AddHostedService<MessageTopicInitializer>()
             .AddHostedService<OutboxPublisherHostedService>()
             .AddHostedService<OutboxConsumerHostedService>();
 
-        // ElasticSearch
+        // Elasticsearch
         services.Configure<ElasticsearchOptions>(configuration.GetSection(ElasticsearchOptions.OptionKey));
         services.AddSingleton(sp =>
         {
             var opt = sp.GetRequiredService<IOptions<ElasticsearchOptions>>().Value;
             var settings = new ElasticsearchClientSettings(new Uri(opt.Url));
-
             if (!string.IsNullOrWhiteSpace(opt.Username))
-            {
                 settings.Authentication(new BasicAuthentication(opt.Username, opt.Password ?? string.Empty));
-            }
-
             return new ElasticsearchClient(settings);
         });
         services.AddScoped<IProductSearchService, ElasticsearchProductSearchService>();

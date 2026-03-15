@@ -3,17 +3,14 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using eShopX.Common.Exceptions;
-using eShopX.Common.Extensions;
+using eShopX.Application.Exceptions;
 using Infrastructure.Options;
 using Infrastructure.Payments.Line.Models;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Payments.Line;
 
-public class LinePayService(IHttpClientFactory httpClientFactory, IOptions<LinePayOptions> options):
-        ICreatePaymentService<LinePayRequest, LinePayRequestResponse>,
-        IConfirmPaymentService<LinePayConfirmInput, LinePayConfirmResponse>
+public class LinePayService(IHttpClientFactory httpClientFactory, IOptions<LinePayOptions> options)
 {
     private readonly LinePayOptions _options = options.Value;
 
@@ -23,38 +20,28 @@ public class LinePayService(IHttpClientFactory httpClientFactory, IOptions<LineP
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    private async Task<LinePayRequestResponse> RequestPaymentAsync(LinePayRequest request,
+    public async Task<LinePayRequestResponse> RequestPaymentAsync(LinePayRequest request,
         CancellationToken ct = default)
     {
         var path = "/v3/payments/request";
         var normalizedRequest = request with { RedirectUrls = NormalizeRedirectUrls(request.RedirectUrls) };
-        var body = normalizedRequest.ToJson(JsonOptions);
+        var body = JsonSerializer.Serialize(normalizedRequest, JsonOptions);
         var text = await SendAsync("POST", path, body, ct);
-        
-        if (!text.TryParseJson<LinePayRequestResponse>(out var response, out var errorMsg, JsonOptions))                       
-            throw new ExternalServiceException($"LinePay API Error: {errorMsg}");                                              
-                                                                                                                             
-        return response!;
+
+        return JsonSerializer.Deserialize<LinePayRequestResponse>(text, JsonOptions)
+               ?? throw new ExternalServiceException("LinePay", "Empty response from payment request.");
     }
 
-    private async Task<LinePayConfirmResponse> ConfirmPaymentAsync(long transactionId, LinePayConfirmRequest request,
+    public async Task<LinePayConfirmResponse> ConfirmPaymentAsync(long transactionId, LinePayConfirmRequest request,
         CancellationToken ct = default)
     {
         var path = $"/v3/payments/{transactionId}/confirm";
-        var body = request.ToJson(JsonOptions);
+        var body = JsonSerializer.Serialize(request, JsonOptions);
         var text = await SendAsync("POST", path, body, ct);
 
-        if (!text.TryParseJson<LinePayConfirmResponse>(out var response, out var errorMsg, JsonOptions))
-            throw new ExternalServiceException($"LinePay Confirm API Error: {errorMsg}");
-
-        return response!;
+        return JsonSerializer.Deserialize<LinePayConfirmResponse>(text, JsonOptions)
+               ?? throw new ExternalServiceException("LinePay", "Empty response from confirm.");
     }
-
-    public Task<LinePayRequestResponse> CreateAsync(LinePayRequest request, CancellationToken ct = default) =>
-        RequestPaymentAsync(request, ct);
-
-    public Task<LinePayConfirmResponse> ConfirmAsync(LinePayConfirmInput request, CancellationToken ct = default) =>
-        ConfirmPaymentAsync(request.TransactionId, request.Request, ct);
 
     private async Task<string> SendAsync(string method, string apiPath, string? jsonBody,
         CancellationToken cancellationToken)
@@ -69,16 +56,14 @@ public class LinePayService(IHttpClientFactory httpClientFactory, IOptions<LineP
 
         if (!string.Equals(method, "GET", StringComparison.OrdinalIgnoreCase))
         {
-            request.Content = new StringContent(jsonBody ?? "", Encoding.UTF8,  MediaTypeNames.Application.Json);
+            request.Content = new StringContent(jsonBody ?? "", Encoding.UTF8, MediaTypeNames.Application.Json);
         }
 
         var response = await http.SendAsync(request, cancellationToken);
         var responseText = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (string.IsNullOrWhiteSpace(responseText))
-        {
-            throw new ExternalServiceException("LinePay API returned empty response");
-        }
+            throw new ExternalServiceException("LinePay", "API returned empty response.");
 
         return responseText;
     }

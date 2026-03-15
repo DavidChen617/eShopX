@@ -1,5 +1,5 @@
+using System.Text.Json;
 using Confluent.Kafka;
-using eShopX.Common.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -17,24 +17,26 @@ public class OutboxConsumerHostedService(
         var consumer = scope.ServiceProvider.GetRequiredService<IConsumer<string, string>>();
         consumer.Subscribe(Topic);
         logger.LogInformation("Outbox consumer started, listening to {Topic}", Topic);
-        
+
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 var result = consumer.Consume(stoppingToken);
-                
-                if (!result.Message.Value.TryParseJson<OutboxEventEnvelope>(out var outboxEvent, out var errorMessage) ||
-                    outboxEvent is null)
+
+                OutboxEventEnvelope? outboxEvent;
+                try
                 {
-                    logger.LogWarning("Invalid outbox message. Error={Error}", errorMessage);
+                    outboxEvent = JsonSerializer.Deserialize<OutboxEventEnvelope>(result.Message.Value);
+                }
+                catch (JsonException ex)
+                {
+                    logger.LogWarning("Invalid outbox message: {Error}", ex.Message);
                     consumer.Commit(result);
                     continue;
                 }
 
-                var processedEventStore = scope.ServiceProvider.GetRequiredService<IProcessedEventStore>();
-        
-                if (await processedEventStore.ExistsAsync(outboxEvent.EventId, stoppingToken))
+                if (outboxEvent is null)
                 {
                     consumer.Commit(result);
                     continue;
@@ -50,9 +52,9 @@ public class OutboxConsumerHostedService(
                 }
 
                 await handler.HandleAsync(outboxEvent, stoppingToken);
-                await processedEventStore.MarkProcessedAsync(outboxEvent.EventId, stoppingToken);
                 consumer.Commit(result);
-            } catch (ConsumeException ex)
+            }
+            catch (ConsumeException ex)
             {
                 logger.LogError(ex, "Kafka consume error");
             }
@@ -62,10 +64,10 @@ public class OutboxConsumerHostedService(
             }
             catch (Exception ex)
             {
-                // do not commit; let Kafka redeliver
                 logger.LogError(ex, "Failed to process outbox event");
             }
         }
+
         consumer.Close();
     }
 }

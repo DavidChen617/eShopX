@@ -1,3 +1,5 @@
+using eShopX.Domain.Outbox;
+
 namespace Infrastructure.Messaging;
 
 public interface IOutboxEventPublisher

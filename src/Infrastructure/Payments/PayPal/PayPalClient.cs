@@ -1,8 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using eShopX.Common.Exceptions;
-using eShopX.Common.Extensions;
+using eShopX.Application.Exceptions;
 using Infrastructure.Options;
 using Microsoft.Extensions.Options;
 
@@ -32,12 +31,10 @@ public class PayPalClient(HttpClient http, IOptions<PayPalOptions> options)
         var json = await resp.Content.ReadAsStringAsync(ct);
 
         if (!resp.IsSuccessStatusCode)
-            throw new ExternalServiceException($"PayPal get token failed: {json}");
+            throw new ExternalServiceException("PayPal", $"Failed to get access token: {json}");
 
-        if (!json.TryParseJson<PayPalAccessToken>(out var token, out var errorMsg, JsonOptions))
-            throw new ExternalServiceException($"PayPal token parse failed: {errorMsg}");
-
-        return token!;
+        return JsonSerializer.Deserialize<PayPalAccessToken>(json, JsonOptions)
+               ?? throw new ExternalServiceException("PayPal", "Failed to parse access token.");
     }
 
     public async Task<PayPalCreateOrderResponse> CreateOrderAsync(
@@ -56,12 +53,10 @@ public class PayPalClient(HttpClient http, IOptions<PayPalOptions> options)
         var text = await resp.Content.ReadAsStringAsync(ct);
 
         if (!resp.IsSuccessStatusCode)
-            throw new ExternalServiceException($"PayPal create order failed: {text}");
+            throw new ExternalServiceException("PayPal", $"Failed to create order: {text}");
 
-        if (!text.TryParseJson<PayPalCreateOrderResponse>(out var response, out var errorMsg, JsonOptions))
-            throw new ExternalServiceException($"PayPal create order parse failed: {errorMsg}");
-
-        return response!;
+        return JsonSerializer.Deserialize<PayPalCreateOrderResponse>(text, JsonOptions)
+               ?? throw new ExternalServiceException("PayPal", "Failed to parse create order response.");
     }
 
     public async Task<PayPalCaptureOrderResponse> CaptureOrderAsync(
@@ -79,11 +74,9 @@ public class PayPalClient(HttpClient http, IOptions<PayPalOptions> options)
         var text = await resp.Content.ReadAsStringAsync(ct);
 
         if (!resp.IsSuccessStatusCode)
-            throw new ExternalServiceException($"PayPal capture order failed: {text}");
+            throw new ExternalServiceException("PayPal", $"Failed to capture order: {text}");
 
-        if (!text.TryParseJson<PayPalCaptureOrderResponse>(out var response, out var errorMsg, JsonOptions))
-            throw new ExternalServiceException($"PayPal capture order parse failed: {errorMsg}");
-
-        return response!;
+        return JsonSerializer.Deserialize<PayPalCaptureOrderResponse>(text, JsonOptions)
+               ?? throw new ExternalServiceException("PayPal", "Failed to parse capture order response.");
     }
 }

@@ -6,7 +6,7 @@ using eShopX.Application.Interfaces.Repositories;
 
 namespace eShopX.Application.UseCases.Orders;
 
-public record MarkOrderAsShippedCommand(Guid OrderId) : IRequest<Result>;
+public record MarkOrderAsShippedCommand(Guid OrderId, string RealLogisticsId) : IRequest<Result>;
 
 public class MarkOrderAsShippedHandler(
     IOrderRepository orderRepository,
@@ -26,7 +26,7 @@ public class MarkOrderAsShippedHandler(
             return Result.NotFound(new Error("shipment_not_found", "Shipment not found."));
 
         order.MarkAsShipped();
-
+        shipment.AssignRealLogisticsId(command.RealLogisticsId);
         shipment.UpdateStatus("300", "出貨中", DateTime.UtcNow);
 
         orderRepository.Update(order);

@@ -12,6 +12,8 @@ public abstract class Shipment : AggregateRoot
     public DateTime UpdateStatusDate { get; protected set; }
     public DateTime CreatedAt { get; protected set; }
 
+    public void AssignRealLogisticsId(string logisticsId) => LogisticsId = logisticsId;
+
     public void UpdateStatus(string logisticsStatus, string logisticsStatusName, DateTime updateStatusDate)
     {
         LogisticsStatus = logisticsStatus;

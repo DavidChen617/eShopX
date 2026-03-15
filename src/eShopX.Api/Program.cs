@@ -2,8 +2,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using CoreMesh.Dispatching.Extensions;
-using CoreMesh.Endpoints;
-using CoreMesh.Result.AspNetCore;
+using CoreMesh.Endpoints.Extensions;
+using CoreMesh.Result.Extensions;
 using Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);

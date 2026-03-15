@@ -2,9 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace Infrastructure.Payments.PayPal;
 
-public class PayPalService(PayPalClient client) :
-    ICreatePaymentService<PayPalCreateOrderRequest, PayPalCreateOrderResponse>,
-    IConfirmPaymentService<PayPalCaptureRequest, PayPalCaptureOrderResponse>
+public class PayPalService(PayPalClient client)
 {
     public async Task<PayPalCreateOrderResponse> CreateAsync(
         PayPalCreateOrderRequest request, CancellationToken ct = default)

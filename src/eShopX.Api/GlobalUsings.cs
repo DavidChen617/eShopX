@@ -1,9 +1,9 @@
-global using System.Net.Mime;
+global using System.Security.Claims;
 global using CoreMesh.Dispatching.Abstractions;
 global using CoreMesh.Endpoints;
 global using CoreMesh.Result;
 global using CoreMesh.Result.Extensions;
+global using CoreMesh.Result.Http;
 global using Infrastructure;
 global using Microsoft.AspNetCore.Http;
-global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Routing;

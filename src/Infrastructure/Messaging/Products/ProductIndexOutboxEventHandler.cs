@@ -1,19 +1,20 @@
-using ApplicationCore.UseCases.Outbox;
-using eShopX.Common.Extensions;
+using System.Text.Json;
+using eShopX.Application.Interfaces;
+using eShopX.Application.UseCases.Outbox;
 
 namespace Infrastructure.Messaging.Products;
 
 public class ProductIndexOutboxEventHandler(
-    IProductSearchIndexSyncService syncService): IOutboxEventHandler
+    IProductSearchIndexSyncService syncService) : IOutboxEventHandler
 {
     public bool CanHandle(string eventType) =>
         eventType is OutboxEventFactory.ProductUpsertEventType or OutboxEventFactory.ProductDeleteEventType;
 
     public async Task HandleAsync(OutboxEventEnvelope evt, CancellationToken ct)
     {
-        if (!evt.PayloadJson.TryParseJson<ProductOutboxPayload>(out var payload, out var err) || payload is null)
-             throw new InvalidOperationException($"Invalid payload: {err}");
-        
+        var payload = JsonSerializer.Deserialize<ProductOutboxPayload>(evt.PayloadJson)
+                      ?? throw new InvalidOperationException($"Invalid payload for event {evt.EventId}");
+
         switch (evt.EventType)
         {
             case OutboxEventFactory.ProductUpsertEventType:

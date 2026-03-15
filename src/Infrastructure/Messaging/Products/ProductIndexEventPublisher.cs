@@ -1,6 +1,7 @@
-using ApplicationCore.UseCases.Outbox;
+using System.Text.Json;
 using Confluent.Kafka;
-using eShopX.Common.Extensions;
+using eShopX.Application.UseCases.Outbox;
+using eShopX.Domain.Outbox;
 
 namespace Infrastructure.Messaging.Products;
 
@@ -19,13 +20,13 @@ public class ProductIndexOutboxEventPublisher(
         var envelope = new OutboxEventEnvelope(
             @event.Id,
             @event.EventType,
-            @event.PayloadJson,
+            @event.Payload,
             DateTime.UtcNow);
 
         var kafkaMessage = new Message<string, string>
         {
             Key = @event.Id.ToString(),
-            Value = envelope.ToJson()
+            Value = JsonSerializer.Serialize(envelope)
         };
 
         await producer.ProduceAsync(Topic, kafkaMessage, ct);

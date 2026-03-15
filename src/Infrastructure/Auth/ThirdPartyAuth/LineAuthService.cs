@@ -1,10 +1,10 @@
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
-
-using eShopX.Common.Exceptions;
-using eShopX.Common.Extensions;
+using eShopX.Application.Exceptions;
+using eShopX.Application.Interfaces;
+using eShopX.Application.Interfaces.Repositories;
+using eShopX.Domain.Aggregates.Users;
 using Infrastructure.Options;
-
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Auth.ThirdPartyAuth;
@@ -12,97 +12,55 @@ namespace Infrastructure.Auth.ThirdPartyAuth;
 public class LineAuthService(
     IHttpClientFactory httpClientFactory,
     IOptions<LineAuthOptions> options,
-    IRepository<User> userRepository,
-    IRepository<ExternalLogin> externalLoginRepository,
-    IRepository<RefreshToken> refreshTokenRepository,
-    IJwtService jwtService
-) : IThirdPartyAuthService<LineAuthRequest, LineAuthResponse>
+    IUserRepository userRepository,
+    IRefreshTokenRepository refreshTokenRepository,
+    ITokenGenerator tokenGenerator,
+    IUnitOfWork unitOfWork) : IThirdPartyAuthService<LineAuthRequest, LineAuthResponse>
 {
     private readonly LineAuthOptions _options = options.Value;
-    private const string ProviderName = "LINE";
 
     public async Task<LineAuthResponse> AuthAsync(LineAuthRequest request)
     {
-        var authResponse = await ExchangeTokenAsync(request.Code, request.CodeVerifier);
+        var tokenResponse = await ExchangeTokenAsync(request.Code, request.CodeVerifier);
+        if (string.IsNullOrWhiteSpace(tokenResponse.IdToken))
+            throw new ExternalServiceException("LINE", "No id_token in response");
 
-        if (string.IsNullOrWhiteSpace(authResponse.IdToken))
-            throw new BadRequestException("LINE Auth Error: No id_token");
+        var payload = await VerifyIdTokenAsync(tokenResponse.IdToken, request.Nonce);
 
-        var idTokenPayload = await VerifyIdTokenAsync(authResponse.IdToken, request.Nonce);
-        Console.WriteLine(idTokenPayload.ToJson());
-        var sub = idTokenPayload.Sub;
-        var email = idTokenPayload.Email ?? string.Empty;
-        var name = idTokenPayload.Name ?? string.Empty;
-        var now = DateTime.UtcNow;
-        var externalLogin =
-            await externalLoginRepository.FirstOrDefaultAsync(x =>
-                x.LoginProvider == ProviderName && x.ProviderUserId == sub);
+        var sub = payload.Sub;
+        var email = payload.Email ?? string.Empty;
+        var name = payload.Name ?? sub;
 
-        User? user;
-
-        if (externalLogin != null)
+        var user = await userRepository.FindByProviderAsync(Provider.Line, sub);
+        if (user is null)
         {
-            user = await userRepository.GetByIdAsync(externalLogin.UserId)
-                   ?? throw new BadRequestException("LINE Auth Error: User not found");
-
-            externalLogin.LastLoginAt = now;
-            externalLoginRepository.Update(externalLogin);
-            if (!string.IsNullOrWhiteSpace(idTokenPayload.Picture) && user.AvatarUrl != idTokenPayload.Picture)
-            {
-                user.AvatarUrl = idTokenPayload.Picture;
-            }
-            userRepository.Update(user);
-        }
-        else
-        {
-            user = await userRepository.FirstOrDefaultAsync(u => u.Email == email);
+            user = await userRepository.FindByEmailAsync(email);
             if (user is null)
             {
-                user = new User
-                {
-                    Name = name,
-                    Email = email,
-                    Phone = string.Empty,
-                    PasswordHash = string.Empty,
-                    AvatarUrl = idTokenPayload.Picture
-                };
+                user = User.Create(name, email, null);
                 await userRepository.AddAsync(user);
             }
-
-            externalLogin = new ExternalLogin
-            {
-                UserId = user.Id,
-                LoginProvider = ProviderName,
-                ProviderUserId = sub,
-                EmailAtLinkTime = email,
-                LastLoginAt = now
-            };
-            await externalLoginRepository.AddAsync(externalLogin);
+            user.AddAuthProvider(Provider.Line, sub, null);
         }
 
-        await userRepository.SaveChangesAsync();
-        await externalLoginRepository.SaveChangesAsync();
+        if (!string.IsNullOrWhiteSpace(payload.Picture))
+            user.UpdateAvatar(payload.Picture, sub);
 
-        var roles = new List<string>();
-        if (user.IsAdmin) roles.Add("Admin");
-        if (user.IsSeller) roles.Add("Seller");
+        userRepository.Update(user);
 
-        var accessToken = jwtService.GenerateAccessToken(user.Id, user.Email, user.Name, roles);
-        var accessTokenExpiresAt = DateTime.UtcNow.AddMinutes(jwtService.AccessTokenExpirationMinutes);
+        var roles = Enum.GetValues<Role>().Where(r => user.Roles.HasFlag(r)).Select(r => r.ToString());
+        var accessToken = tokenGenerator.GenerateAccessToken(user.Id, user.Email, user.Name, roles);
+        var expiresAt = DateTime.UtcNow.AddMinutes(tokenGenerator.AccessTokenExpirationMinutes);
 
-        RefreshToken refreshToken = new()
-        {
-            UserId = user.Id,
-            Token = jwtService.GenerateRefreshToken(),
-            ExpireAt = DateTime.UtcNow.AddDays(jwtService.RefreshTokenExpirationDays),
-            IsRevoked = false
-        };
+        var refreshToken = RefreshToken.Create(
+            user.Id,
+            tokenGenerator.GenerateRefreshToken(),
+            DateTime.UtcNow.AddDays(tokenGenerator.RefreshTokenExpirationDays));
 
         await refreshTokenRepository.AddAsync(refreshToken);
-        await refreshTokenRepository.SaveChangesAsync();
+        await unitOfWork.SaveChangesAsync();
 
-        return new LineAuthResponse(
-            accessToken, refreshToken.Token, user.Id, user.Name, accessTokenExpiresAt, sub, email);
+        return new LineAuthResponse(accessToken, refreshToken.Token, user.Id, user.Name, expiresAt, sub, email);
     }
 
     private async Task<LineTokenResponse> ExchangeTokenAsync(string code, string? codeVerifier)
@@ -118,18 +76,13 @@ public class LineAuthService(
         };
 
         if (!string.IsNullOrWhiteSpace(codeVerifier))
-        {
             form["code_verifier"] = codeVerifier;
-        }
 
         var resp = await http.PostAsync("https://api.line.me/oauth2/v2.1/token",
             new FormUrlEncodedContent(form));
 
         if (!resp.IsSuccessStatusCode)
-        {
-            var err = await resp.Content.ReadAsStringAsync();
-            throw new BadRequestException("LINE Auth Error: " + err);
-        }
+            throw new ExternalServiceException("LINE", await resp.Content.ReadAsStringAsync());
 
         return (await resp.Content.ReadFromJsonAsync<LineTokenResponse>())!;
     }
@@ -140,22 +93,17 @@ public class LineAuthService(
         var form = new Dictionary<string, string>
         {
             ["id_token"] = idToken,
-            ["client_id"] = _options.ChannelId,
+            ["client_id"] = _options.ChannelId
         };
 
         if (!string.IsNullOrWhiteSpace(nonce))
-        {
             form["nonce"] = nonce;
-        }
 
         var resp = await http.PostAsync("https://api.line.me/oauth2/v2.1/verify",
             new FormUrlEncodedContent(form));
 
         if (!resp.IsSuccessStatusCode)
-        {
-            var err = await resp.Content.ReadAsStringAsync();
-            throw new BadRequestException("LINE Auth Error: " + err);
-        }
+            throw new ExternalServiceException("LINE", await resp.Content.ReadAsStringAsync());
 
         return (await resp.Content.ReadFromJsonAsync<LineIdTokenPayload>())!;
     }
@@ -174,17 +122,12 @@ public record LineAuthResponse(
 );
 
 public record LineTokenResponse(
-    [property: JsonPropertyName("access_token")]
-    string AccessToken,
-    [property: JsonPropertyName("id_token")]
-    string? IdToken,
-    [property: JsonPropertyName("refresh_token")]
-    string? RefreshToken,
-    [property: JsonPropertyName("expires_in")]
-    int ExpiresIn,
+    [property: JsonPropertyName("access_token")] string AccessToken,
+    [property: JsonPropertyName("id_token")] string? IdToken,
+    [property: JsonPropertyName("refresh_token")] string? RefreshToken,
+    [property: JsonPropertyName("expires_in")] int ExpiresIn,
     [property: JsonPropertyName("scope")] string Scope,
-    [property: JsonPropertyName("token_type")]
-    string TokenType
+    [property: JsonPropertyName("token_type")] string TokenType
 );
 
 public record LineIdTokenPayload(
@@ -195,7 +138,6 @@ public record LineIdTokenPayload(
     [property: JsonPropertyName("iat")] long Iat,
     [property: JsonPropertyName("nonce")] string? Nonce,
     [property: JsonPropertyName("name")] string? Name,
-    [property: JsonPropertyName("picture")]
-    string? Picture,
+    [property: JsonPropertyName("picture")] string? Picture,
     [property: JsonPropertyName("email")] string? Email
 );

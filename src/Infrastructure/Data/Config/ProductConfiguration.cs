@@ -1,3 +1,5 @@
+using eShopX.Domain.Aggregates.Products;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Config;
@@ -6,56 +8,23 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 {
     public void Configure(EntityTypeBuilder<Product> builder)
     {
-        builder.HasKey(x => x.Id);
+        builder.Ignore(p => p.DomainEvents);
 
-        builder.Property(x => x.Name)
-            .IsRequired()
-            .HasMaxLength(100)
-            .HasComment("商品名稱");
+        builder.HasKey(p => p.Id);
+        builder.ToTable(t => t.HasComment("商品主表"));
 
-        builder.Property(x => x.Description)
-            .HasMaxLength(500)
-            .HasComment("商品描述");
+        builder.Property(p => p.Name).IsRequired().HasMaxLength(200).HasComment("商品名稱");
+        builder.Property(p => p.Description).HasComment("商品描述");
+        builder.Property(p => p.Audience).HasComment("適用客群（男、女、中性）");
+        builder.Property(p => p.IsActive).HasComment("是否上架販售");
+        builder.Property(p => p.CategoryId).IsRequired().HasComment("所屬分類 ID");
 
-        builder.Property(x => x.Price)
-            .IsRequired()
-            .HasPrecision(18, 2)
-            .HasComment("商品單價");
+        builder.HasMany(p => p.Variants)
+            .WithOne()
+            .HasForeignKey(v => v.ProductId);
 
-        builder.Property(x => x.StockQuantity)
-            .IsRequired()
-            .HasComment("庫存數量");
-
-        builder.Property(x => x.IsActive)
-            .IsRequired()
-            .HasDefaultValue(true)
-            .HasComment("是否上架");
-
-        builder.Property(x => x.CategoryId)
-            .HasComment("分類 ID");
-
-        builder.HasOne(x => x.Category)
-            .WithMany(x => x.Products)
-            .HasForeignKey(x => x.CategoryId)
-            .OnDelete(DeleteBehavior.SetNull);
-
-        builder.HasIndex(x => x.CategoryId);
-
-        // 賣家關聯
-        builder.Property(x => x.SellerId)
-            .HasComment("賣家 ID");
-
-        builder.HasOne(x => x.Seller)
-            .WithMany(x => x.Products)
-            .HasForeignKey(x => x.SellerId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasIndex(x => x.SellerId);
-
-        builder.Property(x => x.RowVersion)
-            .HasColumnName("xmin")
-            .HasColumnType("xid")
-            .ValueGeneratedOnAddOrUpdate()
-            .IsConcurrencyToken();
+        builder.HasMany(p => p.Tags)
+            .WithOne()
+            .HasForeignKey(t => t.ProductId);
     }
 }

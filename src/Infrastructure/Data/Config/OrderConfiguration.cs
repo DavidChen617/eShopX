@@ -1,3 +1,5 @@
+using eShopX.Domain.Aggregates.Orders;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Config;
@@ -6,47 +8,19 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 {
     public void Configure(EntityTypeBuilder<Order> builder)
     {
-        builder.HasKey(x => x.Id);
+        builder.Ignore(o => o.DomainEvents);
 
-        builder.Property(x => x.UserId)
-            .IsRequired()
-            .HasComment("下單使用者 ID");
+        builder.HasKey(o => o.Id);
+        builder.ToTable(t => t.HasComment("訂單主表"));
 
-        builder.Property(x => x.Status)
-            .IsRequired()
-            .HasComment("訂單狀態");
+        builder.Property(o => o.UserId).IsRequired().HasComment("下單使用者 ID");
+        builder.Property(o => o.Status).HasComment("訂單狀態（待付款、已付款、已出貨、已完成）");
 
-        builder.Property(x => x.TotalAmount)
-            .IsRequired()
-            .HasPrecision(18, 2)
-            .HasComment("訂單總金額");
+        builder.OwnsOne(o => o.TotalAmount, b =>
+            b.Property(m => m.Amount).HasColumnName("TotalAmount").HasComment("訂單總金額"));
 
-        builder.Property(x => x.PaymentMethod)
-            .IsRequired()
-            .HasMaxLength(30)
-            .HasComment("付款方式");
-
-        builder.Property(x => x.PaidAt)
-            .HasComment("付款時間");
-
-        builder.Property(x => x.ShippingName)
-            .IsRequired()
-            .HasMaxLength(50)
-            .HasComment("收件人姓名");
-
-        builder.Property(x => x.ShippingAddress)
-            .IsRequired()
-            .HasMaxLength(300)
-            .HasComment("收件地址");
-
-        builder.Property(x => x.ShippingPhone)
-            .IsRequired()
-            .HasMaxLength(20)
-            .HasComment("收件人電話");
-
-        builder.HasMany(x => x.Items)
+        builder.HasMany(o => o.Items)
             .WithOne()
-            .HasForeignKey(x => x.OrderId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(i => i.OrderId);
     }
 }

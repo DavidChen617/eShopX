@@ -1,25 +1,51 @@
-using eShopX.Common.Logging;
+using eShopX.Domain.Aggregates.Carts;
+using eShopX.Domain.Aggregates.Categories;
+using eShopX.Domain.Aggregates.Orders;
+using eShopX.Domain.Aggregates.Payments;
+using eShopX.Domain.Aggregates.Products;
+using eShopX.Domain.Aggregates.Shipments;
+using eShopX.Domain.Aggregates.Sizes;
+using eShopX.Domain.Aggregates.Tags;
+using eShopX.Domain.Aggregates.Users;
+using eShopX.Domain.Outbox;
 
 namespace Infrastructure.Data;
 
 public class EShopContext(DbContextOptions<EShopContext> options) : DbContext(options)
 {
-    public virtual DbSet<Product> Products { get; set; }
-    public virtual DbSet<ProductImage> ProductImages { get; set; }
-    public virtual DbSet<Order> Orders { get; set; }
-    public virtual DbSet<OrderItem> OrderItems { get; set; }
-    public virtual DbSet<User> Users { get; set; }
-    public virtual DbSet<ExternalLogin> ExternalLogins { get; set; }
-    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
-    public virtual DbSet<Cart> Carts { get; set; }
-    public virtual DbSet<CartItem> CartItems { get; set; }
-    public virtual DbSet<Banner> Banners { get; set; }
-    public virtual DbSet<Category> Categories { get; set; }
-    public virtual DbSet<ProductRecommend> ProductRecommends { get; set; }
-    public virtual DbSet<Review> Reviews { get; set; }
-    public virtual DbSet<ReviewImage> ReviewImages { get; set; }
-    public virtual DbSet<ApplicationLog> ApplicationLogs { get; set; }
-    public virtual DbSet<ProcessedEvent>  ProcessedEvents { get; set; }
+    // Users
+    public DbSet<User> Users { get; set; }
+    public DbSet<UserAuthProvider> UserAuthProviders { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+
+    // Products
+    public DbSet<Product> Products { get; set; }
+    public DbSet<ProductVariant> ProductVariants { get; set; }
+    public DbSet<ProductSku> ProductSkus { get; set; }
+    public DbSet<ProductImage> ProductImages { get; set; }
+    public DbSet<ProductTag> ProductTags { get; set; }
+
+    // Carts
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
+
+    // Orders
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+
+    // Payments
+    public DbSet<Payment> Payments { get; set; }
+
+    // Shipments
+    public DbSet<Shipment> Shipments { get; set; }
+
+    // Lookup
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Size> Sizes { get; set; }
+    public DbSet<Tag> Tags { get; set; }
+
+    // Outbox
+    public DbSet<OutboxEvent> OutboxEvents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

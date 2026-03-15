@@ -1,28 +1,22 @@
+using eShopX.Domain.Outbox;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Config;
 
-public class OutboxEventConfiguration: IEntityTypeConfiguration<OutboxEvent>
+public class OutboxEventConfiguration : IEntityTypeConfiguration<OutboxEvent>
 {
     public void Configure(EntityTypeBuilder<OutboxEvent> builder)
     {
-        builder.ToTable("OutboxEvents");
+        builder.HasKey(e => e.Id);
+        builder.ToTable(t => t.HasComment("Outbox 事件佇列（保證至少一次送出 Domain Event）"));
 
-        builder.Property(x => x.EventType)
-            .HasMaxLength(100)
-            .IsRequired();
+        builder.Property(e => e.EventType).IsRequired().HasMaxLength(200).HasComment("事件類型名稱（如 PaymentPaidEvent）");
+        builder.Property(e => e.Payload).IsRequired().HasComment("事件序列化內容（JSON）");
+        builder.Property(e => e.Status).HasComment("處理狀態（Pending、Processed、Failed）");
+        builder.Property(e => e.RetryCount).HasComment("已重試次數（上限 3 次後標記為 Failed）");
+        builder.Property(e => e.ProcessedAt).HasComment("事件成功處理的時間");
 
-        builder.Property(x => x.PayloadJson)
-            .IsRequired();
-
-        builder.Property(x => x.Status)
-            .HasConversion<string>()
-            .HasMaxLength(20)
-            .IsRequired();
-
-        builder.Property(x => x.LastError)
-            .HasMaxLength(2000);
-
-        builder.HasIndex(x => new { x.Status, x.NextRetryAt });
+        builder.HasIndex(e => e.Status);
     }
 }

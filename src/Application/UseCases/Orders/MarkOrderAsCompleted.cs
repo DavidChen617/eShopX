@@ -10,6 +10,7 @@ public record MarkOrderAsCompletedCommand(Guid OrderId) : IRequest<Result>;
 
 public class MarkOrderAsCompletedHandler(
     IOrderRepository orderRepository,
+    IShipmentRepository shipmentRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<MarkOrderAsCompletedCommand, Result>
 {
     public async Task<Result> Handle(
@@ -20,7 +21,14 @@ public class MarkOrderAsCompletedHandler(
         if (order is null)
             return Result.NotFound(new Error("order_not_found", "Order not found."));
 
+        var shipment = await shipmentRepository.GetByOrderIdAsync(command.OrderId, cancellationToken);
+        if (shipment is null)
+            return Result.NotFound(new Error("shipment_not_found", "Shipment not found."));
+
+        shipment.MarkAsCompleted();
         order.MarkAsCompleted();
+
+        shipmentRepository.Update(shipment);
         orderRepository.Update(order);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

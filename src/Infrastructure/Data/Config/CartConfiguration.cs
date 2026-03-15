@@ -1,3 +1,5 @@
+using eShopX.Domain.Aggregates.Carts;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Data.Config;
@@ -6,19 +8,15 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
 {
     public void Configure(EntityTypeBuilder<Cart> builder)
     {
-        builder.HasKey(x => x.Id);
+        builder.Ignore(c => c.DomainEvents);
 
-        builder.Property(x => x.UserId)
-            .IsRequired()
-            .HasComment("使用者 ID");
+        builder.HasKey(c => c.Id);
+        builder.ToTable(t => t.HasComment("購物車（每位使用者一個）"));
 
-        builder.HasIndex(x => x.UserId)
-            .IsUnique()
-            .HasDatabaseName("IX_Cart_UserId");
+        builder.Property(c => c.UserId).IsRequired().HasComment("所屬使用者 ID");
 
-        builder.HasMany(x => x.Items)
+        builder.HasMany(c => c.Items)
             .WithOne()
-            .HasForeignKey(x => x.CartId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .HasForeignKey(i => i.CartId);
     }
 }

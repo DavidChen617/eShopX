@@ -10,6 +10,7 @@ public record MarkOrderAsShippedCommand(Guid OrderId) : IRequest<Result>;
 
 public class MarkOrderAsShippedHandler(
     IOrderRepository orderRepository,
+    IShipmentRepository shipmentRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<MarkOrderAsShippedCommand, Result>
 {
     public async Task<Result> Handle(
@@ -20,8 +21,16 @@ public class MarkOrderAsShippedHandler(
         if (order is null)
             return Result.NotFound(new Error("order_not_found", "Order not found."));
 
+        var shipment = await shipmentRepository.GetByOrderIdAsync(command.OrderId, cancellationToken);
+        if (shipment is null)
+            return Result.NotFound(new Error("shipment_not_found", "Shipment not found."));
+
         order.MarkAsShipped();
+
+        shipment.UpdateStatus("300", "出貨中", DateTime.UtcNow);
+
         orderRepository.Update(order);
+        shipmentRepository.Update(shipment);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.NoContent();

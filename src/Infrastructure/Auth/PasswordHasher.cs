@@ -1,4 +1,3 @@
-using eShopX.Application.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 namespace Infrastructure.Auth;

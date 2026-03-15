@@ -3,7 +3,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using eShopX.Application.Exceptions;
-using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Logistics.EcPay;
 

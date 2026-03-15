@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Mapper;
 using CoreMesh.Result;
@@ -14,7 +13,6 @@ namespace eShopX.Application.UseCases.Auth;
 public record RegisterUserCommand(
     string Name,
     string Email,
-    string? Phone,
     string Password) : IRequest<Result<RegisterUserResponse>>, IValidatable<RegisterUserCommand>
 {
     public void ConfigureValidateRules(IValidationBuilder<RegisterUserCommand> builder)
@@ -26,10 +24,6 @@ public record RegisterUserCommand(
         builder.For(x => x.Email)
             .NotEmpty("Email is required.")
             .EmailAddress("Email format is invalid.");
-
-        builder.For(x => x.Phone)
-            .Must(x => x is null || Regex.IsMatch(x, @"^09\d{8}$"),
-                "Phone must be a 10-digit number starting with 09.");
 
         builder.For(x => x.Password)
             .NotEmpty("Password is required.")
@@ -64,7 +58,7 @@ public class RegisterUserHandler(
             return Result<RegisterUserResponse>.BadRequest(
                 new Error("email_conflict", $"Email {command.Email} is already registered."));
 
-        var user = User.Create(command.Name, command.Email, command.Phone);
+        var user = User.Create(command.Name, command.Email);
         user.AddAuthProvider(Provider.Local, null, passwordHasher.HashPassword(command.Password));
 
         await userRepository.AddAsync(user, cancellationToken);

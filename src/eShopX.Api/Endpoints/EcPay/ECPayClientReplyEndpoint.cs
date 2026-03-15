@@ -1,6 +1,5 @@
 using eShopX.Application.Interfaces;
 using eShopX.Application.UseCases.Logistics;
-using Infrastructure.Logistics;
 using Infrastructure.Logistics.EcPay;
 using Microsoft.AspNetCore.Mvc;
 

@@ -8,7 +8,7 @@ public class ProductTagConfiguration : IEntityTypeConfiguration<ProductTag>
 {
     public void Configure(EntityTypeBuilder<ProductTag> builder)
     {
-        builder.HasNoKey();
+        builder.HasKey(t => new { t.ProductId, t.TagId });
         builder.ToTable(t => t.HasComment("商品與標籤的對應關係"));
 
         builder.Property(t => t.ProductId).HasComment("商品 ID");

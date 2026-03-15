@@ -41,7 +41,7 @@ public class GoogleAuthService(
             user = await userRepository.FindByEmailAsync(email);
             if (user is null)
             {
-                user = User.Create(name, email, null);
+                user = User.Create(name, email);
                 await userRepository.AddAsync(user);
             }
             user.AddAuthProvider(Provider.Google, googleSub, null);

@@ -54,7 +54,7 @@ public class ElasticsearchProductSearcher(
                     .NumCandidates(100)
                     .Filter(filters.ToArray()))
                 .Query(q => q.Bool(b => b
-                    .Must(new MultiMatchQuery { Query = query.Keyword, Fields = new[] { "name^3", "description" } })
+                    .Must(new MultiMatchQuery { Query = query.Keyword, Fields = Infer.Fields<ProductSearchDocument>(f => f.Name, f => f.Description) })
                     .Filter(filters.ToArray()))),
                 cancellationToken);
 

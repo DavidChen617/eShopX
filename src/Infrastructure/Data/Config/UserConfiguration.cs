@@ -16,16 +16,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.Name).IsRequired().HasMaxLength(100).HasComment("顯示名稱");
         builder.Property(u => u.Email).IsRequired().HasMaxLength(200).HasComment("電子信箱（唯一）");
         builder.HasIndex(u => u.Email).IsUnique();
-        builder.Property(u => u.Phone).HasMaxLength(20).HasComment("手機號碼");
         builder.Property(u => u.Roles).HasComment("角色旗標（Flags enum，可複選）");
-
-        builder.OwnsOne(u => u.Address, b =>
-        {
-            b.Property(a => a.City).HasComment("縣市");
-            b.Property(a => a.District).HasComment("鄉鎮市區");
-            b.Property(a => a.Street).HasComment("詳細地址");
-            b.Property(a => a.PostalCode).HasComment("郵遞區號");
-        });
 
         builder.OwnsOne(u => u.Avatar, b =>
         {

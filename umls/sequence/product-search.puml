@@ -1,0 +1,103 @@
+@startuml product-search
+
+title Product Search Flow
+
+actor User
+participant "API\n(Endpoint)" as API
+participant "ElasticsearchProductSearcher" as Searcher
+participant "EmbeddingClient\n(OpenAI)" as Embedding
+participant "Elasticsearch" as ES
+
+== Search with Keyword (Hybrid Search) ==
+
+User -> API : GET /products/search\n?keyword=xxx&categoryId=&minPrice=&maxPrice=&isActive=&page=&pageSize=
+API -> Searcher : SearchAsync(ProductSearchQuery)
+
+Searcher -> Embedding : GetEmbeddingAsync(keyword)
+note right: 將 keyword 轉成 1024 維向量
+Embedding --> Searcher : float[] queryVector
+
+Searcher -> ES : SearchAsync\n(\n  kNN: field=embedding, queryVector, k=size*5, numCandidates=100\n  query: bool.must MultiMatch(name, description)\n  filter: isActive / price range / categoryId\n)
+note right
+  Hybrid Search：
+  kNN（語意搜尋）+ BM25（關鍵字搜尋）
+  ES 自動合併兩者分數排序
+  embedding 欄位從 source 中排除（不回傳）
+end note
+
+ES --> Searcher : SearchResponse<ProductSearchDocument>
+Searcher --> API : ProductSearchResponse
+API --> User : 200\n{ page, pageSize, totalCount, totalPages,\n  items[{ productId, categoryId, name, description,\n          price, stockQuantity, isActive, primaryImageUrl }] }
+
+== Search without Keyword (Filter Only) ==
+
+User -> API : GET /products/search\n?categoryId=&minPrice=&maxPrice=&isActive=&page=&pageSize=
+API -> Searcher : SearchAsync(ProductSearchQuery)
+
+Searcher -> ES : SearchAsync\n(\n  query: bool.must MatchAll + filter\n  sort: createdAt DESC\n)
+
+ES --> Searcher : SearchResponse<ProductSearchDocument>
+Searcher --> API : ProductSearchResponse
+API --> User : 200 ProductSearchResponse
+
+== Index Sync (Product Created / Updated) ==
+
+note over ES
+  Outbox → Kafka → ProductIndexOutboxEventHandler
+  → UpsertProductAsync(productId)
+end note
+
+participant "ProductSearchIndexSynchronizer" as Sync
+participant "PostgreSQL" as DB
+
+Sync -> DB : GetByIdAsync(productId)\n→ Product + Variants + Skus + Images + Tags
+Sync -> DB : Query Category.Name
+Sync -> DB : Query Tag.Names
+
+Sync -> Sync : BuildEmbeddingText(\n  name, description, categoryName,\n  colors, tagNames, audience\n)
+note right
+  向量化欄位（組合成一段文字再向量化）：
+  ┌────────────────┬──────────────────────────────────┐
+  │ 欄位           │ 說明                             │
+  ├────────────────┼──────────────────────────────────┤
+  │ name           │ 商品名稱                         │
+  │ description    │ 商品描述                         │
+  │ categoryName   │ 分類名稱                         │
+  │ colors         │ 所有 variant 顏色（空格分隔）    │
+  │ tagNames       │ 所有標籤名稱（空格分隔）         │
+  │ audience       │ 受眾：男 / 女                    │
+  └────────────────┴──────────────────────────────────┘
+  組合範例：
+  "Air Force 1. 經典低筒球鞋. 球鞋. 白色 紅色. 運動 休閒. 男"
+end note
+
+Sync -> Embedding : GetEmbeddingAsync(embeddingText)
+Embedding --> Sync : float[1024] embedding
+
+Sync -> ES : IndexAsync(ProductSearchDocument)\n{\n  productId, categoryId,\n  name       → text (BM25)\n  description→ text (BM25)\n  price      → float (最低 SKU 價格)\n  stockQuantity → int (所有 SKU 庫存加總)\n  isActive   → boolean\n  createdAt  → date\n  embedding  → dense_vector(1024, cosine)\n}
+
+== Index Sync (Product Deleted) ==
+
+note over ES
+  Outbox → Kafka → ProductIndexOutboxEventHandler
+  → DeleteProductAsync(productId)
+end note
+
+Sync -> ES : DeleteAsync(productId)
+
+== Startup: Index Initialization ==
+
+participant "EsIndexInitializer" as Init
+participant "ProductReindexer" as Reindexer
+
+Init -> ES : Indices.ExistsAsync(indexName)
+
+alt Index 不存在
+  Init -> ES : Indices.CreateAsync\n(mapping: keyword / text / float / bool / date / dense_vector)
+  Init -> Reindexer : ReindexAsync(batchSize=500)
+  note right: 分批從 DB 撈所有 product\n逐一 UpsertProductAsync
+else Index 已存在
+  Init -> ES : Indices.PutMappingAsync\n(更新 embedding dense_vector mapping)
+end
+
+@enduml

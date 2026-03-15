@@ -8,7 +8,6 @@ public interface IProductSearcher
 public record ProductSearchQuery(
     string? Keyword = null,
     Guid? CategoryId = null,
-    Guid? SellerId = null,
     decimal? MinPrice = null,
     decimal? MaxPrice = null,
     bool? IsActive = null,

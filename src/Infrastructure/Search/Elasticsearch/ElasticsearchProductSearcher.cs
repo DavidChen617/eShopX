@@ -32,9 +32,6 @@ public class ElasticsearchProductSearcher(
         if (query.CategoryId.HasValue)
             filters.Add(new TermQuery("categoryId", query.CategoryId.Value.ToString()));
 
-        if (query.SellerId.HasValue)
-            filters.Add(new TermQuery("sellerId", query.SellerId.Value.ToString()));
-
         var hasKeyword = !string.IsNullOrWhiteSpace(query.Keyword);
 
         if (hasKeyword)

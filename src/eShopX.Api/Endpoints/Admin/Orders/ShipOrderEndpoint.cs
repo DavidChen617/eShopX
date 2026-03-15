@@ -2,7 +2,7 @@ using eShopX.Application.UseCases.Orders;
 using eShopX.Application.UseCases.Shipments;
 using Infrastructure.Logistics.EcPay;
 
-namespace eShopX.Endpoints.Admin;
+namespace eShopX.Endpoints.Admin.Orders;
 
 public sealed class ShipOrderEndpoint : IGroupedEndpoint<AdminOrdersGroup>
 {

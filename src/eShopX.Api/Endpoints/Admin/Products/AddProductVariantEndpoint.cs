@@ -1,6 +1,6 @@
 using eShopX.Application.UseCases.Products;
 
-namespace eShopX.Endpoints.Admin;
+namespace eShopX.Endpoints.Admin.Products;
 
 public sealed class AddProductVariantEndpoint : IGroupedEndpoint<AdminProductsGroup>
 {
@@ -17,7 +17,7 @@ public sealed class AddProductVariantEndpoint : IGroupedEndpoint<AdminProductsGr
         CancellationToken ct)
     {
         var result = await dispatcher.Send(
-            new AddProductVariantCommand(productId, request.Color, request.Skus, request.Images),
+            new AddProductVariantCommand(productId, request.Color, request.Skus),
             ct);
         return result.ToHttpResult();
     }
@@ -25,5 +25,4 @@ public sealed class AddProductVariantEndpoint : IGroupedEndpoint<AdminProductsGr
 
 public record AddVariantRequest(
     string Color,
-    IReadOnlyList<SkuRequest> Skus,
-    IReadOnlyList<ImageRequest>? Images);
+    IReadOnlyList<SkuRequest> Skus);

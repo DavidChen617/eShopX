@@ -1,10 +1,10 @@
 using Asp.Versioning;
 
-namespace eShopX.Endpoints.Admin;
+namespace eShopX.Endpoints.Admin.Orders;
 
-public sealed class AdminProductsGroup : IGroupEndpoint
+public sealed class AdminOrdersGroup : IGroupEndpoint
 {
-    public string GroupPrefix => "/api/v{version:apiVersion}/admin/products";
+    public string GroupPrefix => "/api/v{version:apiVersion}/admin/orders";
 
     public void Configure(RouteGroupBuilder group)
     {
@@ -14,7 +14,7 @@ public sealed class AdminProductsGroup : IGroupEndpoint
             .Build();
 
         group
-            .WithTags("Admin - Products")
+            .WithTags("Admin")
             .RequireAuthorization("Admin")
             .WithApiVersionSet(apiVersionSet);
     }

@@ -17,8 +17,7 @@ public record ImageRequest(string Url, string PublicId, bool IsPrimary, int Sort
 public record AddProductVariantCommand(
     Guid ProductId,
     string Color,
-    IReadOnlyList<SkuRequest> Skus,
-    IReadOnlyList<ImageRequest>? Images) : IRequest<Result<AddProductVariantResponse>>, IValidatable<AddProductVariantCommand>
+    IReadOnlyList<SkuRequest> Skus) : IRequest<Result<AddProductVariantResponse>>, IValidatable<AddProductVariantCommand>
 {
     public void ConfigureValidateRules(IValidationBuilder<AddProductVariantCommand> builder)
     {
@@ -59,9 +58,6 @@ public class AddProductVariantHandler(
 
         foreach (var sku in command.Skus)
             variant.AddSku(sku.SizeId, Money.Of(sku.Price), sku.Stock);
-
-        foreach (var image in command.Images ?? [])
-            variant.AddImage(image.Url, image.PublicId, image.IsPrimary, image.SortOrder);
 
         productRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -176,7 +176,7 @@ public static class Dependencies
                 var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
                 return new ConsumerBuilder<string, string>(kafkaOptions.Consumer).Build();
             })
-            .AddSingleton<IOutboxEventPublisher, ProductIndexOutboxEventPublisher>()
+            .AddSingleton<IOutboxEventPublisher, OutboxEventPublisher>()
             .AddSingleton<AdminClientConfig>(sp =>
             {
                 var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;

@@ -7,15 +7,22 @@ using CoreMesh.Validation.Abstractions.Extensions;
 using eShopX.Application.Interfaces;
 using eShopX.Application.Interfaces.Repositories;
 using eShopX.Domain.Aggregates.Products;
+using eShopX.Domain.ValueObjects;
 
 namespace eShopX.Application.UseCases.Products;
+
+public record CreateVariantRequest(
+    string Color,
+    IReadOnlyList<SkuRequest> Skus,
+    IReadOnlyList<ImageRequest>? Images);
 
 public record CreateProductCommand(
     string Name,
     string? Description,
     Audience? Audience,
     Guid CategoryId,
-    IReadOnlyList<Guid>? TagIds) : IRequest<Result<CreateProductResponse>>, IValidatable<CreateProductCommand>
+    IReadOnlyList<Guid>? TagIds,
+    IReadOnlyList<CreateVariantRequest>? Variants) : IRequest<Result<CreateProductResponse>>, IValidatable<CreateProductCommand>
 {
     public void ConfigureValidateRules(IValidationBuilder<CreateProductCommand> builder)
     {
@@ -50,6 +57,15 @@ public class CreateProductHandler(
 
         foreach (var tagId in command.TagIds ?? [])
             product.AddTag(tagId);
+
+        foreach (var v in command.Variants ?? [])
+        {
+            var variant = product.AddVariant(v.Color);
+            foreach (var sku in v.Skus)
+                variant.AddSku(sku.SizeId, Money.Of(sku.Price), sku.Stock);
+            foreach (var img in v.Images ?? [])
+                variant.AddImage(img.Url, img.PublicId, img.IsPrimary, img.SortOrder);
+        }
 
         await productRepository.AddAsync(product, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);

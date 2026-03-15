@@ -27,6 +27,14 @@ public sealed class ProductSku : Entity
         };
     }
 
+    public void Update(Money price, int stock)
+    {
+        if (stock < 0)
+            throw new ArgumentInvalidException("Stock quantity cannot be negative.");
+        Price = price;
+        StockQuantity = stock;
+    }
+
     public void UpdatePrice(Money price) => Price = price;
 
     public void AddStock(int quantity)

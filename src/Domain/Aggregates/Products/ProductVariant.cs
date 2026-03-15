@@ -32,9 +32,23 @@ public sealed class ProductVariant : Entity
         return sku;
     }
 
+    public void UpdateColor(string color) => Color = color;
+
+    public void RemoveSku(Guid skuId)
+    {
+        var sku = _skus.FirstOrDefault(s => s.Id == skuId);
+        if (sku is not null) _skus.Remove(sku);
+    }
+
     public void AddImage(string url, string publicId, bool isPrimary, int sortOrder)
     {
         var image = ProductImage.Create(Id, url, publicId, isPrimary, sortOrder);
         _images.Add(image);
+    }
+
+    public void RemoveImage(Guid imageId)
+    {
+        var image = _images.FirstOrDefault(i => i.Id == imageId);
+        if (image is not null) _images.Remove(image);
     }
 }

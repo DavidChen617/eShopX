@@ -1,7 +1,7 @@
 using eShopX.Application.UseCases.Orders;
 using eShopX.Domain.Aggregates.Orders;
 
-namespace eShopX.Endpoints.Admin;
+namespace eShopX.Endpoints.Admin.Orders;
 
 public sealed class AdminGetOrdersEndpoint : IGroupedEndpoint<AdminOrdersGroup>
 {

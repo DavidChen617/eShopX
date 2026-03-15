@@ -1,0 +1,157 @@
+@startuml product-crud
+
+title Product CRUD Flow
+
+actor Admin
+participant "API\n(Endpoint)" as API
+participant "Handler\n(Use Case)" as Handler
+participant "Redis\n(ICacher)" as Redis
+participant "PostgreSQL\n(IProductRepository)" as DB
+participant "Cloudinary\n(IImageStorage)" as Cloudinary
+participant "Kafka\n(Outbox)" as Kafka
+participant "Elasticsearch" as ES
+
+== Create Product ==
+
+group Pre-upload Images (optional, per variant)
+  Admin -> API : POST /admin/products/images\nmultipart files[]
+  API -> Cloudinary : UploadAsync(files)
+  Cloudinary --> API : [{ fileName, url, publicId }]
+  API --> Admin : 200 [{ fileName, url, publicId }]
+end
+
+Admin -> API : POST /admin/products\n{ name, description, audience, categoryId,\n  tagIds, variants[{ color, skus, images }] }
+API -> Handler : CreateProductCommand
+Handler -> Handler : Validate
+Handler -> DB : AddAsync(product)\n+ variants + skus + images
+Handler -> DB : SaveChanges\n→ ProductCreatedEvent → OutboxEvent
+DB --> Handler : OK
+Handler --> API : CreateProductResponse
+API --> Admin : 201 { productId, name, isActive, createdAt }
+
+Kafka -> ES : product.upsert\n→ index product
+
+== Read Product (by ID) ==
+
+Admin -> API : GET /products/{productId}
+API -> Handler : GetProductByIdQuery
+Handler -> Redis : GetAsync(product:{id})
+alt Cache Hit
+  Redis --> Handler : ProductResponse
+else Cache Miss
+  Handler -> DB : GetByIdAsync(productId)
+  DB --> Handler : Product
+  Handler -> Redis : SetAsync(product:{id}, TTL 30min)
+end
+Handler --> API : ProductResponse
+API --> Admin : 200 ProductResponse
+
+== Read Products (list) ==
+
+Admin -> API : GET /products?categoryId=&page=&pageSize=
+API -> Handler : GetProductsQuery
+Handler -> Redis : GetAsync(products:{filters}:{page}:{size})
+alt Cache Hit
+  Redis --> Handler : PagedResponse
+else Cache Miss
+  Handler -> DB : GetPagedAsync(filters, page, size)
+  DB --> Handler : (items, totalCount)
+  Handler -> Redis : SetAsync(products:..., TTL 5min)
+end
+Handler --> API : PagedResponse
+API --> Admin : 200 PagedResponse
+
+== Update Product ==
+
+group Pre-upload New Images (optional)
+  Admin -> API : POST /admin/products/images\nmultipart files[]
+  API -> Cloudinary : UploadAsync(files)
+  Cloudinary --> API : [{ fileName, url, publicId }]
+  API --> Admin : 200 [{ fileName, url, publicId }]
+end
+
+Admin -> API : PUT /admin/products/{productId}\n{ name, description, audience, categoryId,\n  tagIds, variants[{ variantId?, color,\n  skus[{ skuId?, sizeId, price, stock }],\n  images[{ url, publicId, isPrimary, sortOrder }] }] }
+API -> Handler : UpdateProductCommand
+Handler -> Handler : Validate
+Handler -> DB : GetByIdAsync(productId)\nwith variants + skus + images
+DB --> Handler : Product
+
+Handler -> Handler : product.Update(name, desc, audience, categoryId)
+Handler -> Handler : product.SyncTags(tagIds)
+
+loop Each existing variant not in request
+  loop Each image in variant
+    Handler -> Cloudinary : DeleteAsync(publicId)
+  end
+  Handler -> Handler : product.RemoveVariant(variantId)
+end
+
+loop Each variant in request
+  alt variantId exists
+    Handler -> Handler : variant.UpdateColor(color)
+  else new variant
+    Handler -> Handler : product.AddVariant(color)
+  end
+
+  loop Each existing SKU not in request
+    Handler -> Handler : variant.RemoveSku(skuId)
+  end
+  loop Each SKU in request
+    alt skuId exists
+      Handler -> Handler : sku.Update(price, stock)
+    else new SKU
+      Handler -> Handler : variant.AddSku(sizeId, price, stock)
+    end
+  end
+
+  loop Each existing image not in request
+    Handler -> Cloudinary : DeleteAsync(publicId)
+    Handler -> Handler : variant.RemoveImage(imageId)
+  end
+  loop Each new image in request
+    Handler -> Handler : variant.AddImage(url, publicId, isPrimary, sortOrder)
+  end
+end
+
+Handler -> DB : SaveChanges\n→ ProductUpdatedEvent → OutboxEvent
+Handler -> Redis : RemoveAsync(product:{id})
+DB --> Handler : OK
+Handler --> API : NoContent
+API --> Admin : 204
+
+Kafka -> ES : product.upsert\n→ re-index product
+
+== Upload Image to Existing Variant ==
+
+Admin -> API : POST /admin/products/{productId}/variants/{variantId}/images\nfile + ?isPrimary=&sortOrder=
+API -> Handler : UploadProductImageCommand
+Handler -> DB : GetByIdAsync(productId)
+DB --> Handler : Product
+Handler -> Handler : Find variant by variantId
+Handler -> Cloudinary : UploadAsync(file)
+Cloudinary --> Handler : { url, publicId }
+Handler -> Handler : variant.AddImage(url, publicId, isPrimary, sortOrder)
+Handler -> DB : SaveChanges\n→ ProductUpdatedEvent → OutboxEvent
+DB --> Handler : OK
+Handler --> API : UploadProductImageResponse
+API --> Admin : 200 { imageId, url }
+
+Kafka -> ES : product.upsert\n→ re-index product
+
+== Delete Product ==
+
+Admin -> API : DELETE /admin/products/{productId}
+API -> Handler : DeleteProductCommand
+Handler -> DB : GetByIdAsync(productId)
+DB --> Handler : Product
+Handler -> Handler : product.Delete()\n→ ProductDeletedEvent → OutboxEvent
+Handler -> DB : Delete(product)
+Handler -> DB : SaveChanges
+Handler -> Redis : RemoveAsync(product:{id})
+DB --> Handler : OK
+Handler --> API : NoContent
+API --> Admin : 204
+
+Kafka -> ES : product.delete\n→ remove from index
+
+@enduml

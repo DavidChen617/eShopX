@@ -52,6 +52,20 @@ public sealed class Product : AggregateRoot
         _tags.Add(tag);
     }
 
+    public void SyncTags(IReadOnlyList<Guid> tagIds)
+    {
+        _tags.Clear();
+        foreach (var tagId in tagIds)
+            AddTag(tagId);
+    }
+
+    public void RemoveVariant(Guid variantId)
+    {
+        var variant = _variants.FirstOrDefault(v => v.Id == variantId);
+        if (variant is not null)
+            _variants.Remove(variant);
+    }
+
     public void Update(string name, string? description, Audience? audience, Guid categoryId)
     {
         Name = name;

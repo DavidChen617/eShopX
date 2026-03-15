@@ -21,6 +21,7 @@ public class ImageStorage(Cloudinary cloudinary) : IImageStorage
             throw new ExternalServiceException("Cloudinary", result.Error.Message);
 
         return new AppImageUploadResult(
+            request.FileName,
             result.SecureUrl?.ToString() ?? result.Url?.ToString() ?? string.Empty,
             result.PublicId,
             result.Format ?? string.Empty,

@@ -1,6 +1,6 @@
 using eShopX.Application.UseCases.Products;
 
-namespace eShopX.Endpoints.Admin;
+namespace eShopX.Endpoints.Admin.Products;
 
 public sealed class CreateProductEndpoint : IGroupedEndpoint<AdminProductsGroup>
 {

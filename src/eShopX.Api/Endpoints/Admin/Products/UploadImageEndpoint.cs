@@ -1,29 +1,35 @@
-using eShopX.Application.Interfaces;
+using eShopX.Application.UseCases.Products;
 
-namespace eShopX.Endpoints.Admin;
+namespace eShopX.Endpoints.Admin.Products;
 
 public sealed class UploadImageEndpoint : IGroupedEndpoint<AdminProductsGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/images/upload", Handle)
+        group.MapPost("/{productId:guid}/variants/{variantId:guid}/images", Handle)
             .DisableAntiforgery()
             .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(
+        Guid productId,
+        Guid variantId,
         IFormFile file,
-        IImageStorage imageStorage,
+        [AsParameters] UploadImageParams p,
+        IDispatcher dispatcher,
         CancellationToken ct)
     {
         if (file.Length == 0)
             return Results.BadRequest(new { code = "empty_file", message = "File is empty." });
 
         await using var stream = file.OpenReadStream();
-        var result = await imageStorage.UploadAsync(
-            new ImageUploadRequest(file.FileName, stream),
+
+        var result = await dispatcher.Send(
+            new UploadProductImageCommand(productId, variantId, file.FileName, stream, p.IsPrimary, p.SortOrder),
             ct);
 
-        return Results.Ok(result);
+        return result.ToHttpResult();
     }
 }
+
+public record UploadImageParams(bool IsPrimary = false, int SortOrder = 0);

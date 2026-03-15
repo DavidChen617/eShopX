@@ -9,6 +9,7 @@ public interface IImageStorage
 public record ImageUploadRequest(string FileName, Stream Content);
 
 public record ImageUploadResult(
+    string FileName,
     string Url,
     string PublicId,
     string Format,

@@ -1,6 +1,6 @@
 using eShopX.Application.UseCases.Orders;
 
-namespace eShopX.Endpoints.Admin;
+namespace eShopX.Endpoints.Admin.Orders;
 
 public sealed class CompleteOrderEndpoint : IGroupedEndpoint<AdminOrdersGroup>
 {

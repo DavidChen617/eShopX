@@ -1,19 +1,14 @@
 using System.Text.Json;
 using Confluent.Kafka;
-using eShopX.Application.UseCases.Outbox;
 using eShopX.Domain.Outbox;
-using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Messaging.Products;
+namespace Infrastructure.Messaging;
 
-public class ProductIndexOutboxEventPublisher(
+public class OutboxEventPublisher(
     IProducer<string, string> producer,
     IOptions<KafkaOptions> options) : IOutboxEventPublisher
 {
-    public bool CanHandle(string eventType)
-    {
-        return eventType is OutboxEventFactory.ProductUpsertEventType or OutboxEventFactory.ProductDeleteEventType;
-    }
+    public bool CanHandle(string eventType) => true;
 
     public async Task PublishAsync(OutboxEvent @event, CancellationToken ct = default)
     {

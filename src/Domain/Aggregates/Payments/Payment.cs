@@ -31,6 +31,8 @@ public sealed class Payment : AggregateRoot
         };
     }
 
+    public void SetPaymentUrl(string url) => PaymentUrl = url;
+
     public void MarkAsPaid(string transactionId)
     {
         if (Status != PaymentStatus.Pending)

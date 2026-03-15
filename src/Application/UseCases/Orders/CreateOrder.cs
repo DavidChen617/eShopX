@@ -40,7 +40,7 @@ public class CreateOrderHandler(
         CreateOrderCommand command,
         CancellationToken cancellationToken = default)
     {
-        // 1. 取得物流暫存資料（使用者在 ECPay 選完門市後寫入 Redis）
+        // 1. 取得物流暫存資料
         var logistics = await cacher.GetAsync<LogisticsCacheData>(
             LogisticsCacheKeys.UserLogistics(command.UserId), cancellationToken);
 
@@ -58,7 +58,6 @@ public class CreateOrderHandler(
             return Result<CreateOrderResponse>.BadRequest(new Error("cart_empty", "Cart is empty."));
 
         // 3. 逐一驗證 SKU、建立商品快照、扣庫存（in-memory）
-        //    skuQuantityMap 用於樂觀鎖衝突時重新套用扣減
         var orderItems = new List<(Guid SkuId, ProductSnapshot Snapshot, Money UnitPrice, int Quantity)>();
         var skuQuantityMap = new Dictionary<Guid, int>();
 
@@ -88,43 +87,28 @@ public class CreateOrderHandler(
             productRepository.Update(skuDetails.Product);
         }
 
-        // 4. 建立訂單
+        // 4. 建立訂單、物流、付款記錄（PaymentUrl 暫為 null，gateway 呼叫前不寫 URL）
         var order = Order.Create(command.UserId, orderItems);
         await orderRepository.AddAsync(order, cancellationToken);
 
-        // 5. 向支付 gateway 發起付款請求，取得付款 URL
-        //    此時尚未寫入 DB，若閘道失敗直接 return，庫存不受影響
-        var paymentResult = await paymentGateway.RequestAsync(
-            new PaymentGatewayRequest(command.PaymentMethod, order),
-            cancellationToken);
-
-        if (!paymentResult.IsSuccess)
-            return Result<CreateOrderResponse>.BadRequest(
-                new Error(paymentResult.ErrorCode!, paymentResult.ErrorMessage!));
-
-        // 6. 建立付款記錄
-        var payment = Payment.Create(order.Id, command.PaymentMethod, order.TotalAmount, paymentResult.PaymentUrl);
+        var payment = Payment.Create(order.Id, command.PaymentMethod, order.TotalAmount, null);
         await paymentRepository.AddAsync(payment, cancellationToken);
 
-        // 7. 建立物流記錄（CVS 門市 or 宅配）
         var receiver = new ReceiverInfo(command.ReceiverName, command.ReceiverPhone);
         var isCvs = CvsTypes.Contains(logisticsSubType);
-
         Shipment shipment = isCvs
             ? CVSShipment.Create(order.Id, logistics.TempLogisticsID, logisticsSubType,
                 receiver, logistics.ReceiverStoreID!, logistics.ReceiverStoreName!)
             : HomeShipment.Create(order.Id, logistics.TempLogisticsID, logisticsSubType,
                 receiver, logistics.ReceiverZipCode!, logistics.ReceiverAddress!, null);
-
         await shipmentRepository.AddAsync(shipment, cancellationToken);
 
-        // 8. 清空購物車
         cart.Clear();
         cartRepository.Update(cart);
 
-        // 9. 一次寫入 DB：庫存扣減、訂單、付款、物流、購物車清空
-        //    若 SKU 發生樂觀鎖衝突（xmin），EfUnitOfWork 會 reload 最新庫存並拋 ConcurrencyException
-        //    catch 後重新套用 DeductStock，最多重試 3 次
+        // 5. 寫入 DB（庫存扣減、訂單、付款、物流、購物車清空）
+        //    在呼叫 gateway 之前先寫，確保 DB 一致性
+        //    若 SKU 發生樂觀鎖衝突，最多重試 3 次；全部失敗則回傳錯誤，此時 gateway 尚未呼叫
         const int maxRetries = 3;
         for (var attempt = 0; attempt < maxRetries; attempt++)
         {
@@ -141,9 +125,28 @@ public class CreateOrderHandler(
                         staleSku.DeductStock(qty);
                 }
             }
+            catch (ConcurrencyException) when (attempt == maxRetries - 1)
+            {
+                return Result<CreateOrderResponse>.BadRequest(
+                    new Error("stock_conflict", "庫存更新衝突，請重試。"));
+            }
         }
 
-        // 10. 清除 Redis 快取（購物車、物流選擇）
+        // 6. 呼叫 payment gateway 取得付款 URL
+        var paymentResult = await paymentGateway.RequestAsync(
+            new PaymentGatewayRequest(command.PaymentMethod, order),
+            cancellationToken);
+
+        if (!paymentResult.IsSuccess)
+            return Result<CreateOrderResponse>.BadRequest(
+                new Error(paymentResult.ErrorCode!, paymentResult.ErrorMessage!));
+
+        // 7. 更新付款 URL
+        payment.SetPaymentUrl(paymentResult.PaymentUrl!);
+        paymentRepository.Update(payment);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // 8. 清除 Redis（購物車、物流選擇）
         await cacher.RemoveAsync(CartCacheKeys.Cart(command.UserId), cancellationToken);
         await cacher.RemoveAsync(LogisticsCacheKeys.UserLogistics(command.UserId), cancellationToken);
 

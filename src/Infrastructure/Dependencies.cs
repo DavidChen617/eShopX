@@ -8,13 +8,18 @@ using Elastic.Transport;
 using eShopX.Application.Interfaces;
 using eShopX.Application.Interfaces.Repositories;
 using Infrastructure.Auth;
-using Infrastructure.Auth.ThirdPartyAuth;
+using Infrastructure.Auth.ThirdPartyAuth.Google;
+using Infrastructure.Auth.ThirdPartyAuth.Google.Models;
+using Infrastructure.Auth.ThirdPartyAuth.Line;
+using Infrastructure.Auth.ThirdPartyAuth.Line.Models;
 using Infrastructure.Caches;
 using Infrastructure.Data;
 using Infrastructure.Data.Repositories;
 using eShopX.Application.Interfaces.Repositories;
+using Infrastructure.Auth.ThirdPartyAuth;
 using Infrastructure.Email;
 using Infrastructure.Logistics;
+using Infrastructure.Logistics.EcPay;
 using Infrastructure.Messaging;
 using Infrastructure.Messaging.Orders;
 using Infrastructure.Messaging.Products;
@@ -27,6 +32,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
+using HttpMethod = System.Net.Http.HttpMethod;
 
 namespace Infrastructure;
 
@@ -41,16 +47,16 @@ public static class Dependencies
         services.AddDbContext<EShopContext>((_, options) =>
         {
             options.UseNpgsql(
-                configuration.GetConnectionString(nameof(ConnectionStrings.PostgreSQL)),
-                npgsql =>
-                {
-                    npgsql.MinBatchSize(1);
-                    npgsql.MaxBatchSize(100);
-                    npgsql.EnableRetryOnFailure(
-                        maxRetryCount: 3,
-                        maxRetryDelay: TimeSpan.FromSeconds(5),
-                        errorCodesToAdd: null);
-                })
+                    configuration.GetConnectionString(nameof(ConnectionStrings.PostgreSQL)),
+                    npgsql =>
+                    {
+                        npgsql.MinBatchSize(1);
+                        npgsql.MaxBatchSize(100);
+                        npgsql.EnableRetryOnFailure(
+                            maxRetryCount: 3,
+                            maxRetryDelay: TimeSpan.FromSeconds(5),
+                            errorCodesToAdd: null);
+                    })
                 .EnableSensitiveDataLogging()
                 .EnableDetailedErrors();
         });
@@ -113,14 +119,28 @@ public static class Dependencies
 
         // Google Auth
         services.Configure<GoogleAuthOptions>(configuration.GetSection(GoogleAuthOptions.OptionKey));
+        services.AddHttpClient<GoogleAuthClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://oauth2.googleapis.com");
+        });
         services.AddScoped<IThirdPartyAuthService<GoogleAuthRequest, GoogleAuthResponse>, GoogleAuthService>();
 
         // LINE Auth
         services.Configure<LineAuthOptions>(configuration.GetSection(LineAuthOptions.OptionKey));
+        services.AddHttpClient<LineAuthClient>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.line.me/oauth2/v2.1/");
+        });
+        
         services.AddScoped<IThirdPartyAuthService<LineAuthRequest, LineAuthResponse>, LineAuthService>();
 
         // LinePay
         services.Configure<LinePayOptions>(configuration.GetSection(LinePayOptions.OptionKey));
+        services.AddHttpClient<LinePayClient>((sp, client) =>
+        {
+            var options = sp.GetRequiredService<IOptions<LinePayOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl + "/v3/payments/");
+        });
         services.AddScoped<LinePayService>();
 
         // PayPal
@@ -135,7 +155,15 @@ public static class Dependencies
 
         // ECPay
         services.Configure<ECPayOptions>(configuration.GetSection(ECPayOptions.OptionKey));
-        services.AddScoped<IECPayLogisticsService, ECPayLogisticsService>();
+        
+        services.AddHttpClient<EcPayClient>((sp, client) =>
+        {
+            client.BaseAddress = new Uri(sp.GetRequiredService<IOptions<ECPayOptions>>().Value.BaseUrl +  "/Express/v2");
+        });
+        
+        services.AddScoped<EcPayLogisticsSelectionClient>();
+        services.AddScoped<EcPayCreateByTempTradeClient>();
+        services.AddScoped<EcPayPrintTradeDocumentClient>();
 
         // Kafka
         services.Configure<KafkaOptions>(configuration.GetSection(KafkaOptions.OptionKey));
@@ -158,7 +186,13 @@ public static class Dependencies
         services.AddSingleton<List<TopicSpecification>>(sp =>
         {
             var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
-            return [new TopicSpecification { Name = kafkaOptions.OutboxEventTopic, NumPartitions = 3, ReplicationFactor = 1 }];
+            return
+            [
+                new TopicSpecification
+                {
+                    Name = kafkaOptions.OutboxEventTopic, NumPartitions = 3, ReplicationFactor = 1
+                }
+            ];
         });
         services.AddSingleton<IAdminClient>(sp =>
             new AdminClientBuilder(sp.GetRequiredService<AdminClientConfig>()).Build());

@@ -16,9 +16,12 @@ using eShopX.Application.Interfaces.Repositories;
 using Infrastructure.Email;
 using Infrastructure.Logistics;
 using Infrastructure.Messaging;
+using Infrastructure.Messaging.Orders;
 using Infrastructure.Messaging.Products;
+using Infrastructure.Payments;
 using Infrastructure.Payments.Line;
 using Infrastructure.Payments.PayPal;
+using Infrastructure.Search.Elasticsearch;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
@@ -29,8 +32,11 @@ namespace Infrastructure;
 
 public static class Dependencies
 {
-    public static void ConfigureInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static void AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
+        // Site
+        services.Configure<SiteOptions>(configuration.GetSection(SiteOptions.OptionKey));
+
         // Database
         services.AddDbContext<EShopContext>((_, options) =>
         {
@@ -52,15 +58,16 @@ public static class Dependencies
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 
         // Repositories
-        services.AddScoped<IOutboxEventRepository, OutboxEventRepository>();
-        services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-        services.AddScoped<ICartRepository, CartRepository>();
-        services.AddScoped<IProductRepository, ProductRepository>();
-        services.AddScoped<IOrderRepository, OrderRepository>();
-        services.AddScoped<IPaymentRepository, PaymentRepository>();
-        services.AddScoped<IShipmentRepository, ShipmentRepository>();
-        services.AddScoped<ISizeRepository, SizeRepository>();
+        services
+            .AddScoped<IOutboxEventRepository, OutboxEventRepository>()
+            .AddScoped<IUserRepository, UserRepository>()
+            .AddScoped<IRefreshTokenRepository, RefreshTokenRepository>()
+            .AddScoped<ICartRepository, CartRepository>()
+            .AddScoped<IProductRepository, ProductRepository>()
+            .AddScoped<IOrderRepository, OrderRepository>()
+            .AddScoped<IPaymentRepository, PaymentRepository>()
+            .AddScoped<IShipmentRepository, ShipmentRepository>()
+            .AddScoped<ISizeRepository, SizeRepository>();
 
         // Redis
         var redisOptions = ConfigurationOptions.Parse(
@@ -124,6 +131,7 @@ public static class Dependencies
             client.BaseAddress = new Uri(opt.BaseUrl);
         });
         services.AddScoped<PayPalService>();
+        services.AddScoped<IPaymentGateway, PaymentGateway>();
 
         // ECPay
         services.Configure<ECPayOptions>(configuration.GetSection(ECPayOptions.OptionKey));
@@ -170,9 +178,10 @@ public static class Dependencies
                 settings.Authentication(new BasicAuthentication(opt.Username, opt.Password ?? string.Empty));
             return new ElasticsearchClient(settings);
         });
-        services.AddScoped<IProductSearchService, ElasticsearchProductSearchService>();
+        services.AddScoped<IProductSearcher, ElasticsearchProductSearcher>();
         services.AddScoped<IProductSearchIndexService, ReindexProductsService>();
-        services.AddScoped<IProductSearchIndexSyncService, ProductSearchIndexSyncService>();
+        services.AddScoped<IProductSearchIndexSynchronizer, ProductSearchIndexSynchronizer>();
         services.AddScoped<IOutboxEventHandler, ProductIndexOutboxEventHandler>();
+        services.AddScoped<IOutboxEventHandler, OrderShippedEmailHandler>();
     }
 }

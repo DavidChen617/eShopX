@@ -72,13 +72,11 @@ services:
       Mail__Password: ${MAIL_PASSWORD:-}
       Mail__FromName: ${MAIL_FROM_NAME:-eShopX}
       Mail__FromEmail: ${MAIL_FROM_EMAIL:-}
-      PayPal__PublicBaseUrl: ${PAYPAL_PUBLIC_BASE_URL:-}
-      PayPal__FrontendBaseUrl: ${PAYPAL_FRONTEND_BASE_URL:-}
+      Site__FrontendDomain: ${SITE_FRONTEND_DOMAIN:-http://localhost:4200}
+      Site__DomainUrl: ${SITE_DOMAIN_URL:-}
       PayPal__ClientSecret: ${PAYPAL_CLIENT_SECRET:-}
       PayPal__ClientId: ${PAYPAL_CLIENT_ID:-}
       PayPal__BaseUrl: ${PAYPAL_BASE_URL:-https://api-m.sandbox.paypal.com}
-      LinePay__PublicBaseUrl: ${LINEPAY_PUBLIC_BASE_URL:-}
-      LinePay__FrontendBaseUrl: ${LINEPAY_FRONTEND_BASE_URL:-}
       LinePay__ChannelSecret: ${LINEPAY_CHANNEL_SECRET:-}
       LinePay__ChannelId: ${LINEPAY_CHANNEL_ID:-}
       LinePay__BaseUrl: ${LINEPAY_BASE_URL:-https://sandbox-api-pay.line.me}

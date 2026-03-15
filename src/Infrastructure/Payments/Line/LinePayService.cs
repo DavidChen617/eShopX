@@ -4,15 +4,17 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using eShopX.Application.Exceptions;
-using Infrastructure.Options;
-using Infrastructure.Payments.Line.Models;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Payments.Line;
 
-public class LinePayService(IHttpClientFactory httpClientFactory, IOptions<LinePayOptions> options)
+public class LinePayService(
+    IHttpClientFactory httpClientFactory,
+    IOptions<LinePayOptions> options,
+    IOptions<SiteOptions> siteOptions)
 {
     private readonly LinePayOptions _options = options.Value;
+    private readonly SiteOptions _site = siteOptions.Value;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -79,13 +81,13 @@ public class LinePayService(IHttpClientFactory httpClientFactory, IOptions<LineP
 
     private LinePayRedirectUrls NormalizeRedirectUrls(LinePayRedirectUrls urls)
     {
-        if (string.IsNullOrWhiteSpace(_options.PublicBaseUrl))
+        if (string.IsNullOrWhiteSpace(_site.DomainUrl))
         {
             return urls;
         }
 
-        var confirm = BuildPublicUrl(_options.PublicBaseUrl, urls.ConfirmUrl);
-        var cancel = BuildPublicUrl(_options.PublicBaseUrl, urls.CancelUrl);
+        var confirm = BuildPublicUrl(_site.DomainUrl, urls.ConfirmUrl);
+        var cancel = BuildPublicUrl(_site.DomainUrl, urls.CancelUrl);
         return urls with { ConfirmUrl = confirm, CancelUrl = cancel };
     }
 

@@ -17,5 +17,7 @@ public class ProductSkuConfiguration : IEntityTypeConfiguration<ProductSku>
 
         builder.OwnsOne(s => s.Price, b =>
             b.Property(m => m.Amount).HasColumnName("Price").HasComment("售價"));
+
+        builder.Property<uint>("xmin").HasColumnType("xid").IsRowVersion();
     }
 }

@@ -1,11 +1,12 @@
 using Elastic.Clients.Elasticsearch;
 using eShopX.Application.Exceptions;
 using eShopX.Application.Interfaces;
+using Infrastructure.Search;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services;
 
-public class ProductSearchIndexSyncService(
+public class ProductSearchIndexSynchronizer(
     ElasticsearchClient esClient,
     IOptions<ElasticsearchOptions> options) : IProductSearchIndexSyncService
 {

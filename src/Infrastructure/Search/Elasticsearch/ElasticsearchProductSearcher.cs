@@ -1,12 +1,11 @@
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using eShopX.Application.Exceptions;
-using eShopX.Application.Interfaces;
 using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Search;
 
-public class ElasticsearchProductSearchService(
+public class ElasticsearchProductSearcher(
     ElasticsearchClient esClient,
     IOptions<ElasticsearchOptions> options) : IProductSearchService
 {

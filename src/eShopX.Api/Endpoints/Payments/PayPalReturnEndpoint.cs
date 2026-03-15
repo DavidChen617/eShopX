@@ -1,16 +1,11 @@
-using CoreMesh.Dispatching.Abstractions;
-using CoreMesh.Endpoints;
-using CoreMesh.Result.Http;
 using eShopX.Application.Interfaces.Repositories;
-using eShopX.Application.UseCases.Orders;
 using eShopX.Application.UseCases.Payments;
+using eShopX.Domain.Aggregates.Payments;
 using Infrastructure.Options;
 using Infrastructure.Payments.PayPal;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
 
-namespace eShopX.Api.Endpoints.Payments;
+namespace eShopX.Endpoints.Payments;
 
 public sealed class PayPalReturnEndpoint : IGroupedEndpoint<PaymentsGroup>
 {
@@ -25,23 +20,25 @@ public sealed class PayPalReturnEndpoint : IGroupedEndpoint<PaymentsGroup>
         IDispatcher dispatcher,
         IPaymentRepository paymentRepository,
         PayPalService payPalService,
-        IOptions<PayPalOptions> payPalOptions,
+        IOptions<SiteOptions> siteOptions,
         CancellationToken ct)
     {
-        var captureResponse = await payPalService.ConfirmAsync(new PayPalCaptureRequest(token), ct);
+        var frontendDomain = siteOptions.Value.FrontendDomain;
 
         var payment = await paymentRepository.GetByOrderIdAsync(orderId, ct);
         if (payment is null)
             return Results.NotFound(new { code = "payment_not_found" });
 
-        var markPaidResult = await dispatcher.Send(
-            new MarkPaymentAsPaidCommand(payment.Id, captureResponse.Id), ct);
-        if (!markPaidResult.IsSuccess) return markPaidResult.ToHttpResult();
+        if (payment.Status == PaymentStatus.Paid)
+            return Results.Redirect($"{frontendDomain}/orders/{orderId}?payment=success");
 
-        var markOrderPaidResult = await dispatcher.Send(new MarkOrderAsPaidCommand(orderId), ct);
-        if (!markOrderPaidResult.IsSuccess) return markOrderPaidResult.ToHttpResult();
+        var captureResponse = await payPalService.ConfirmAsync(new PayPalCaptureRequest(token), ct);
 
-        var frontendUrl = payPalOptions.Value.FrontendBaseUrl;
-        return Results.Redirect($"{frontendUrl}/orders/{orderId}?payment=success");
+        var confirmResult = await dispatcher.Send(
+            new ConfirmPaymentCommand(orderId, captureResponse.Id), ct);
+        if (!confirmResult.IsSuccess)
+            return confirmResult.ToHttpResult();
+
+        return Results.Redirect($"{frontendDomain}/orders/{orderId}?payment=success");
     }
 }

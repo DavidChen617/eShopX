@@ -1,14 +1,9 @@
-using CoreMesh.Dispatching.Abstractions;
-using CoreMesh.Endpoints;
-using CoreMesh.Result.Http;
 using eShopX.Application.Interfaces.Repositories;
 using eShopX.Application.UseCases.Payments;
 using Infrastructure.Options;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
 
-namespace eShopX.Api.Endpoints.Payments;
+namespace eShopX.Endpoints.Payments;
 
 public sealed class PayPalCancelEndpoint : IGroupedEndpoint<PaymentsGroup>
 {
@@ -21,7 +16,7 @@ public sealed class PayPalCancelEndpoint : IGroupedEndpoint<PaymentsGroup>
         Guid orderId,
         IDispatcher dispatcher,
         IPaymentRepository paymentRepository,
-        IOptions<PayPalOptions> payPalOptions,
+        IOptions<SiteOptions> siteOptions,
         CancellationToken ct)
     {
         var payment = await paymentRepository.GetByOrderIdAsync(orderId, ct);
@@ -31,7 +26,7 @@ public sealed class PayPalCancelEndpoint : IGroupedEndpoint<PaymentsGroup>
             if (!result.IsSuccess) return result.ToHttpResult();
         }
 
-        var frontendUrl = payPalOptions.Value.FrontendBaseUrl;
-        return Results.Redirect($"{frontendUrl}/orders/{orderId}?payment=cancelled");
+        var frontendDomain = siteOptions.Value.FrontendDomain;
+        return Results.Redirect($"{frontendDomain}/orders/{orderId}?payment=cancelled");
     }
 }

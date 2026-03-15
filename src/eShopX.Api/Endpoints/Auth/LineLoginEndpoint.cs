@@ -16,7 +16,7 @@ public sealed class LineLoginEndpoint : IGroupedEndpoint<AuthGroup>
         IThirdPartyAuthService<LineAuthRequest, LineAuthResponse> lineAuth,
         CancellationToken ct)
     {
-        var response = await lineAuth.AuthAsync(request);
+        var response = await lineAuth.AuthAsync(request, ct);
         return Results.Ok(response);
     }
 }

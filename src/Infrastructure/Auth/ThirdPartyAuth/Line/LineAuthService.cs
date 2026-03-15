@@ -13,7 +13,7 @@ public class LineAuthService(
     IUnitOfWork unitOfWork) : IThirdPartyAuthService<LineAuthRequest, LineAuthResponse>
 {
 
-    public async Task<LineAuthResponse> AuthAsync(LineAuthRequest request)
+    public async Task<LineAuthResponse> AuthAsync(LineAuthRequest request, CancellationToken cancellationToken = default)
     {
         var tokenResponse = await lineAuthClient.ExchangeTokenAsync(request.Code, request.CodeVerifier);
         if (string.IsNullOrWhiteSpace(tokenResponse.IdToken))
@@ -52,7 +52,7 @@ public class LineAuthService(
             DateTime.UtcNow.AddDays(tokenGenerator.RefreshTokenExpirationDays));
 
         await refreshTokenRepository.AddAsync(refreshToken);
-        await unitOfWork.SaveChangesAsync();
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new LineAuthResponse(accessToken, refreshToken.Token, user.Id, user.Name, expiresAt, sub, email);
     }

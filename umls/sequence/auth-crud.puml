@@ -1,0 +1,142 @@
+@startuml auth-crud
+
+title Auth Flow
+
+actor User
+participant "API\n(Endpoint)" as API
+participant "Handler /\nService" as Handler
+participant "PostgreSQL" as DB
+participant "Google\nOAuth" as Google
+participant "LINE\nOAuth" as Line
+
+== Register ==
+
+User -> API : POST /auth/register\n{ name, email, password }
+API -> Handler : RegisterUserCommand
+Handler -> Handler : Validate\n(name, email format, password min 8)
+Handler -> DB : FindByEmailAsync(email)
+alt Email 已存在
+  Handler --> API : 400 email_conflict
+end
+Handler -> Handler : User.Create(name, email)\nuser.AddAuthProvider(Local, hash=bcrypt(password))
+Handler -> DB : AddAsync(user) + SaveChanges
+Handler --> API : 201 { userId, email, createdAt }
+
+== Login (Local) ==
+
+User -> API : POST /auth/login\n{ email, password }
+API -> Handler : LoginCommand
+Handler -> Handler : Validate
+Handler -> DB : FindByEmailAsync(email)
+alt User 不存在 or 無 Local provider or 密碼錯誤
+  Handler --> API : 400 credentials invalid
+end
+Handler -> Handler : bcrypt.Verify(password, hash)
+Handler -> Handler : GenerateAccessToken(userId, email, name, roles)\nRefreshToken.Create(userId, token, expireAt)
+Handler -> DB : AddAsync(refreshToken) + SaveChanges
+Handler --> API : 200\n{ accessToken, refreshToken, userId, name, expiresAt }
+
+== Refresh Token ==
+
+User -> API : POST /auth/refresh\n{ refreshToken }
+API -> Handler : RefreshTokenCommand
+Handler -> DB : FindByTokenAsync(refreshToken)
+alt Token 不存在
+  Handler --> API : 404 refresh_token_not_found
+end
+alt Token 已 revoked
+  Handler --> API : 400 refresh_token_revoked
+end
+alt Token 已過期
+  Handler --> API : 400 refresh_token_expired
+end
+Handler -> Handler : existing.Revoke()
+Handler -> DB : Update(existing)
+Handler -> DB : GetByIdAsync(userId)
+Handler -> Handler : GenerateAccessToken(...)\nRefreshToken.Create(...) ← 新 token
+Handler -> DB : AddAsync(newRefreshToken) + SaveChanges
+note right: Rotation：舊 token revoke，發新 token
+Handler --> API : 200\n{ accessToken, refreshToken, expiresAt }
+
+== Logout ==
+
+User -> API : POST /auth/logout\n{ refreshToken }
+API -> Handler : LogoutCommand
+Handler -> DB : FindByTokenAsync(refreshToken)
+alt Token 不存在 or 已 revoked
+  Handler --> API : 204（idempotent）
+end
+Handler -> Handler : refreshToken.Revoke()
+Handler -> DB : Update + SaveChanges
+Handler --> API : 204
+
+== Google Login ==
+
+note over User, Google
+  前端先走 Google OAuth PKCE flow：
+  → 取得 code + codeVerifier
+end note
+
+User -> API : POST /auth/google\n{ code, codeVerifier }
+API -> Handler : GoogleAuthService.AuthAsync
+
+Handler -> Google : POST /token\n{ code, clientId, clientSecret, redirectUri,\n  grantType=authorization_code, codeVerifier }
+Google --> Handler : { idToken, accessToken }
+
+Handler -> Google : GoogleJsonWebSignature.ValidateAsync(idToken)\n驗證 audience=clientId, issuer=accounts.google.com
+Google --> Handler : { sub, email, name, picture }
+
+Handler -> DB : FindByProviderAsync(Google, sub)
+alt 找不到
+  Handler -> DB : FindByEmailAsync(email)
+  alt Email 也找不到
+    Handler -> Handler : User.Create(name, email)
+    Handler -> DB : AddAsync(user)
+  end
+  Handler -> Handler : user.AddAuthProvider(Google, sub)
+end
+Handler -> Handler : user.UpdateAvatar(picture, sub)
+Handler -> DB : Update(user)
+
+Handler -> Handler : GenerateAccessToken(...)\nRefreshToken.Create(...)
+Handler -> DB : AddAsync(refreshToken) + SaveChanges
+Handler --> API : 200\n{ accessToken, refreshToken, userId, name, expiresAt, sub, email, picture }
+
+== LINE Login ==
+
+note over User, Line
+  前端先走 LINE OAuth PKCE flow：
+  → 取得 code + codeVerifier + nonce
+end note
+
+User -> API : POST /auth/line\n{ code, codeVerifier, nonce }
+API -> Handler : LineAuthService.AuthAsync
+
+Handler -> Line : POST /token\n{ grantType, code, redirectUri, clientId, clientSecret, codeVerifier }
+Line --> Handler : { idToken }
+
+Handler -> Line : POST /verify\n{ idToken, clientId, nonce }
+Line --> Handler : { sub, email, name, picture }
+
+Handler -> DB : FindByProviderAsync(Line, sub)
+alt 找不到
+  Handler -> DB : FindByEmailAsync(email)
+  alt Email 也找不到
+    Handler -> Handler : User.Create(name, email)
+    Handler -> DB : AddAsync(user)
+  end
+  Handler -> Handler : user.AddAuthProvider(Line, sub)
+end
+Handler -> Handler : user.UpdateAvatar(picture, sub)
+Handler -> DB : Update(user)
+
+Handler -> Handler : GenerateAccessToken(...)\nRefreshToken.Create(...)
+Handler -> DB : AddAsync(refreshToken) + SaveChanges
+Handler --> API : 200\n{ accessToken, refreshToken, userId, name, expiresAt, sub, email }
+
+note over DB
+  User.AuthProviders 支援多 provider 綁定：
+  同一個 email 可同時有 Local + Google + LINE
+end note
+
+@enduml

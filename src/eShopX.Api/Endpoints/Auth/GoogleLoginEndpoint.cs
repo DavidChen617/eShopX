@@ -16,7 +16,7 @@ public sealed class GoogleLoginEndpoint : IGroupedEndpoint<AuthGroup>
         IThirdPartyAuthService<GoogleAuthRequest, GoogleAuthResponse> googleAuth,
         CancellationToken ct)
     {
-        var response = await googleAuth.AuthAsync(request);
+        var response = await googleAuth.AuthAsync(request, ct);
         return Results.Ok(response);
     }
 }

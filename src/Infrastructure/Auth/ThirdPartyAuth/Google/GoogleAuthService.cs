@@ -19,7 +19,7 @@ public class GoogleAuthService(
 {
     private readonly GoogleAuthOptions _options = options.Value;
 
-    public async Task<GoogleAuthResponse> AuthAsync(GoogleAuthRequest request)
+    public async Task<GoogleAuthResponse> AuthAsync(GoogleAuthRequest request, CancellationToken cancellationToken = default)
     {
         var token = await googleAuthClient.ExchangeTokenAsync(request.Code, request.CodeVerifier);
         if (token.IdToken is null)
@@ -62,7 +62,7 @@ public class GoogleAuthService(
             DateTime.UtcNow.AddDays(tokenGenerator.RefreshTokenExpirationDays));
 
         await refreshTokenRepository.AddAsync(refreshToken);
-        await unitOfWork.SaveChangesAsync();
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new GoogleAuthResponse(accessToken, refreshToken.Token, user.Id, user.Name, expiresAt, googleSub, email, payload.Picture);
     }

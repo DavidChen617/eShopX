@@ -71,7 +71,8 @@ public static class Dependencies
             .AddScoped<IOrderRepository, OrderRepository>()
             .AddScoped<IPaymentRepository, PaymentRepository>()
             .AddScoped<IShipmentRepository, ShipmentRepository>()
-            .AddScoped<ISizeRepository, SizeRepository>();
+            .AddScoped<ISizeRepository, SizeRepository>()
+            .AddScoped<ICategoryRepository, CategoryRepository>();
 
         // Redis
         var redisOptions = ConfigurationOptions.Parse(

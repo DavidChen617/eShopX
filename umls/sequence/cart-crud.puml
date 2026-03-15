@@ -1,0 +1,102 @@
+@startuml cart-crud
+
+title Cart Flow
+
+actor User
+participant "API\n(Endpoint)" as API
+participant "Handler\n(Use Case)" as Handler
+participant "Redis\n(ICacher)" as Redis
+participant "PostgreSQL" as DB
+
+== Get Cart ==
+
+User -> API : GET /cart
+API -> Handler : GetCartQuery(userId)
+Handler -> Redis : GetAsync(cart:{userId})
+
+alt Cache Hit
+  Redis --> Handler : CartResponse
+else Cache Miss
+  Handler -> DB : GetByUserIdAsync(userId)
+  alt Cart exists
+    DB --> Handler : Cart + Items
+    loop Each cart item
+      Handler -> DB : GetSkuDetailsAsync(skuId)\n→ Product + Variant(含 Images) + Sku
+      opt SizeId exists
+        Handler -> DB : GetByIdAsync(sizeId)
+        DB --> Handler : Size.Name
+      end
+    end
+    Handler -> Redis : SetAsync(cart:{userId}, TTL 10min)
+  else Cart not found
+    Handler --> API : CartResponse(cartId=null, items=[])
+  end
+end
+
+Handler --> API : CartResponse
+API --> User : 200\n{ cartId, userId, items[{ itemId, skuId, quantity,\n  productName, color, sizeName, unitPrice, primaryImageUrl }] }
+
+== Add Item ==
+
+User -> API : POST /cart/items\n{ skuId, quantity }
+API -> Handler : AddCartItemCommand(userId, skuId, quantity)
+Handler -> Handler : Validate (quantity > 0)
+
+Handler -> DB : GetByUserIdAsync(userId)
+
+alt Cart not found
+  Handler -> DB : AddAsync(Cart.Create(userId))
+  Handler -> Handler : cart.AddItem(skuId, quantity)
+else Cart exists
+  Handler -> Handler : cart.AddItem(skuId, quantity)\n(同 SKU → 數量累加)
+  Handler -> DB : Update(cart)
+end
+
+Handler -> DB : SaveChangesAsync
+Handler -> Redis : RemoveAsync(cart:{userId})
+Handler --> API : NoContent
+API --> User : 204
+
+== Update Item Quantity ==
+
+User -> API : PUT /cart/items/{skuId}\n{ quantity }
+API -> Handler : UpdateCartItemQuantityCommand(userId, skuId, quantity)
+Handler -> Handler : Validate (quantity > 0)
+Handler -> DB : GetByUserIdAsync(userId)
+DB --> Handler : Cart
+Handler -> Handler : cart.UpdateQuantity(skuId, quantity)
+Handler -> DB : SaveChangesAsync
+Handler -> Redis : RemoveAsync(cart:{userId})
+Handler --> API : NoContent
+API --> User : 204
+
+== Remove Item ==
+
+User -> API : DELETE /cart/items/{skuId}
+API -> Handler : RemoveCartItemCommand(userId, skuId)
+Handler -> DB : GetByUserIdAsync(userId)
+DB --> Handler : Cart
+Handler -> Handler : cart.RemoveItem(skuId)
+Handler -> DB : SaveChangesAsync
+Handler -> Redis : RemoveAsync(cart:{userId})
+Handler --> API : NoContent
+API --> User : 204
+
+== Clear Cart ==
+
+User -> API : DELETE /cart
+API -> Handler : ClearCartCommand(userId)
+Handler -> DB : GetByUserIdAsync(userId)
+DB --> Handler : Cart
+Handler -> Handler : cart.Clear()
+Handler -> DB : SaveChangesAsync
+Handler -> Redis : RemoveAsync(cart:{userId})
+Handler --> API : NoContent
+API --> User : 204
+
+note over DB, Redis
+  下訂單後購物車清空（由 CreateOrderHandler 呼叫）：
+  cart.Clear() → SaveChanges → RemoveAsync(cart:{userId})
+end note
+
+@enduml

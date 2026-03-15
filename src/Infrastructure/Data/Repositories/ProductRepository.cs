@@ -18,7 +18,9 @@ public class ProductRepository(EShopContext db) : IProductRepository
         var sku = await db.ProductSkus.FirstOrDefaultAsync(s => s.Id == skuId, cancellationToken);
         if (sku is null) return null;
 
-        var variant = await db.ProductVariants.FirstOrDefaultAsync(v => v.Id == sku.ProductVariantId, cancellationToken);
+        var variant = await db.ProductVariants
+            .Include(v => v.Images)
+            .FirstOrDefaultAsync(v => v.Id == sku.ProductVariantId, cancellationToken);
         if (variant is null) return null;
 
         var product = await db.Products.FirstOrDefaultAsync(p => p.Id == variant.ProductId, cancellationToken);

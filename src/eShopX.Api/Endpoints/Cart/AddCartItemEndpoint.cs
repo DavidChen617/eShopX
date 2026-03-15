@@ -6,7 +6,8 @@ public sealed class AddCartItemEndpoint : IGroupedEndpoint<CartGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/items", Handle);
+        group.MapPost("/items", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

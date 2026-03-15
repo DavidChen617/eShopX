@@ -6,7 +6,8 @@ public sealed class UnpublishProductEndpoint : IGroupedEndpoint<AdminProductsGro
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/{productId:guid}/unpublish", Handle);
+        group.MapPost("/{productId:guid}/unpublish", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

@@ -12,7 +12,8 @@ public sealed class LinePayConfirmCallbackEndpoint : IGroupedEndpoint<PaymentsGr
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapGet("/linepay/confirm", Handle);
+        group.MapGet("/linepay/confirm", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

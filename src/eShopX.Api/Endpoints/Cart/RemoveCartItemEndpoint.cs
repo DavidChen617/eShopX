@@ -6,7 +6,8 @@ public sealed class RemoveCartItemEndpoint : IGroupedEndpoint<CartGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapDelete("/items/{skuId:guid}", Handle);
+        group.MapDelete("/items/{skuId:guid}", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

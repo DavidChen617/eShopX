@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
+using Asp.Versioning;
 using CoreMesh.Dispatching.Extensions;
 using CoreMesh.Endpoints.Extensions;
 using Infrastructure.Search.Elasticsearch;
@@ -9,6 +10,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddEndpoints([typeof(Program).Assembly])
+    .AddApiVersioning(options =>
+    {
+        options.DefaultApiVersion = new ApiVersion(1);
+        options.ApiVersionReader = new UrlSegmentApiVersionReader();
+    })
+    .AddApiExplorer(options =>
+    {
+        options.GroupNameFormat = "'v'V";
+        options.SubstituteApiVersionInUrl = true;
+    });
+
+builder.Services
     .AddDispatching([typeof(eShopX.Application.AssemblyMarker).Assembly])
     .AddCoreMeshExceptionHandling()
     .AddInfrastructureServices(builder.Configuration);

@@ -6,7 +6,9 @@ public sealed class LogoutEndpoint : IGroupedEndpoint<AuthGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/logout", Handle).RequireAuthorization();
+        group.MapPost("/logout", Handle)
+            .RequireAuthorization()
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

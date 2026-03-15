@@ -7,7 +7,8 @@ public sealed class LineLoginEndpoint : IGroupedEndpoint<AuthGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/line", Handle);
+        group.MapPost("/line", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

@@ -6,7 +6,8 @@ public sealed class UpdateProductEndpoint : IGroupedEndpoint<AdminProductsGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPut("/{productId:guid}", Handle);
+        group.MapPut("/{productId:guid}", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

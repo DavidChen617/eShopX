@@ -1,4 +1,3 @@
-using Infrastructure.Logistics;
 using Infrastructure.Logistics.EcPay;
 
 namespace eShopX.Endpoints.Admin;
@@ -7,7 +6,8 @@ public sealed class PrintLabelEndpoint : IGroupedEndpoint<AdminOrdersGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/print-label", Handle);
+        group.MapPost("/print-label", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

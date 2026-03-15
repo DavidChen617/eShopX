@@ -2,12 +2,13 @@ using eShopX.Application.Interfaces;
 
 namespace eShopX.Endpoints.Admin;
 
-
 public sealed class UploadImageEndpoint : IGroupedEndpoint<AdminProductsGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/images/upload", Handle).DisableAntiforgery();
+        group.MapPost("/images/upload", Handle)
+            .DisableAntiforgery()
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

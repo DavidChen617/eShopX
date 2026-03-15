@@ -9,7 +9,8 @@ public sealed class PayPalCancelEndpoint : IGroupedEndpoint<PaymentsGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapGet("/paypal/cancel", Handle);
+        group.MapGet("/paypal/cancel", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

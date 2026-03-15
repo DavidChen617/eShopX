@@ -9,7 +9,8 @@ public sealed class StartLogisticsSelectionEndpoint : IGroupedEndpoint<OrdersGro
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/logistics/start", Handle);
+        group.MapPost("/logistics/start", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

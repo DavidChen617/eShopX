@@ -6,7 +6,8 @@ public sealed class ClearCartEndpoint : IGroupedEndpoint<CartGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapDelete("/", Handle);
+        group.MapDelete("/", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

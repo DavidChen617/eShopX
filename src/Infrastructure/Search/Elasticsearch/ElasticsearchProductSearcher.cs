@@ -2,7 +2,6 @@ using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using eShopX.Application.Exceptions;
 using Infrastructure.Search.Embedding;
-using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Search.Elasticsearch;
 
@@ -114,7 +113,6 @@ public class ProductSearchDocument
 {
     public Guid ProductId { get; set; }
     public Guid? CategoryId { get; set; }
-    public Guid? SellerId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public decimal Price { get; set; }

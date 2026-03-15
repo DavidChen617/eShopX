@@ -1,3 +1,5 @@
+using eShopX.Domain.Aggregates.Products;
+
 namespace eShopX.Application.UseCases.Products;
 
 internal static class ProductCacheKeys

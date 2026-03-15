@@ -1,6 +1,5 @@
 using eShopX.Application.UseCases.Orders;
 using eShopX.Application.UseCases.Shipments;
-using Infrastructure.Logistics;
 using Infrastructure.Logistics.EcPay;
 
 namespace eShopX.Endpoints.Admin;
@@ -9,7 +8,8 @@ public sealed class ShipOrderEndpoint : IGroupedEndpoint<AdminOrdersGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/{orderId:guid}/ship", Handle);
+        group.MapPost("/{orderId:guid}/ship", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

@@ -88,7 +88,7 @@ public class PaymentGateway(
 
         string GetUrl(string type)
         {
-            return site.DomainUrl + "/api/payments/paypal/" + type + "?orderId=" + order.Id;
+            return site.DomainUrl + "/api/v1/payments/paypal/" + type + "?orderId=" + order.Id;
         }
     }
 }

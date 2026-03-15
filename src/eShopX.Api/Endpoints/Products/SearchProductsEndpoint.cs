@@ -7,7 +7,8 @@ public sealed class SearchProductsEndpoint : IGroupedEndpoint<ProductsGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapGet("/search", Handle);
+        group.MapGet("/search", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

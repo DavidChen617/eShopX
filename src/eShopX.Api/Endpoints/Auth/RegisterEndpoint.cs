@@ -6,7 +6,8 @@ public sealed class RegisterEndpoint : IGroupedEndpoint<AuthGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/register", Handle);
+        group.MapPost("/register", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

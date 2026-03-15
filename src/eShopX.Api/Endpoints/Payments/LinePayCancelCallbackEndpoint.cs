@@ -9,7 +9,8 @@ public sealed class LinePayCancelCallbackEndpoint : IGroupedEndpoint<PaymentsGro
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapGet("/linepay/cancel", Handle);
+        group.MapGet("/linepay/cancel", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

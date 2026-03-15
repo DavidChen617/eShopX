@@ -12,7 +12,8 @@ public sealed class PayPalReturnEndpoint : IGroupedEndpoint<PaymentsGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapGet("/paypal/return", Handle);
+        group.MapGet("/paypal/return", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

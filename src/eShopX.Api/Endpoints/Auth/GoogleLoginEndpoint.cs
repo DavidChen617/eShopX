@@ -7,7 +7,8 @@ public sealed class GoogleLoginEndpoint : IGroupedEndpoint<AuthGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/google", Handle);
+        group.MapPost("/google", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

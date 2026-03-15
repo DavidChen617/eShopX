@@ -6,7 +6,8 @@ public sealed class RefreshTokenEndpoint : IGroupedEndpoint<AuthGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/refresh", Handle);
+        group.MapPost("/refresh", Handle)
+            .MapToApiVersion(1);
     }
 
     private static async Task<IResult> Handle(

@@ -1,42 +1,25 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
-using eShopX.Common.Exceptions.Handlers;
-using eShopX.Common.Logging;
-using eShopX.Common.Mapping;
-using eShopX.Common.Proxy;
+using CoreMesh.Dispatching.Extensions;
+using CoreMesh.Endpoints;
+using CoreMesh.Result.AspNetCore;
 using Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpoints();
+builder.Services.AddEndpoints(typeof(Program).Assembly);
 
 builder.Services.ConfigureInfrastructureServices(builder.Configuration);
 
-builder.Services.AddMediator(typeof(IAssemblyMarker).Assembly)
-    .AddValidators(typeof(IAssemblyMarker).Assembly)
-    .AddValidationBehavior()
-    .AddLoggingBehavior();
-
-builder.Services.AddMapping(typeof(IAssemblyMarker).Assembly, typeof(Dependencies).Assembly);
+builder.Services.AddDispatching(typeof(eShopX.Application.AssemblyMarker).Assembly);
 
 builder.Services.AddProblemDetails();
-
-builder.Services
-    .AddExceptionHandler<NotFoundExceptionHandler>()
-    .AddExceptionHandler<ValidationExceptionHandler>()
-    .AddExceptionHandler<ConflictExceptionHandler>()
-    .AddExceptionHandler<ForbiddenExceptionHandler>()
-    .AddExceptionHandler<GlobalExceptionHandler>();
-
-builder.Services.DecorateWithDispatchProxyFromAttributes([
-    typeof(Dependencies).Assembly, typeof(IAssemblyMarker).Assembly
-]);
+builder.Services.AddCoreMeshExceptionHandling();
 
 builder.Services.AddHttpClient();
-
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddSingleton<IScopeIdAccessor, ScopeIdAccessor>();
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
@@ -78,43 +61,19 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Rate Limiting - Current limiting and anti-brushing
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-    // Global current limit: 100 times per second per IP
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
             factory: _ => new FixedWindowRateLimiterOptions { PermitLimit = 100, Window = TimeSpan.FromSeconds(1) }));
-
-    // Flash Sale only: 5 per second per user
-    options.AddPolicy("FlashSale", context =>
-        RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: context.User.Identity?.Name ?? context.Connection.RemoteIpAddress?.ToString() ?? "Unknown",
-            factory: _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromSeconds(1) }));
 });
 
 builder.Services.AddOpenApi();
 
-builder.Logging.ClearProviders()
-    .AddCustomLogger<PostgresLogDbProvider>(options =>
-    {
-        options.EnableConsole = true;
-        options.EnableFile = false;
-        options.EnableDb = false;
-        options.LogDirectory = "Logs";
-        options.FilePrefix = "app-";
-        options.MinLevel = LogLevel.Information;
-        options.IncludeThreadId = false;
-    });
-
 var app = builder.Build();
-
-using var scope = app.Services.CreateScope();
-var db = scope.ServiceProvider.GetRequiredService<EShopContext>();
-await DbInitializer.SeedAsync(db);
 
 if (app.Environment.IsDevelopment())
 {
@@ -123,12 +82,11 @@ if (app.Environment.IsDevelopment())
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.UseHttpsRedirection();
-app.UseScopeId();
 app.UseCors("MyPolicy");
 app.UseAuthentication();
 app.UseRateLimiter();
 app.UseAuthorization();
+app.UseCoreMeshExceptionHandling();
 app.MapEndpoints();
-app.UseExceptionHandler();
 
 app.Run();

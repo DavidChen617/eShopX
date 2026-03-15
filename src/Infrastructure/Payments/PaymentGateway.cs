@@ -4,24 +4,23 @@ using Infrastructure.Options;
 using Infrastructure.Payments.Line;
 using Infrastructure.Payments.Line.Models;
 using Infrastructure.Payments.PayPal;
+using Infrastructure.Payments.PayPal.Models;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Payments;
 
 public class PaymentGateway(
     LinePayService linePay,
-    IOptions<LinePayOptions> linePayOptions,
     PayPalService payPal,
-    IOptions<PayPalOptions> payPalOptions,
     IOptions<SiteOptions> siteOptions) : IPaymentGateway
 {
     public Task<PaymentGatewayResult> RequestAsync(PaymentGatewayRequest request, CancellationToken ct = default)
         => request.Method switch
         {
             PaymentMethod.LinePay => RequestLinePayAsync(request, ct),
-            PaymentMethod.PayPal  => RequestPayPalAsync(request, ct),
+            PaymentMethod.PayPal => RequestPayPalAsync(request, ct),
             _ => Task.FromResult(new PaymentGatewayResult(false, null, "unsupported_method",
-                    $"Payment method {request.Method} is not supported."))
+                $"Payment method {request.Method} is not supported."))
         };
 
     private async Task<PaymentGatewayResult> RequestLinePayAsync(PaymentGatewayRequest request, CancellationToken ct)
@@ -47,8 +46,8 @@ public class PaymentGateway(
                 )
             ],
             RedirectUrls: new LinePayRedirectUrls(
-                ConfirmUrl: $"{site.FrontendDomain}/payments/linepay/confirm?orderId={order.Id}",
-                CancelUrl: $"{site.FrontendDomain}/payments/linepay/cancel?orderId={order.Id}"
+                ConfirmUrl: GetUrl("confirm"),
+                CancelUrl: GetUrl("cancel")
             )
         );
 
@@ -57,6 +56,11 @@ public class PaymentGateway(
             return new PaymentGatewayResult(false, null, "linepay_error", response.ReturnMessage);
 
         return new PaymentGatewayResult(true, response.Info?.PaymentUrl?.Web);
+
+        string GetUrl(string type)
+        {
+            return site.FrontendDomain + "/payments/linepay/" + type + "?orderId=" + order.Id;
+        }
     }
 
     private async Task<PaymentGatewayResult> RequestPayPalAsync(PaymentGatewayRequest request, CancellationToken ct)
@@ -73,13 +77,18 @@ public class PaymentGateway(
                 )
             ],
             ApplicationContext: new PayPalApplicationContext(
-                ReturnUrl: $"{site.DomainUrl}/api/payments/paypal/return?orderId={order.Id}",
-                CancelUrl: $"{site.DomainUrl}/api/payments/paypal/cancel?orderId={order.Id}"
+                ReturnUrl: GetUrl("return"),
+                CancelUrl: GetUrl("cancel")
             )
         );
 
         var response = await payPal.CreateAsync(req, ct);
         var paymentUrl = response.Links?.FirstOrDefault(l => l.Rel == "approve")?.Href;
         return new PaymentGatewayResult(true, paymentUrl);
+
+        string GetUrl(string type)
+        {
+            return site.DomainUrl + "/api/payments/paypal/" + type + "?orderId=" + order.Id;
+        }
     }
 }

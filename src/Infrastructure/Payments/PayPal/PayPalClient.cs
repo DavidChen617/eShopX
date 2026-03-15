@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using eShopX.Application.Exceptions;
 using Infrastructure.Options;
+using Infrastructure.Payments.PayPal.Models;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Payments.PayPal;

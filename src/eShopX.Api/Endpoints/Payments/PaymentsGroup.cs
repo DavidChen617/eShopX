@@ -1,7 +1,4 @@
-using CoreMesh.Endpoints;
-using Microsoft.AspNetCore.Routing;
-
-namespace eShopX.Api.Endpoints.Payments;
+namespace eShopX.Endpoints.Payments;
 
 public sealed class PaymentsGroup : IGroupEndpoint
 {

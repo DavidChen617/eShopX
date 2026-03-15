@@ -1,13 +1,9 @@
-using CoreMesh.Dispatching.Abstractions;
-using CoreMesh.Endpoints;
-using CoreMesh.Result.Http;
 using eShopX.Application.UseCases.Orders;
 using eShopX.Application.UseCases.Shipments;
 using Infrastructure.Logistics;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+using Infrastructure.Logistics.EcPay;
 
-namespace eShopX.Api.Endpoints.Admin;
+namespace eShopX.Endpoints.Admin;
 
 public sealed class ShipOrderEndpoint : IGroupedEndpoint<AdminOrdersGroup>
 {
@@ -19,7 +15,7 @@ public sealed class ShipOrderEndpoint : IGroupedEndpoint<AdminOrdersGroup>
     private static async Task<IResult> Handle(
         Guid orderId,
         IDispatcher dispatcher,
-        IECPayLogisticsService ecpay,
+        EcPayCreateByTempTradeClient ecpay,
         CancellationToken ct)
     {
         var shipmentResult = await dispatcher.Send(new GetShipmentByOrderIdQuery(orderId), ct);

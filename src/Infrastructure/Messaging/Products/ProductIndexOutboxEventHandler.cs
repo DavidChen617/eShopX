@@ -1,11 +1,10 @@
 using System.Text.Json;
-using eShopX.Application.Interfaces;
 using eShopX.Application.UseCases.Outbox;
 
 namespace Infrastructure.Messaging.Products;
 
 public class ProductIndexOutboxEventHandler(
-    IProductSearchIndexSyncService syncService) : IOutboxEventHandler
+    IProductSearchIndexSynchronizer synchronizer) : IOutboxEventHandler
 {
     public bool CanHandle(string eventType) =>
         eventType is OutboxEventFactory.ProductUpsertEventType or OutboxEventFactory.ProductDeleteEventType;
@@ -18,10 +17,10 @@ public class ProductIndexOutboxEventHandler(
         switch (evt.EventType)
         {
             case OutboxEventFactory.ProductUpsertEventType:
-                await syncService.UpsertProductAsync(payload.ProductId, ct);
+                await synchronizer.UpsertProductAsync(payload.ProductId, ct);
                 break;
             case OutboxEventFactory.ProductDeleteEventType:
-                await syncService.DeleteProductAsync(payload.ProductId, ct);
+                await synchronizer.DeleteProductAsync(payload.ProductId, ct);
                 break;
         }
     }

@@ -1,6 +1,5 @@
 using eShopX.Application.Interfaces.Repositories;
 using eShopX.Domain.Aggregates.Payments;
-using Infrastructure.Data;
 
 namespace Infrastructure.Data.Repositories;
 

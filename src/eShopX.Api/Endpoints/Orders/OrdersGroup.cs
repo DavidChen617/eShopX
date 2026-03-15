@@ -1,6 +1,4 @@
-using CoreMesh.Endpoints;
-
-namespace eShopX.Api.Endpoints.Orders;
+namespace eShopX.Endpoints.Orders;
 
 public sealed class OrdersGroup : IGroupEndpoint
 {

@@ -50,16 +50,26 @@ public record ProductResponse(
 
 public class GetProductByIdHandler(
     IProductRepository productRepository,
+    ICacher cacher,
     IMapper mapper) : IRequestHandler<GetProductByIdQuery, Result<ProductResponse>>
 {
     public async Task<Result<ProductResponse>> Handle(
         GetProductByIdQuery query,
         CancellationToken cancellationToken = default)
     {
+        var cacheKey = ProductCacheKeys.Product(query.ProductId);
+
+        var cached = await cacher.GetAsync<ProductResponse>(cacheKey, cancellationToken);
+        if (cached is not null)
+            return Result<ProductResponse>.Ok(cached);
+
         var product = await productRepository.GetByIdAsync(query.ProductId, cancellationToken);
         if (product is null)
             return Result<ProductResponse>.NotFound(new Error("product_not_found", "Product not found."));
 
-        return Result<ProductResponse>.Ok(mapper.Map<Product, ProductResponse>(product));
+        var response = mapper.Map<Product, ProductResponse>(product);
+        await cacher.SetAsync(cacheKey, response, TimeSpan.FromMinutes(30), cancellationToken);
+
+        return Result<ProductResponse>.Ok(response);
     }
 }

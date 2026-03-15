@@ -5,7 +5,4 @@
     <Project Path="src/eShopX.Api/eShopX.Api.csproj" />
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/UnitTests/UnitTests.csproj" />
-  </Folder>
 </Solution>

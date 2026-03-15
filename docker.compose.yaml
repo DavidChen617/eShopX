@@ -80,9 +80,11 @@ services:
       LinePay__ChannelSecret: ${LINEPAY_CHANNEL_SECRET:-}
       LinePay__ChannelId: ${LINEPAY_CHANNEL_ID:-}
       LinePay__BaseUrl: ${LINEPAY_BASE_URL:-https://sandbox-api-pay.line.me}
+      LineAuth__BaseUrl: ${LINEAUTH_BASE_URL:-https://api.line.me/oauth2/v2.1}
       LineAuth__RedirectUri: ${LINEAUTH_REDIRECT_URI:-}
       LineAuth__ChannelSecret: ${LINEAUTH_CHANNEL_SECRET:-}
       LineAuth__ChannelId: ${LINEAUTH_CHANNEL_ID:-}
+      GoogleAuth__BaseUrl: ${GOOGLE_BASE_URL:-https://oauth2.googleapis.com}
       GoogleAuth__RedirectUrl: ${GOOGLE_REDIRECT_URL:-}
       GoogleAuth__ClientSecret: ${GOOGLE_CLIENT_SECRET:-}
       GoogleAuth__ClientId: ${GOOGLE_CLIENT_ID:-}

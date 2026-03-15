@@ -1,10 +1,9 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using eShopX.Application.Exceptions;
-using eShopX.Application.Interfaces;
 using AppImageUploadResult = eShopX.Application.Interfaces.ImageUploadResult;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Image;
 
 public class ImageStorage(Cloudinary cloudinary) : IImageStorage
 {

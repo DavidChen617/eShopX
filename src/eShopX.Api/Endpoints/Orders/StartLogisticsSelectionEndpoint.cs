@@ -1,6 +1,7 @@
-using eShopX.Api.Endpoints.Orders;
 using eShopX.Application.UseCases.Logistics;
-using Infrastructure.Logistics;
+using Infrastructure.Logistics.EcPay;
+using Infrastructure.Options;
+using Microsoft.Extensions.Options;
 
 namespace eShopX.Endpoints.Orders;
 
@@ -15,29 +16,27 @@ public sealed class StartLogisticsSelectionEndpoint : IGroupedEndpoint<OrdersGro
         StartLogisticsSelectionRequest request,
         ClaimsPrincipal user,
         IDispatcher dispatcher,
-        IECPayLogisticsService ecpay,
-        IHttpContextAccessor httpContextAccessor,
+        EcPayLogisticsSelectionClient ecpay,
+        IOptions<SiteOptions> siteOptions,
         CancellationToken ct)
     {
         var userId = Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         var result = await dispatcher.Send(new StartLogisticsSelectionCommand(userId), ct);
-        if (!result.IsSuccess) 
+        if (!result.IsSuccess)
             return result.ToHttpResult();
 
-        var token = result.Data!.Token;
-        var httpContext = httpContextAccessor.HttpContext!;
-        var baseUrl = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
-        var serverReplyUrl = $"{baseUrl}/api/ecpay/client-reply?token={token}";
-
         var html = await ecpay.GetSelectionFormHtmlAsync(
-            serverReplyUrl,
+            ServerReplyUrl(),
             request.GoodsAmount,
             request.ReceiverName,
             request.ReceiverPhone,
             ct);
 
         return Results.Content(html, "text/html");
+
+        string ServerReplyUrl() =>
+            siteOptions.Value.DomainUrl + "/api/ecpay/client-reply?token=" + result.Data!.Token;
     }
 }
 

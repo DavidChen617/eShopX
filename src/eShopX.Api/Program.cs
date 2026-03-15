@@ -3,22 +3,17 @@ using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using CoreMesh.Dispatching.Extensions;
 using CoreMesh.Endpoints.Extensions;
-using CoreMesh.Result.Extensions;
-using Infrastructure.Data;
+using Infrastructure.Search.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEndpoints(typeof(Program).Assembly);
-
-builder.Services.ConfigureInfrastructureServices(builder.Configuration);
-
-builder.Services.AddDispatching(typeof(eShopX.Application.AssemblyMarker).Assembly);
-
-builder.Services.AddProblemDetails();
-builder.Services.AddCoreMeshExceptionHandling();
+builder.Services
+    .AddEndpoints([typeof(Program).Assembly])
+    .AddDispatching([typeof(eShopX.Application.AssemblyMarker).Assembly])
+    .AddCoreMeshExceptionHandling()
+    .AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddHttpClient();
-builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -75,12 +70,17 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var esInit = scope.ServiceProvider.GetRequiredService<EsIndexInitializer>();
+    await esInit.EnsureIndexAsync();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.UseHttpsRedirection();
 app.UseCors("MyPolicy");
 app.UseAuthentication();

@@ -1,12 +1,7 @@
-using CoreMesh.Dispatching.Abstractions;
-using CoreMesh.Endpoints;
-using CoreMesh.Result.Http;
 using eShopX.Application.UseCases.Orders;
 using eShopX.Domain.Aggregates.Orders;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 
-namespace eShopX.Api.Endpoints.Admin;
+namespace eShopX.Endpoints.Admin;
 
 public sealed class AdminGetOrdersEndpoint : IGroupedEndpoint<AdminOrdersGroup>
 {

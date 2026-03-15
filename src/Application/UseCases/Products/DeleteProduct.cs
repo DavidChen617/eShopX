@@ -10,7 +10,8 @@ public record DeleteProductCommand(Guid ProductId) : IRequest<Result>;
 
 public class DeleteProductHandler(
     IProductRepository productRepository,
-    IUnitOfWork unitOfWork) : IRequestHandler<DeleteProductCommand, Result>
+    IUnitOfWork unitOfWork,
+    ICacher cacher) : IRequestHandler<DeleteProductCommand, Result>
 {
     public async Task<Result> Handle(
         DeleteProductCommand command,
@@ -23,6 +24,8 @@ public class DeleteProductHandler(
         product.Delete();
         productRepository.Delete(product);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await cacher.RemoveAsync(ProductCacheKeys.Product(command.ProductId), cancellationToken);
 
         return Result.NoContent();
     }

@@ -27,6 +27,7 @@ public record UpdateProductCommand(
 public class UpdateProductHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
+    ICacher cacher,
     IValidator validator) : IRequestHandler<UpdateProductCommand, Result>
 {
     public async Task<Result> Handle(
@@ -44,6 +45,8 @@ public class UpdateProductHandler(
         product.Update(command.Name, command.Description, command.Audience, command.CategoryId);
         productRepository.Update(product);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await cacher.RemoveAsync(ProductCacheKeys.Product(command.ProductId), cancellationToken);
 
         return Result.NoContent();
     }

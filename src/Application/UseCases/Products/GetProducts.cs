@@ -34,12 +34,20 @@ public record GetProductsResponse(
 
 public class GetProductsHandler(
     IProductRepository productRepository,
+    ICacher cacher,
     IMapper mapper) : IRequestHandler<GetProductsQuery, Result<GetProductsResponse>>
 {
     public async Task<Result<GetProductsResponse>> Handle(
         GetProductsQuery query,
         CancellationToken cancellationToken = default)
     {
+        var cacheKey = ProductCacheKeys.ProductList(
+            query.CategoryId, query.Audience, query.IsActive, query.Page, query.PageSize);
+
+        var cached = await cacher.GetAsync<GetProductsResponse>(cacheKey, cancellationToken);
+        if (cached is not null)
+            return Result<GetProductsResponse>.Ok(cached);
+
         var (items, totalCount) = await productRepository.GetPagedAsync(
             query.CategoryId,
             query.Audience,
@@ -49,8 +57,9 @@ public class GetProductsHandler(
             cancellationToken);
 
         var responses = mapper.Map<Product, ProductSummaryResponse>(items).ToList();
+        var response = new GetProductsResponse(responses, totalCount, query.Page, query.PageSize);
+        await cacher.SetAsync(cacheKey, response, TimeSpan.FromMinutes(5), cancellationToken);
 
-        return Result<GetProductsResponse>.Ok(
-            new GetProductsResponse(responses, totalCount, query.Page, query.PageSize));
+        return Result<GetProductsResponse>.Ok(response);
     }
 }

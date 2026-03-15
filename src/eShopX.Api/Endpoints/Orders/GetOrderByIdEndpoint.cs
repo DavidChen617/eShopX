@@ -1,12 +1,6 @@
-using System.Security.Claims;
-using CoreMesh.Dispatching.Abstractions;
-using CoreMesh.Endpoints;
-using CoreMesh.Result.Http;
 using eShopX.Application.UseCases.Orders;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 
-namespace eShopX.Api.Endpoints.Orders;
+namespace eShopX.Endpoints.Orders;
 
 public sealed class GetOrderByIdEndpoint : IGroupedEndpoint<OrdersGroup>
 {

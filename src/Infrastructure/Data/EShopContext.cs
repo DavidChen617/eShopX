@@ -1,8 +1,14 @@
+using CoreMesh.Dispatching.Abstractions;
+using eShopX.Application.UseCases.Outbox;
+using eShopX.Domain.Aggregates;
 using eShopX.Domain.Aggregates.Carts;
 using eShopX.Domain.Aggregates.Categories;
 using eShopX.Domain.Aggregates.Orders;
 using eShopX.Domain.Aggregates.Payments;
 using eShopX.Domain.Aggregates.Products;
+using eShopX.Domain.Aggregates.Payments.Events;
+using eShopX.Domain.Aggregates.Products.Events;
+using eShopX.Domain.Aggregates.Shipments.Events;
 using eShopX.Domain.Aggregates.Shipments;
 using eShopX.Domain.Aggregates.Sizes;
 using eShopX.Domain.Aggregates.Tags;
@@ -46,6 +52,43 @@ public class EShopContext(DbContextOptions<EShopContext> options) : DbContext(op
 
     // Outbox
     public DbSet<OutboxEvent> OutboxEvents { get; set; }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ConvertDomainEventsToOutboxEvents();
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void ConvertDomainEventsToOutboxEvents()
+    {
+        var aggregates = ChangeTracker
+            .Entries<AggregateRoot>()
+            .Where(e => e.Entity.DomainEvents.Count > 0)
+            .Select(e => e.Entity)
+            .ToList();
+
+        var outboxEvents = aggregates
+            .SelectMany(a => a.DomainEvents)
+            .Select(ToOutboxEvent)
+            .OfType<OutboxEvent>()
+            .ToList();
+
+        OutboxEvents.AddRange(outboxEvents);
+
+        foreach (var aggregate in aggregates)
+            aggregate.ClearDomainEvents();
+    }
+
+    private static OutboxEvent? ToOutboxEvent(INotification domainEvent) => domainEvent switch
+    {
+        ProductCreatedEvent e  => OutboxEventFactory.CreateProductUpsert(e.ProductId),
+        ProductUpdatedEvent e  => OutboxEventFactory.CreateProductUpsert(e.ProductId),
+        ProductDeletedEvent e  => OutboxEventFactory.CreateProductDelete(e.ProductId),
+        PaymentPaidEvent e     => OutboxEventFactory.CreatePaymentPaid(e.OrderId),
+        PaymentFailedEvent e   => OutboxEventFactory.CreatePaymentFailed(e.OrderId),
+        ShipmentCompletedEvent e => OutboxEventFactory.CreateShipmentCompleted(e.OrderId),
+        _ => null
+    };
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

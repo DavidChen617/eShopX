@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using CloudinaryDotNet;
@@ -5,9 +6,8 @@ using Confluent.Kafka;
 using Confluent.Kafka.Admin;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
 using Infrastructure.Auth;
+using Infrastructure.Auth.ThirdPartyAuth;
 using Infrastructure.Auth.ThirdPartyAuth.Google;
 using Infrastructure.Auth.ThirdPartyAuth.Google.Models;
 using Infrastructure.Auth.ThirdPartyAuth.Line;
@@ -15,24 +15,22 @@ using Infrastructure.Auth.ThirdPartyAuth.Line.Models;
 using Infrastructure.Caches;
 using Infrastructure.Data;
 using Infrastructure.Data.Repositories;
-using eShopX.Application.Interfaces.Repositories;
-using Infrastructure.Auth.ThirdPartyAuth;
 using Infrastructure.Email;
-using Infrastructure.Logistics;
+using Infrastructure.Image;
 using Infrastructure.Logistics.EcPay;
 using Infrastructure.Messaging;
 using Infrastructure.Messaging.Orders;
+using Infrastructure.Messaging.Payments;
 using Infrastructure.Messaging.Products;
+using Infrastructure.Messaging.Shipments;
 using Infrastructure.Payments;
 using Infrastructure.Payments.Line;
 using Infrastructure.Payments.PayPal;
 using Infrastructure.Search.Elasticsearch;
-using Infrastructure.Services;
+using Infrastructure.Search.Embedding;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
-using HttpMethod = System.Net.Http.HttpMethod;
 
 namespace Infrastructure;
 
@@ -118,104 +116,120 @@ public static class Dependencies
         services.AddScoped<IMailSender, MailKitEmailSender>();
 
         // Google Auth
-        services.Configure<GoogleAuthOptions>(configuration.GetSection(GoogleAuthOptions.OptionKey));
-        services.AddHttpClient<GoogleAuthClient>(client =>
-        {
-            client.BaseAddress = new Uri("https://oauth2.googleapis.com");
-        });
-        services.AddScoped<IThirdPartyAuthService<GoogleAuthRequest, GoogleAuthResponse>, GoogleAuthService>();
+        services.Configure<GoogleAuthOptions>(configuration.GetSection(GoogleAuthOptions.OptionKey))
+            .AddScoped<IThirdPartyAuthService<GoogleAuthRequest, GoogleAuthResponse>, GoogleAuthService>()
+            .AddHttpClient<GoogleAuthClient>((sp, client) =>
+            {
+                var opt = sp.GetRequiredService<IOptions<GoogleAuthOptions>>().Value;
+                client.BaseAddress = new Uri(opt.BaseUrl + "/");
+            });
 
         // LINE Auth
-        services.Configure<LineAuthOptions>(configuration.GetSection(LineAuthOptions.OptionKey));
-        services.AddHttpClient<LineAuthClient>(client =>
-        {
-            client.BaseAddress = new Uri("https://api.line.me/oauth2/v2.1/");
-        });
-        
-        services.AddScoped<IThirdPartyAuthService<LineAuthRequest, LineAuthResponse>, LineAuthService>();
+        services.Configure<LineAuthOptions>(configuration.GetSection(LineAuthOptions.OptionKey))
+            .AddScoped<IThirdPartyAuthService<LineAuthRequest, LineAuthResponse>, LineAuthService>()
+            .AddHttpClient<LineAuthClient>((sp, client) =>
+            {
+                var opt = sp.GetRequiredService<IOptions<LineAuthOptions>>().Value;
+                client.BaseAddress = new Uri(opt.BaseUrl + "/");
+            });
 
         // LinePay
-        services.Configure<LinePayOptions>(configuration.GetSection(LinePayOptions.OptionKey));
-        services.AddHttpClient<LinePayClient>((sp, client) =>
-        {
-            var options = sp.GetRequiredService<IOptions<LinePayOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseUrl + "/v3/payments/");
-        });
-        services.AddScoped<LinePayService>();
+        services.Configure<LinePayOptions>(configuration.GetSection(LinePayOptions.OptionKey))
+            .AddScoped<LinePayService>()
+            .AddHttpClient<LinePayClient>((sp, client) =>
+            {
+                var options = sp.GetRequiredService<IOptions<LinePayOptions>>().Value;
+                client.BaseAddress = new Uri(options.BaseUrl + "/v3/payments/");
+            });
 
         // PayPal
-        services.Configure<PayPalOptions>(configuration.GetSection(PayPalOptions.OptionKey));
-        services.AddHttpClient<PayPalClient>((sp, client) =>
-        {
-            var opt = sp.GetRequiredService<IOptions<PayPalOptions>>().Value;
-            client.BaseAddress = new Uri(opt.BaseUrl);
-        });
-        services.AddScoped<PayPalService>();
+        services.Configure<PayPalOptions>(configuration.GetSection(PayPalOptions.OptionKey))
+            .AddScoped<PayPalService>()
+            .AddHttpClient<PayPalClient>((sp, client) =>
+            {
+                var opt = sp.GetRequiredService<IOptions<PayPalOptions>>().Value;
+                client.BaseAddress = new Uri(opt.BaseUrl);
+            });
+        
         services.AddScoped<IPaymentGateway, PaymentGateway>();
 
         // ECPay
-        services.Configure<ECPayOptions>(configuration.GetSection(ECPayOptions.OptionKey));
-        
-        services.AddHttpClient<EcPayClient>((sp, client) =>
-        {
-            client.BaseAddress = new Uri(sp.GetRequiredService<IOptions<ECPayOptions>>().Value.BaseUrl +  "/Express/v2");
-        });
-        
-        services.AddScoped<EcPayLogisticsSelectionClient>();
-        services.AddScoped<EcPayCreateByTempTradeClient>();
-        services.AddScoped<EcPayPrintTradeDocumentClient>();
+        services.Configure<EcPayOptions>(configuration.GetSection(EcPayOptions.OptionKey))
+            .AddScoped<EcPayLogisticsSelectionClient>()
+            .AddScoped<EcPayCreateByTempTradeClient>()
+            .AddScoped<EcPayPrintTradeDocumentClient>()
+            .AddHttpClient<EcPayClient>((sp, client) =>
+            {
+                client.BaseAddress =
+                    new Uri(sp.GetRequiredService<IOptions<EcPayOptions>>().Value.BaseUrl + "/Express/v2");
+            });
 
         // Kafka
-        services.Configure<KafkaOptions>(configuration.GetSection(KafkaOptions.OptionKey));
-        services.AddSingleton<IProducer<string, string>>(sp =>
-        {
-            var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
-            return new ProducerBuilder<string, string>(kafkaOptions.Producer).Build();
-        });
-        services.AddScoped<IConsumer<string, string>>(sp =>
-        {
-            var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
-            return new ConsumerBuilder<string, string>(kafkaOptions.Consumer).Build();
-        });
-        services.AddSingleton<IOutboxEventPublisher, ProductIndexOutboxEventPublisher>();
-        services.AddSingleton<AdminClientConfig>(sp =>
-        {
-            var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
-            return new AdminClientConfig { BootstrapServers = kafkaOptions.Producer.BootstrapServers };
-        });
-        services.AddSingleton<List<TopicSpecification>>(sp =>
-        {
-            var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
-            return
-            [
-                new TopicSpecification
-                {
-                    Name = kafkaOptions.OutboxEventTopic, NumPartitions = 3, ReplicationFactor = 1
-                }
-            ];
-        });
-        services.AddSingleton<IAdminClient>(sp =>
-            new AdminClientBuilder(sp.GetRequiredService<AdminClientConfig>()).Build());
+        services.Configure<KafkaOptions>(configuration.GetSection(KafkaOptions.OptionKey))
+            .AddSingleton<IProducer<string, string>>(sp =>
+            {
+                var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+                return new ProducerBuilder<string, string>(kafkaOptions.Producer).Build();
+            })
+            .AddScoped<IConsumer<string, string>>(sp =>
+            {
+                var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+                return new ConsumerBuilder<string, string>(kafkaOptions.Consumer).Build();
+            })
+            .AddSingleton<IOutboxEventPublisher, ProductIndexOutboxEventPublisher>()
+            .AddSingleton<AdminClientConfig>(sp =>
+            {
+                var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+                return new AdminClientConfig { BootstrapServers = kafkaOptions.Producer.BootstrapServers };
+            })
+            .AddSingleton<List<TopicSpecification>>(sp =>
+            {
+                var kafkaOptions = sp.GetRequiredService<IOptions<KafkaOptions>>().Value;
+                return
+                [
+                    new TopicSpecification
+                    {
+                        Name = kafkaOptions.OutboxEventTopic, NumPartitions = 3, ReplicationFactor = 1
+                    }
+                ];
+            })
+            .AddSingleton<IAdminClient>(sp =>
+                new AdminClientBuilder(sp.GetRequiredService<AdminClientConfig>()).Build());
 
         services
             .AddHostedService<MessageTopicInitializer>()
             .AddHostedService<OutboxPublisherHostedService>()
             .AddHostedService<OutboxConsumerHostedService>();
 
+        // HuggingFace Embedding
+        services.Configure<HuggingFaceOptions>(configuration.GetSection(HuggingFaceOptions.OptionKey))
+            .AddHttpClient<IEmbeddingClient, HuggingFaceEmbeddingClient>((sp, client) =>
+            {
+                var options = sp.GetRequiredService<IOptions<HuggingFaceOptions>>();
+
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", options.Value.Token);
+                client.BaseAddress = new Uri(options.Value.EmbeddingUrl);
+            });
+
         // Elasticsearch
-        services.Configure<ElasticsearchOptions>(configuration.GetSection(ElasticsearchOptions.OptionKey));
-        services.AddSingleton(sp =>
-        {
-            var opt = sp.GetRequiredService<IOptions<ElasticsearchOptions>>().Value;
-            var settings = new ElasticsearchClientSettings(new Uri(opt.Url));
-            if (!string.IsNullOrWhiteSpace(opt.Username))
-                settings.Authentication(new BasicAuthentication(opt.Username, opt.Password ?? string.Empty));
-            return new ElasticsearchClient(settings);
-        });
-        services.AddScoped<IProductSearcher, ElasticsearchProductSearcher>();
-        services.AddScoped<IProductSearchIndexService, ReindexProductsService>();
-        services.AddScoped<IProductSearchIndexSynchronizer, ProductSearchIndexSynchronizer>();
-        services.AddScoped<IOutboxEventHandler, ProductIndexOutboxEventHandler>();
-        services.AddScoped<IOutboxEventHandler, OrderShippedEmailHandler>();
+        services.Configure<ElasticsearchOptions>(configuration.GetSection(ElasticsearchOptions.OptionKey))
+            .AddSingleton(sp =>
+            {
+                var opt = sp.GetRequiredService<IOptions<ElasticsearchOptions>>().Value;
+                var settings = new ElasticsearchClientSettings(new Uri(opt.Url));
+                if (!string.IsNullOrWhiteSpace(opt.Username))
+                    settings.Authentication(new BasicAuthentication(opt.Username, opt.Password ?? string.Empty));
+                return new ElasticsearchClient(settings);
+            })
+            .AddScoped<EsIndexInitializer>()
+            .AddScoped<IProductSearcher, ElasticsearchProductSearcher>()
+            .AddScoped<IProductSearchIndexService, ProductReindexer>()
+            .AddScoped<IProductSearchIndexSynchronizer, ProductSearchIndexSynchronizer>()
+            .AddScoped<IOutboxEventHandler, ProductIndexOutboxEventHandler>()
+            .AddScoped<IOutboxEventHandler, OrderShippedEmailHandler>()
+            .AddScoped<IOutboxEventHandler, PaymentPaidEmailHandler>()
+            .AddScoped<IOutboxEventHandler, PaymentFailedEmailHandler>()
+            .AddScoped<IOutboxEventHandler, ShipmentCompletedEmailHandler>();
     }
 }

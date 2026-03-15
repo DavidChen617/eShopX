@@ -3,6 +3,7 @@ using eShopX.Application.UseCases.Payments;
 using eShopX.Domain.Aggregates.Payments;
 using Infrastructure.Options;
 using Infrastructure.Payments.PayPal;
+using Infrastructure.Payments.PayPal.Models;
 using Microsoft.Extensions.Options;
 
 namespace eShopX.Endpoints.Payments;

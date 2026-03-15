@@ -1,5 +1,4 @@
 using System.Text.Json;
-using eShopX.Application.Interfaces;
 using StackExchange.Redis;
 
 namespace Infrastructure.Caches;

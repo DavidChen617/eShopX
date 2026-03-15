@@ -1,7 +1,4 @@
-using CoreMesh.Endpoints;
-using Microsoft.AspNetCore.Routing;
-
-namespace eShopX.Api.Endpoints.Admin;
+namespace eShopX.Endpoints.Admin;
 
 public sealed class AdminOrdersGroup : IGroupEndpoint
 {

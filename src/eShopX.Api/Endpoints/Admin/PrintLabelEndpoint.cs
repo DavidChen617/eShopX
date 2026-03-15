@@ -1,9 +1,7 @@
-using CoreMesh.Endpoints;
 using Infrastructure.Logistics;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+using Infrastructure.Logistics.EcPay;
 
-namespace eShopX.Api.Endpoints.Admin;
+namespace eShopX.Endpoints.Admin;
 
 public sealed class PrintLabelEndpoint : IGroupedEndpoint<AdminOrdersGroup>
 {
@@ -14,7 +12,7 @@ public sealed class PrintLabelEndpoint : IGroupedEndpoint<AdminOrdersGroup>
 
     private static async Task<IResult> Handle(
         PrintLabelRequest request,
-        IECPayLogisticsService ecpay,
+        EcPayPrintTradeDocumentClient ecpay,
         CancellationToken ct)
     {
         var html = await ecpay.PrintTradeDocumentAsync(

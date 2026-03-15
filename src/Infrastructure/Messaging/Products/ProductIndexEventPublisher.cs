@@ -2,14 +2,14 @@ using System.Text.Json;
 using Confluent.Kafka;
 using eShopX.Application.UseCases.Outbox;
 using eShopX.Domain.Outbox;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Messaging.Products;
 
 public class ProductIndexOutboxEventPublisher(
-    IProducer<string, string> producer) : IOutboxEventPublisher
+    IProducer<string, string> producer,
+    IOptions<KafkaOptions> options) : IOutboxEventPublisher
 {
-    private const string Topic = "outbox-events";
-
     public bool CanHandle(string eventType)
     {
         return eventType is OutboxEventFactory.ProductUpsertEventType or OutboxEventFactory.ProductDeleteEventType;
@@ -29,6 +29,6 @@ public class ProductIndexOutboxEventPublisher(
             Value = JsonSerializer.Serialize(envelope)
         };
 
-        await producer.ProduceAsync(Topic, kafkaMessage, ct);
+        await producer.ProduceAsync(options.Value.OutboxEventTopic, kafkaMessage, ct);
     }
 }

@@ -1,13 +1,15 @@
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using eShopX.Application.Exceptions;
+using Infrastructure.Search.Embedding;
 using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Search;
+namespace Infrastructure.Search.Elasticsearch;
 
 public class ElasticsearchProductSearcher(
     ElasticsearchClient esClient,
-    IOptions<ElasticsearchOptions> options) : IProductSearchService
+    IOptions<ElasticsearchOptions> options,
+    IEmbeddingClient embeddingClient) : IProductSearcher
 {
     private readonly string _index = options.Value.IndexName;
 
@@ -22,13 +24,11 @@ public class ElasticsearchProductSearcher(
             filters.Add(new TermQuery("isActive", query.IsActive.Value));
 
         if (query.MinPrice.HasValue || query.MaxPrice.HasValue)
-        {
             filters.Add(new NumberRangeQuery("price")
             {
                 Gte = query.MinPrice.HasValue ? (double)query.MinPrice.Value : null,
-                Lte = query.MaxPrice.HasValue ? (double)query.MaxPrice.Value : null,
+                Lte = query.MaxPrice.HasValue ? (double)query.MaxPrice.Value : null
             });
-        }
 
         if (query.CategoryId.HasValue)
             filters.Add(new TermQuery("categoryId", query.CategoryId.Value.ToString()));
@@ -36,27 +36,65 @@ public class ElasticsearchProductSearcher(
         if (query.SellerId.HasValue)
             filters.Add(new TermQuery("sellerId", query.SellerId.Value.ToString()));
 
-        Query mustQuery = string.IsNullOrWhiteSpace(query.Keyword)
-            ? new MatchAllQuery()
-            : new MultiMatchQuery() { Query = query.Keyword, Fields = new[] { "name^3", "description" } };
+        var hasKeyword = !string.IsNullOrWhiteSpace(query.Keyword);
 
-        var response = await esClient.SearchAsync<ProductSearchDocument>(s => s
+        if (hasKeyword)
+        {
+            // Hybrid: kNN (semantic) + BM25 (keyword), scores combined by ES
+            var queryVector = await embeddingClient.GetEmbeddingAsync(query.Keyword!, cancellationToken);
+
+            var response = await esClient.SearchAsync<ProductSearchDocument>(s => s
                 .Indices(_index)
                 .From(from)
                 .Size(size)
-                .Query(q => q.Bool(b => b.Must(mustQuery).Filter(filters.ToArray())))
+                .Source(src => src.Filter(f => f.Excludes(x => x.Embedding)))
+                .Knn(k => k
+                    .Field(f => f.Embedding)
+                    .QueryVector(queryVector)
+                    .K(size * 5)
+                    .NumCandidates(100)
+                    .Filter(filters.ToArray()))
+                .Query(q => q.Bool(b => b
+                    .Must(new MultiMatchQuery { Query = query.Keyword, Fields = new[] { "name^3", "description" } })
+                    .Filter(filters.ToArray()))),
+                cancellationToken);
+
+            if (!response.IsValidResponse)
+                throw new ExternalServiceException("Elasticsearch",
+                    response.ElasticsearchServerError?.Error?.Reason ?? response.DebugInformation);
+
+            return BuildResponse(response, page, size);
+        }
+        else
+        {
+            // No keyword: filter only, sorted by createdAt
+            var response = await esClient.SearchAsync<ProductSearchDocument>(s => s
+                .Indices(_index)
+                .From(from)
+                .Size(size)
+                .Source(src => src.Filter(f => f.Excludes(x => x.Embedding)))
+                .Query(q => q.Bool(b => b
+                    .Must(new MatchAllQuery())
+                    .Filter(filters.ToArray())))
                 .Sort(so => so.Field(f => f.Field("createdAt").Order(SortOrder.Desc))),
-            cancellationToken);
+                cancellationToken);
 
-        if (!response.IsValidResponse)
-            throw new ExternalServiceException("Elasticsearch",
-                response.ElasticsearchServerError?.Error?.Reason ?? response.DebugInformation);
+            if (!response.IsValidResponse)
+                throw new ExternalServiceException("Elasticsearch",
+                    response.ElasticsearchServerError?.Error?.Reason ?? response.DebugInformation);
 
+            return BuildResponse(response, page, size);
+        }
+    }
+
+    private static ProductSearchResponse BuildResponse(SearchResponse<ProductSearchDocument> response, int page, int size)
+    {
         var total = (int)(response.HitsMetadata?.Total?.Match(
             totalHits => totalHits?.Value,
             totalAsLong => totalAsLong) ?? 0L);
 
         var totalPages = total == 0 ? 0 : (int)Math.Ceiling((double)total / size);
+
         var items = response.Documents.Select(d => new ProductSearchItem(
             d.ProductId,
             d.CategoryId,
@@ -84,4 +122,5 @@ public class ProductSearchDocument
     public bool IsActive { get; set; }
     public string? PrimaryImageUrl { get; set; }
     public DateTime CreatedAt { get; set; }
+    public float[] Embedding { get; set; } = [];
 }

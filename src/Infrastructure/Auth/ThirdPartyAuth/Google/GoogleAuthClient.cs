@@ -21,7 +21,7 @@ public class GoogleAuthClient(HttpClient client, IOptions<GoogleAuthOptions> opt
             ["code_verifier"] = codeVerifier
         };
 
-        var resp = await client.PostAsync("/token",
+        var resp = await client.PostAsync("token",
             new FormUrlEncodedContent(form), ct);
 
         if (!resp.IsSuccessStatusCode)

@@ -1,4 +1,3 @@
-using eShopX.Application.Interfaces;
 using eShopX.Application.Interfaces.Repositories;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

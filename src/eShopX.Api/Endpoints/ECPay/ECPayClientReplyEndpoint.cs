@@ -1,6 +1,7 @@
 using eShopX.Application.Interfaces;
 using eShopX.Application.UseCases.Logistics;
 using Infrastructure.Logistics;
+using Infrastructure.Logistics.EcPay;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShopX.Endpoints.ECPay;
@@ -9,13 +10,14 @@ public sealed class EcPayClientReplyEndpoint : IGroupedEndpoint<EcPayGroup>
 {
     public void AddRoute(RouteGroupBuilder group)
     {
-        group.MapPost("/client-reply", Handle).DisableAntiforgery();
+        group.MapPost("/client-reply", Handle)
+            .DisableAntiforgery();
     }
 
     private static async Task<IResult> Handle(
         [FromQuery] string token,
         [FromForm] string ResultData,
-        IECPayLogisticsService ecpay,
+        EcPayLogisticsSelectionClient ecpay,
         ICacher cacher,
         CancellationToken ct)
     {
@@ -30,6 +32,8 @@ public sealed class EcPayClientReplyEndpoint : IGroupedEndpoint<EcPayGroup>
             data,
             TimeSpan.FromMinutes(15),
             ct);
+
+        await cacher.RemoveAsync(LogisticsCacheKeys.LogisticsSession(token), ct);
 
         return Results.Ok();
     }

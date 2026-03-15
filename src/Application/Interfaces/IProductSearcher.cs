@@ -1,6 +1,6 @@
 namespace eShopX.Application.Interfaces;
 
-public interface IProductSearchService
+public interface IProductSearcher
 {
     Task<ProductSearchResponse> SearchAsync(ProductSearchQuery query, CancellationToken cancellationToken = default);
 }

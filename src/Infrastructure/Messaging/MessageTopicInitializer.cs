@@ -6,7 +6,7 @@ namespace Infrastructure.Messaging;
 
 public class MessageTopicInitializer(
     List<TopicSpecification> topics,
-    IAdminClient  adminClient,
+    IAdminClient adminClient,
     ILogger<MessageTopicInitializer> logger)
     : IHostedService
 {

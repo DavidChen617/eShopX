@@ -1,0 +1,15 @@
+@startuml
+class ProductSku <<sealed>> {
+    + StockQuantity : int <<get>>
+    - ProductSku()
+    + {static} Create(variantId:Guid, sizeId:Guid?, price:Money, stock:int) : ProductSku
+    + Update(price:Money, stock:int) : void
+    + UpdatePrice(price:Money) : void
+    + AddStock(quantity:int) : void
+    + DeductStock(quantity:int) : void
+}
+Entity <|-- ProductSku
+ProductSku --> "ProductVariantId" Guid
+ProductSku --> "SizeId" Guid
+ProductSku o-> "Price" Money
+@enduml

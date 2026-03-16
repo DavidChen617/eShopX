@@ -1,0 +1,12 @@
+@startuml
+class Size <<sealed>> {
+    + Name : string <<get>>
+    - Size()
+    + {static} Create(name:string, type:SizeType) : Size
+    + Rename(name:string) : void
+}
+AggregateRoot <|-- Size
+Size --> "Type" SizeType
+Size --> "CreatedAt" DateTime
+Size --> "UpdatedAt" DateTime
+@enduml

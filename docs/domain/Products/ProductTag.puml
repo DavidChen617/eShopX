@@ -1,0 +1,8 @@
+@startuml
+class ProductTag <<sealed>> {
+    - ProductTag()
+    + {static} Create(productId:Guid, tagId:Guid) : ProductTag
+}
+ProductTag --> "ProductId" Guid
+ProductTag --> "TagId" Guid
+@enduml

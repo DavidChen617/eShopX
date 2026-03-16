@@ -1,0 +1,12 @@
+@startuml
+class ProductImage <<sealed>> {
+    + Url : string <<get>>
+    + PublicId : string <<get>>
+    + IsPrimary : bool <<get>>
+    + SortOrder : int <<get>>
+    - ProductImage()
+    + {static} Create(variantId:Guid, url:string, publicId:string, isPrimary:bool, sortOrder:int) : ProductImage
+}
+Entity <|-- ProductImage
+ProductImage --> "ProductVariantId" Guid
+@enduml

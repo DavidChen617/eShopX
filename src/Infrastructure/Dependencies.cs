@@ -19,6 +19,7 @@ using Infrastructure.Email;
 using Infrastructure.Image;
 using Infrastructure.Logistics.EcPay;
 using Infrastructure.Messaging;
+using Infrastructure.Messaging.Auth;
 using Infrastructure.Messaging.Orders;
 using Infrastructure.Messaging.Payments;
 using Infrastructure.Messaging.Products;
@@ -101,6 +102,7 @@ public static class Dependencies
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
                     RoleClaimType = ClaimTypes.Role
                 };
+                opt.MapInboundClaims = true;
             });
 
         // Cloudinary
@@ -163,7 +165,7 @@ public static class Dependencies
             .AddHttpClient<EcPayClient>((sp, client) =>
             {
                 client.BaseAddress =
-                    new Uri(sp.GetRequiredService<IOptions<EcPayOptions>>().Value.BaseUrl + "/Express/v2");
+                    new Uri(sp.GetRequiredService<IOptions<EcPayOptions>>().Value.BaseUrl + "/Express/v2/");
             });
 
         // Kafka
@@ -232,6 +234,7 @@ public static class Dependencies
             .AddScoped<IOutboxEventHandler, OrderShippedEmailHandler>()
             .AddScoped<IOutboxEventHandler, PaymentPaidEmailHandler>()
             .AddScoped<IOutboxEventHandler, PaymentFailedEmailHandler>()
-            .AddScoped<IOutboxEventHandler, ShipmentCompletedEmailHandler>();
+            .AddScoped<IOutboxEventHandler, ShipmentCompletedEmailHandler>()
+            .AddScoped<IOutboxEventHandler, OtpEmailHandler>();
     }
 }

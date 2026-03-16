@@ -1,3 +1,4 @@
+using CoreMesh.Result;
 using eShopX.Application.UseCases.Products;
 
 namespace eShopX.Endpoints.Admin.Products;
@@ -23,7 +24,7 @@ public sealed class UploadImageEndpoint : IGroupedEndpoint<AdminProductsGroup>
         CancellationToken ct)
     {
         if (file.Length == 0)
-            return Results.BadRequest(new { code = "empty_file", message = "File is empty." });
+            return Result<UploadProductImageResponse>.BadRequest(new Error("empty_file", "File is empty.")).ToHttpResult();
 
         await using var stream = file.OpenReadStream();
 

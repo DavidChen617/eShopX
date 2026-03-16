@@ -41,4 +41,9 @@ public sealed class User : AggregateRoot
         var authProvider = UserAuthProvider.Create(Id, provider, providerUserId, passwordHash);
         _authProviders.Add(authProvider);
     }
+
+    public void AssignRole(Role role)
+    {
+        Roles = role;
+    }
 }

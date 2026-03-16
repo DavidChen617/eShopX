@@ -29,7 +29,7 @@ public sealed class PayPalReturnEndpoint : IGroupedEndpoint<PaymentsGroup>
 
         var payment = await paymentRepository.GetByOrderIdAsync(orderId, ct);
         if (payment is null)
-            return Results.NotFound(new { code = "payment_not_found" });
+            return Results.Redirect($"{frontendDomain}/orders?payment=error");
 
         if (payment.Status == PaymentStatus.Paid)
             return Results.Redirect($"{frontendDomain}/orders/{orderId}?payment=success");
@@ -39,7 +39,7 @@ public sealed class PayPalReturnEndpoint : IGroupedEndpoint<PaymentsGroup>
         var confirmResult = await dispatcher.Send(
             new ConfirmPaymentCommand(orderId, captureResponse.Id), ct);
         if (!confirmResult.IsSuccess)
-            return confirmResult.ToHttpResult();
+            return Results.Redirect($"{frontendDomain}/orders/{orderId}?payment=error");
 
         return Results.Redirect($"{frontendDomain}/orders/{orderId}?payment=success");
     }

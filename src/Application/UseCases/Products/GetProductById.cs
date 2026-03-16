@@ -30,6 +30,8 @@ public record ProductResponse(
     IReadOnlyList<ProductVariantResponse> Variants,
     IReadOnlyList<Guid> TagIds) : IMapFrom<Product, ProductResponse>
 {
+    public ProductResponse() : this(default, null!, null, null, default, default, default, default, null!, null!) { }
+
     public ProductResponse MapFrom(Product source) => new(
         source.Id,
         source.Name,

@@ -5,6 +5,7 @@ using CoreMesh.Validation.Abstractions;
 using CoreMesh.Validation.Abstractions.Extensions;
 using eShopX.Application.Interfaces;
 using eShopX.Application.Interfaces.Repositories;
+using eShopX.Application.UseCases.Outbox;
 using eShopX.Domain.Aggregates.Products;
 using eShopX.Domain.ValueObjects;
 
@@ -37,6 +38,7 @@ public record UpdateProductCommand(
 
 public class UpdateProductHandler(
     IProductRepository productRepository,
+    IOutboxEventRepository outboxEventRepository,
     IImageStorage imageStorage,
     IUnitOfWork unitOfWork,
     ICacher cacher,
@@ -60,6 +62,7 @@ public class UpdateProductHandler(
         await SyncVariantsAsync(product, command.Variants ?? [], cancellationToken);
 
         productRepository.Update(product);
+        await outboxEventRepository.AddAsync(OutboxEventFactory.CreateProductUpsert(command.ProductId), cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         await cacher.RemoveAsync(ProductCacheKeys.Product(command.ProductId), cancellationToken);
 

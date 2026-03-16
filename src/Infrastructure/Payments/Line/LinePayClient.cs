@@ -23,7 +23,8 @@ public class LinePayClient(HttpClient client, IOptions<LinePayOptions> options)
     private HttpRequestMessage BuildRequest(string apiPath, string jsonBody)
     {
         var nonce = Guid.NewGuid().ToString();
-        var signature = BuildSignature(apiPath, jsonBody, nonce);
+        var fullPath = new Uri(client.BaseAddress!, apiPath).AbsolutePath;
+        var signature = BuildSignature(fullPath, jsonBody, nonce);
 
         var request = new HttpRequestMessage(HttpMethod.Post, apiPath);
         request.Headers.Add("X-LINE-ChannelId", options.Value.ChannelId);

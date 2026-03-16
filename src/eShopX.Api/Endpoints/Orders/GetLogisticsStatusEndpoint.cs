@@ -1,3 +1,4 @@
+using CoreMesh.Result;
 using eShopX.Application.Interfaces;
 using eShopX.Application.UseCases.Logistics;
 
@@ -8,7 +9,7 @@ public sealed class GetLogisticsStatusEndpoint : IGroupedEndpoint<OrdersGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapGet("/logistics/status", Handle)
-            .Produces(200)
+            .Produces<ApiResponse<LogisticsStatusDto>>(200)
             .MapToApiVersion(1);
     }
 
@@ -23,14 +24,18 @@ public sealed class GetLogisticsStatusEndpoint : IGroupedEndpoint<OrdersGroup>
             LogisticsCacheKeys.UserLogistics(userId), ct);
 
         if (logistics is null)
-            return Results.Ok(new { isReady = false });
+            return Result<LogisticsStatusDto>.Ok(new LogisticsStatusDto(false)).ToHttpResult();
 
-        return Results.Ok(new
-        {
-            isReady = true,
+        return Result<LogisticsStatusDto>.Ok(new LogisticsStatusDto(
+            true,
             logistics.LogisticsSubType,
             logistics.ReceiverStoreName,
-            logistics.ReceiverAddress
-        });
+            logistics.ReceiverAddress)).ToHttpResult();
     }
 }
+
+public record LogisticsStatusDto(
+    bool IsReady,
+    string? LogisticsSubType = null,
+    string? StoreName = null,
+    string? Address = null);

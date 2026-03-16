@@ -29,7 +29,7 @@ public sealed class LinePayConfirmCallbackEndpoint : IGroupedEndpoint<PaymentsGr
 
         var payment = await paymentRepository.GetByOrderIdAsync(orderId, ct);
         if (payment is null)
-            return Results.NotFound(new { code = "payment_not_found" });
+            return Results.Redirect($"{frontendDomain}/orders?payment=error");
 
         if (payment.Status == PaymentStatus.Paid)
             return Results.Redirect($"{frontendDomain}/orders/{orderId}?payment=success");
@@ -40,11 +40,12 @@ public sealed class LinePayConfirmCallbackEndpoint : IGroupedEndpoint<PaymentsGr
             ct);
 
         if (confirmResponse.ReturnCode != "0000")
-            return Results.BadRequest(new { code = "linepay_confirm_error", message = confirmResponse.ReturnMessage });
+            return Results.Redirect($"{frontendDomain}/orders/{orderId}?payment=error");
 
         var confirmResult = await dispatcher.Send(
             new ConfirmPaymentCommand(orderId, transactionId.ToString()), ct);
-        if (!confirmResult.IsSuccess) return confirmResult.ToHttpResult();
+        if (!confirmResult.IsSuccess)
+            return Results.Redirect($"{frontendDomain}/orders/{orderId}?payment=error");
 
         return Results.Redirect($"{frontendDomain}/orders/{orderId}?payment=success");
     }

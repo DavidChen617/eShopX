@@ -11,6 +11,7 @@ public static class OutboxEventFactory
     public const string PaymentPaidEventType        = "payment.paid";
     public const string PaymentFailedEventType      = "payment.failed";
     public const string ShipmentCompletedEventType  = "shipment.completed";
+    public const string OtpEmailEventType           = "auth.otp";
 
     public static OutboxEvent CreateProductUpsert(Guid productId)
         => OutboxEvent.Create(ProductUpsertEventType, JsonSerializer.Serialize(new ProductOutboxPayload(productId)));
@@ -29,8 +30,12 @@ public static class OutboxEventFactory
 
     public static OutboxEvent CreateShipmentCompleted(Guid orderId)
         => OutboxEvent.Create(ShipmentCompletedEventType, JsonSerializer.Serialize(new OrderIdOutboxPayload(orderId)));
+
+    public static OutboxEvent CreateOtpEmail(string email, string otp)
+        => OutboxEvent.Create(OtpEmailEventType, JsonSerializer.Serialize(new OtpEmailOutboxPayload(email, otp)));
 }
 
+public record OtpEmailOutboxPayload(string Email, string Otp);
 public record ProductOutboxPayload(Guid ProductId);
 public record OrderIdOutboxPayload(Guid OrderId);
 

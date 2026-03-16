@@ -1,3 +1,5 @@
+using CoreMesh.Result;
+using CoreMesh.Result.Extensions;
 using eShopX.Application.UseCases.Logistics;
 using Infrastructure.Logistics.EcPay;
 using Infrastructure.Options;
@@ -10,6 +12,7 @@ public sealed class StartLogisticsSelectionEndpoint : IGroupedEndpoint<OrdersGro
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/logistics/start", Handle)
+            .Produces<ApiResponse<string>>(200)
             .MapToApiVersion(1);
     }
 
@@ -27,17 +30,19 @@ public sealed class StartLogisticsSelectionEndpoint : IGroupedEndpoint<OrdersGro
         if (!result.IsSuccess)
             return result.ToHttpResult();
 
+        var token = result.Data!.Token;
+        var serverReplyUrl = siteOptions.Value.DomainUrl + "/api/ecpay/server-reply?token=" + token;
+        var clientReplyUrl = siteOptions.Value.DomainUrl + "/api/ecpay/client-reply?token=" + token;
+
         var html = await ecpay.GetSelectionFormHtmlAsync(
-            ServerReplyUrl(),
+            serverReplyUrl,
+            clientReplyUrl,
             request.GoodsAmount,
             request.ReceiverName,
             request.ReceiverPhone,
             ct);
-
-        return Results.Content(html, "text/html");
-
-        string ServerReplyUrl() =>
-            siteOptions.Value.DomainUrl + "/api/ecpay/client-reply?token=" + result.Data!.Token;
+        
+        return Result<string>.Ok(html).ToHttpResult();
     }
 }
 

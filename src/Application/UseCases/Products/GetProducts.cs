@@ -21,10 +21,36 @@ public record ProductSummaryResponse(
     string? Audience,
     bool IsActive,
     Guid CategoryId,
-    DateTime UpdatedAt) : IMapFrom<Product, ProductSummaryResponse>
+    DateTime UpdatedAt,
+    string? PrimaryImageUrl,
+    decimal? StartingPrice,
+    IReadOnlyList<string> Colors) : IMapFrom<Product, ProductSummaryResponse>
 {
-    public ProductSummaryResponse MapFrom(Product source) =>
-        new(source.Id, source.Name, source.Audience?.ToString(), source.IsActive, source.CategoryId, source.UpdatedAt);
+    public ProductSummaryResponse() : this(default, null!, null, default, default, default, null, null, []) { }
+
+    public ProductSummaryResponse MapFrom(Product source) => new(
+        source.Id,
+        source.Name,
+        source.Audience?.ToString(),
+        source.IsActive,
+        source.CategoryId,
+        source.UpdatedAt,
+        source.Variants
+            .SelectMany(v => v.Images)
+            .Where(i => i.IsPrimary)
+            .OrderBy(i => i.SortOrder)
+            .Select(i => i.Url)
+            .FirstOrDefault(),
+        source.Variants
+            .SelectMany(v => v.Skus)
+            .Select(s => s.Price.Amount)
+            .DefaultIfEmpty()
+            .Min() is var min && min == 0 ? null : min,
+        source.Variants
+            .Select(v => v.Color)
+            .Distinct()
+            .ToList()
+    );
 }
 
 public record GetProductsResponse(

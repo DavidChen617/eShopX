@@ -1,9 +1,7 @@
 using eShopX.Application.Interfaces;
 using eShopX.Application.UseCases.Logistics;
 using Infrastructure.Logistics.EcPay;
-using Infrastructure.Options;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace eShopX.Endpoints.ECPay;
 
@@ -20,12 +18,23 @@ public sealed class EcPayClientReplyEndpoint : IGroupedEndpoint<EcPayGroup>
         [FromForm] string ResultData,
         EcPayLogisticsSelectionClient ecpay,
         ICacher cacher,
-        IOptions<SiteOptions> siteOptions,
         CancellationToken ct)
     {
         var userId = await cacher.GetAsync<Guid>(LogisticsCacheKeys.LogisticsSession(token), ct);
         if (userId == Guid.Empty)
-            return Results.Redirect(siteOptions.Value.FrontendDomain + "/checkout?logistics=error");
+        {
+            const string errorHtml = """
+                <!DOCTYPE html><html><body>
+                <script>
+                  if (window.opener) {
+                    window.opener.postMessage({ type: 'ecpay-logistics-error', message: 'Session expired' }, '*');
+                  }
+                  window.close();
+                </script>
+                </body></html>
+                """;
+            return Results.Content(errorHtml, "text/html");
+        }
 
         var data = ecpay.DecryptClientReply(ResultData);
 
@@ -37,6 +46,16 @@ public sealed class EcPayClientReplyEndpoint : IGroupedEndpoint<EcPayGroup>
 
         await cacher.RemoveAsync(LogisticsCacheKeys.LogisticsSession(token), ct);
 
-        return Results.Redirect(siteOptions.Value.FrontendDomain + "/checkout?logistics=done");
+        var html = """
+            <!DOCTYPE html><html><body>
+            <script>
+              if (window.opener) {
+                window.opener.postMessage({ type: 'ecpay-logistics-done' }, '*');
+              }
+              window.close();
+            </script>
+            </body></html>
+            """;
+        return Results.Content(html, "text/html");
     }
 }

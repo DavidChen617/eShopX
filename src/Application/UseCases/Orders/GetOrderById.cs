@@ -27,6 +27,8 @@ public record OrderResponse(
     DateTime CreatedAt,
     IReadOnlyList<OrderItemResponse> Items) : IMapFrom<Order, OrderResponse>
 {
+    public OrderResponse() : this(default, default, null!, default, default, null!) { }
+
     public OrderResponse MapFrom(Order source) => new(
         source.Id,
         source.UserId,

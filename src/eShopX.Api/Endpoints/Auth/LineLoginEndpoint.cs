@@ -1,3 +1,4 @@
+using CoreMesh.Result;
 using Infrastructure.Auth.ThirdPartyAuth;
 using Infrastructure.Auth.ThirdPartyAuth.Line.Models;
 
@@ -18,6 +19,6 @@ public sealed class LineLoginEndpoint : IGroupedEndpoint<AuthGroup>
         CancellationToken ct)
     {
         var response = await lineAuth.AuthAsync(request, ct);
-        return Results.Ok(ApiResponse<LineAuthResponse>.OnSuccess(response));
+        return Result<LineAuthResponse>.Ok(response).ToHttpResult();
     }
 }

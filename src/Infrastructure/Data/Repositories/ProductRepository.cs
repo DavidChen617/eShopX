@@ -45,6 +45,8 @@ public class ProductRepository(EShopContext db) : IProductRepository
 
         var total = await query.CountAsync(cancellationToken);
         var items = await query
+            .Include(p => p.Variants).ThenInclude(v => v.Skus)
+            .Include(p => p.Variants).ThenInclude(v => v.Images)
             .OrderByDescending(p => p.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)

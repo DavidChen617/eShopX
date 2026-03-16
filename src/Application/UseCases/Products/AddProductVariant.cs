@@ -32,6 +32,8 @@ public record AddProductVariantCommand(
 public record AddProductVariantResponse(Guid VariantId, string Color)
     : IMapFrom<ProductVariant, AddProductVariantResponse>
 {
+    public AddProductVariantResponse() : this(default, null!) { }
+
     public AddProductVariantResponse MapFrom(ProductVariant source) =>
         new(source.Id, source.Color);
 }

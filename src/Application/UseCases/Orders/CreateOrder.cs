@@ -138,8 +138,11 @@ public class CreateOrderHandler(
             cancellationToken);
 
         if (!paymentResult.IsSuccess)
+        {
+            await cacher.RemoveAsync(CartCacheKeys.Cart(command.UserId), cancellationToken);
             return Result<CreateOrderResponse>.BadRequest(
                 new Error(paymentResult.ErrorCode!, paymentResult.ErrorMessage!));
+        }
 
         // 7. 更新付款 URL
         payment.SetPaymentUrl(paymentResult.PaymentUrl!);

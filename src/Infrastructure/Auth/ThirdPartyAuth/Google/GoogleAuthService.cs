@@ -50,8 +50,6 @@ public class GoogleAuthService(
         if (!string.IsNullOrWhiteSpace(payload.Picture))
             user.UpdateAvatar(payload.Picture, googleSub);
 
-        userRepository.Update(user);
-
         var roles = Enum.GetValues<Role>().Where(r => user.Roles.HasFlag(r)).Select(r => r.ToString());
         var accessToken = tokenGenerator.GenerateAccessToken(user.Id, user.Email, user.Name, roles);
         var expiresAt = DateTime.UtcNow.AddMinutes(tokenGenerator.AccessTokenExpirationMinutes);

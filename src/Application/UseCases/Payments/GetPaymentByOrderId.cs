@@ -20,6 +20,8 @@ public record PaymentResponse(
     DateTime? PaidAt,
     DateTime CreatedAt) : IMapFrom<Payment, PaymentResponse>
 {
+    public PaymentResponse() : this(default, default, null!, null!, default, null, null, null, default) { }
+
     public PaymentResponse MapFrom(Payment source) => new(
         source.Id,
         source.OrderId,

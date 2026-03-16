@@ -35,6 +35,8 @@ public record CreateProductCommand(
 public record CreateProductResponse(Guid ProductId, string Name, bool IsActive, DateTime CreatedAt)
     : IMapFrom<Product, CreateProductResponse>
 {
+    public CreateProductResponse() : this(default, null!, default, default) { }
+
     public CreateProductResponse MapFrom(Product source) =>
         new(source.Id, source.Name, source.IsActive, source.CreatedAt);
 }

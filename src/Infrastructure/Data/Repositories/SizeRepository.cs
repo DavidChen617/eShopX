@@ -6,8 +6,13 @@ namespace Infrastructure.Data.Repositories;
 
 public class SizeRepository(EShopContext db) : ISizeRepository
 {
-    public async Task<IReadOnlyList<Size>> GetAllAsync(CancellationToken ct = default)
-        => await db.Sizes.OrderBy(s => s.Name).ToListAsync(ct);
+    public async Task<IReadOnlyList<Size>> GetAllAsync(SizeType? filter = null, CancellationToken ct = default)
+    {
+        var query = db.Sizes.AsQueryable();
+        if (filter.HasValue)
+            query = query.Where(s => (s.Type & filter.Value) == filter.Value);
+        return await query.OrderBy(s => s.Name).ToListAsync(ct);
+    }
 
     public Task<Size?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => db.Sizes.FirstOrDefaultAsync(s => s.Id == id, cancellationToken);

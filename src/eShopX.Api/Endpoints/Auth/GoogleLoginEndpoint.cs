@@ -1,3 +1,5 @@
+using CoreMesh.Result;
+using CoreMesh.Result.Extensions;
 using Infrastructure.Auth.ThirdPartyAuth;
 using Infrastructure.Auth.ThirdPartyAuth.Google.Models;
 
@@ -18,6 +20,6 @@ public sealed class GoogleLoginEndpoint : IGroupedEndpoint<AuthGroup>
         CancellationToken ct)
     {
         var response = await googleAuth.AuthAsync(request, ct);
-        return Results.Ok(ApiResponse<GoogleAuthResponse>.OnSuccess(response));
+        return Result<GoogleAuthResponse>.Ok(response).ToHttpResult();
     }
 }

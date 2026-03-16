@@ -34,6 +34,8 @@ public record LoginResponse(
     string Name,
     DateTime ExpiresAt) : IMapFrom<User, LoginTokenData, LoginResponse>
 {
+    public LoginResponse() : this(null!, null!, default, null!, default) { }
+
     public LoginResponse MapFrom(User user, LoginTokenData token) =>
         new(token.AccessToken, token.RefreshToken, user.Id, user.Name, token.ExpiresAt);
 }

@@ -59,7 +59,7 @@ public class PaymentGateway(
 
         string GetUrl(string type)
         {
-            return site.FrontendDomain + "/payments/linepay/" + type + "?orderId=" + order.Id;
+            return site.DomainUrl + "/api/v1/payments/linepay/" + type + "?orderId=" + order.Id;
         }
     }
 

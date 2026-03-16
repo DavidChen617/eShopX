@@ -1,3 +1,5 @@
+using CoreMesh.Result;
+using CoreMesh.Result.Extensions;
 using eShopX.Application.Interfaces;
 
 namespace eShopX.Endpoints.Admin.Products;
@@ -7,7 +9,7 @@ public sealed class UploadTempImageEndpoint : IGroupedEndpoint<AdminProductsGrou
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/images", Handle)
-            .Produces(200)
+            .Produces<ApiResponse<IReadOnlyList<TempImageUploadResult>>>(200)
             .Produces<ApiResponse>(400)
             .DisableAntiforgery()
             .MapToApiVersion(1);
@@ -19,14 +21,18 @@ public sealed class UploadTempImageEndpoint : IGroupedEndpoint<AdminProductsGrou
         CancellationToken ct)
     {
         if (files.Count == 0)
-            return Results.BadRequest(new { code = "empty_files", message = "No files provided." });
+            return Result<IReadOnlyList<TempImageUploadResult>>.BadRequest(
+                new Error("empty_files", "No files provided.")).ToHttpResult();
 
         var uploads = await Task.WhenAll(files.Select(async file =>
         {
             await using var stream = file.OpenReadStream();
-            return await imageStorage.UploadAsync(new ImageUploadRequest(file.FileName, stream), ct);
+            var r = await imageStorage.UploadAsync(new ImageUploadRequest(file.FileName, stream), ct);
+            return new TempImageUploadResult(r.FileName, r.Url, r.PublicId);
         }));
 
-        return Results.Ok(uploads.Select(r => new { r.FileName, r.Url, r.PublicId }));
+        return Result<IReadOnlyList<TempImageUploadResult>>.Ok(uploads).ToHttpResult();
     }
 }
+
+public record TempImageUploadResult(string FileName, string Url, string PublicId);

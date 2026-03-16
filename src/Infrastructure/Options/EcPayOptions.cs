@@ -10,4 +10,6 @@ public class EcPayOptions
     public string GoodsName { get; set; } = string.Empty;
     public string SenderName { get; set; } = string.Empty;
     public string SenderPhone { get; set; } = string.Empty;
+    public string SenderZipCode { get; set; } = string.Empty;
+    public string SenderAddress { get; set; } = string.Empty;
 }

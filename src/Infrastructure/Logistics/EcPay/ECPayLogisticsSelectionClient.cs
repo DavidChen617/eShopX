@@ -11,6 +11,7 @@ public class EcPayLogisticsSelectionClient(
 
     public async Task<string> GetSelectionFormHtmlAsync(
         string serverReplyUrl,
+        string clientReplyUrl,
         decimal goodsAmount,
         string receiverName,
         string receiverPhone,
@@ -23,25 +24,28 @@ public class EcPayLogisticsSelectionClient(
             LogisticsSubType = string.Empty,
             IsCollection = "N",
             ServerReplyURL = serverReplyUrl,
+            ClientReplyURL = clientReplyUrl,
             GoodsAmount = (int)goodsAmount,
             GoodsName = client.Options.GoodsName,
             SenderName = client.Options.SenderName,
             SenderCellPhone = client.Options.SenderPhone,
+            SenderZipCode = client.Options.SenderZipCode,
+            SenderAddress = client.Options.SenderAddress,
             ReceiverName = receiverName,
             ReceiverCellPhone = receiverPhone
         });
 
         var requestBody = client.BuildV2Request(innerPayload);
-        
-        return await client.SendSelectionFormHtmlGettingAsync(requestBody,ct);
+        return await client.SendSelectionFormHtmlGettingAsync(requestBody, ct);
     }
 
     public LogisticsCacheData DecryptClientReply(string resultData)
     {
-        var outer = JsonSerializer.Deserialize<ECPayClientReplyResultData>(resultData, client.JsonOptions)
+        var decoded = Uri.UnescapeDataString(resultData);
+        var outer = JsonSerializer.Deserialize<ECPayClientReplyResultData>(decoded, client.JsonOptions)
                     ?? throw new ExternalServiceException("ECPay", "Invalid client reply ResultData.");
 
-        var decrypted = client.Decrypt(outer.Data);
+        var decrypted = Uri.UnescapeDataString(client.Decrypt(outer.Data));
 
         var inner = JsonSerializer.Deserialize<ECPayLogisticsSelectionResult>(decrypted, client.JsonOptions)
                     ?? throw new ExternalServiceException("ECPay", "Failed to parse decrypted client reply.");

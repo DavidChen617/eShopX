@@ -6,6 +6,7 @@ using CoreMesh.Dispatching.Extensions;
 using CoreMesh.Endpoints.Extensions;
 using CoreMesh.Mapper.Extensions;
 using CoreMesh.Validation.Extensions;
+using Infrastructure.Data;
 using Infrastructure.Search.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -91,6 +92,8 @@ using (var scope = app.Services.CreateScope())
 {
     var esInit = scope.ServiceProvider.GetRequiredService<EsIndexInitializer>();
     await esInit.EnsureIndexAsync();
+    
+    await DataSeeder.SeedDataAsync(scope.ServiceProvider);
 }
 
 if (app.Environment.IsDevelopment())

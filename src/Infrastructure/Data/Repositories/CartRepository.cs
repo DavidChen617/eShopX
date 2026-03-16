@@ -15,5 +15,8 @@ public class CartRepository(EShopContext db) : ICartRepository
         => await db.Carts.AddAsync(cart, cancellationToken);
 
     public void Update(Cart cart)
-        => db.Carts.Update(cart);
+    {
+        foreach (var item in cart.Items.Where(i => db.Entry(i).State == EntityState.Detached))
+            db.CartItems.Add(item);
+    }
 }

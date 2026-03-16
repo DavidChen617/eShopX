@@ -3,6 +3,7 @@ using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
 using eShopX.Application.Interfaces;
 using eShopX.Application.Interfaces.Repositories;
+using eShopX.Application.UseCases.Outbox;
 
 namespace eShopX.Application.UseCases.Products;
 
@@ -10,6 +11,7 @@ public record UnpublishProductCommand(Guid ProductId) : IRequest<Result>;
 
 public class UnpublishProductHandler(
     IProductRepository productRepository,
+    IOutboxEventRepository outboxEventRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<UnpublishProductCommand, Result>
 {
     public async Task<Result> Handle(
@@ -22,6 +24,7 @@ public class UnpublishProductHandler(
 
         product.Unpublish();
         productRepository.Update(product);
+        await outboxEventRepository.AddAsync(OutboxEventFactory.CreateProductDelete(command.ProductId), cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.NoContent();

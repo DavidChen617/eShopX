@@ -9,6 +9,7 @@ namespace Infrastructure.Logistics.EcPay;
 public class EcPayClient(HttpClient httpClient, IOptions<EcPayOptions> options)
 {
     internal readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+    internal readonly JsonSerializerOptions RequestJsonOptions = new();  // PascalCase, no naming policy
     internal readonly EcPayOptions Options = options.Value;
     
     internal object BuildV2Request(string innerPayload) => new
@@ -20,13 +21,13 @@ public class EcPayClient(HttpClient httpClient, IOptions<EcPayOptions> options)
 
     internal async Task<string> SendSelectionFormHtmlGettingAsync(object payload, CancellationToken ct)
     {
-        var response = await httpClient.PostAsJsonAsync("RedirectToLogisticsSelection", payload, ct);
+        var response = await httpClient.PostAsJsonAsync("RedirectToLogisticsSelection", payload, RequestJsonOptions, ct);
         return await response.Content.ReadAsStringAsync(ct);
     }
 
     internal async Task<string> SendTempTradeCreateAsync(object payload, CancellationToken ct)
     {
-        var response = await httpClient.PostAsJsonAsync("CreateByTempTrade", payload, ct);
+        var response = await httpClient.PostAsJsonAsync("CreateByTempTrade", payload, RequestJsonOptions, ct);
         var text = await response.Content.ReadAsStringAsync(ct);
 
         if (!response.IsSuccessStatusCode)
@@ -37,7 +38,7 @@ public class EcPayClient(HttpClient httpClient, IOptions<EcPayOptions> options)
 
     internal async Task<string> SendTradeDocumentPrintingAsync(object payload, CancellationToken ct)
     {
-        var response = await httpClient.PostAsJsonAsync("PrintTradeDocument", payload, ct);
+        var response = await httpClient.PostAsJsonAsync("PrintTradeDocument", payload, RequestJsonOptions, ct);
         return await response.Content.ReadAsStringAsync(ct);
     }
 

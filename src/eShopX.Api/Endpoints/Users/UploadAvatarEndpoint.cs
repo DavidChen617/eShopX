@@ -1,3 +1,4 @@
+using CoreMesh.Result;
 using eShopX.Application.UseCases.Users;
 
 namespace eShopX.Endpoints.Users;
@@ -21,7 +22,7 @@ public sealed class UploadAvatarEndpoint : IGroupedEndpoint<UsersGroup>
         CancellationToken ct)
     {
         if (file.Length == 0)
-            return Results.BadRequest(new { code = "empty_file", message = "File is empty." });
+            return Result<UpdateUserAvatarResponse>.BadRequest(new Error("empty_file", "File is empty.")).ToHttpResult();
 
         var userId = Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
         await using var stream = file.OpenReadStream();

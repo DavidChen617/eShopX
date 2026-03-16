@@ -11,7 +11,8 @@ public record LineAuthResponse(
     string Name,
     DateTime ExpiresAt,
     string LineSub,
-    string Email
+    string Email,
+    string? AvatarUrl
 );
 
 public record LineTokenResponse(

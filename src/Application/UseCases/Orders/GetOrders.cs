@@ -20,6 +20,8 @@ public record OrderSummaryResponse(
     decimal TotalAmount,
     DateTime CreatedAt) : IMapFrom<Order, OrderSummaryResponse>
 {
+    public OrderSummaryResponse() : this(default, default, null!, default, default) { }
+
     public OrderSummaryResponse MapFrom(Order source) =>
         new(source.Id, source.UserId, source.Status.ToString(), source.TotalAmount.Amount, source.CreatedAt);
 }

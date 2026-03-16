@@ -56,6 +56,10 @@ public class EShopContext(DbContextOptions<EShopContext> options) : DbContext(op
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         ConvertDomainEventsToOutboxEvents();
+
+        foreach (var entry in ChangeTracker.Entries<UserAuthProvider>().Where(e => e.State == EntityState.Modified))
+            entry.State = EntityState.Unchanged;
+
         return await base.SaveChangesAsync(cancellationToken);
     }
 

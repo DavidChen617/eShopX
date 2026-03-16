@@ -26,7 +26,7 @@ public class EcPayCreateByTempTradeClient(
         var outer = JsonSerializer.Deserialize<ECPayV2Response>(text, client.JsonOptions)
                     ?? throw new ExternalServiceException("ECPay", "Invalid CreateByTempTrade response.");
 
-        return client.Decrypt(outer.Data);
+        return Uri.UnescapeDataString(client.Decrypt(outer.Data));
     }
 }
 

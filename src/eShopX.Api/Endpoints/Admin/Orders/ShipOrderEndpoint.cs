@@ -1,3 +1,5 @@
+using CoreMesh.Result;
+using CoreMesh.Result.Extensions;
 using eShopX.Application.UseCases.Orders;
 using eShopX.Application.UseCases.Shipments;
 using Infrastructure.Logistics.EcPay;
@@ -9,7 +11,7 @@ public sealed class ShipOrderEndpoint : IGroupedEndpoint<AdminOrdersGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/{orderId:guid}/ship", Handle)
-            .Produces(200)
+            .Produces<ApiResponse<ShipOrderResponse>>(200)
             .Produces<ApiResponse>(400)
             .Produces<ApiResponse>(404)
             .MapToApiVersion(1);
@@ -36,8 +38,8 @@ public sealed class ShipOrderEndpoint : IGroupedEndpoint<AdminOrdersGroup>
         var rtnCode = doc.RootElement.GetProperty("RtnCode").GetInt32();
         if (rtnCode != 1)
         {
-            var rtnMsg = doc.RootElement.GetProperty("RtnMsg").GetString();
-            return Results.BadRequest(new { code = "ecpay_error", message = rtnMsg });
+            var rtnMsg = doc.RootElement.GetProperty("RtnMsg").GetString()!;
+            return Result<ShipOrderResponse>.BadRequest(new Error("ecpay_error", rtnMsg)).ToHttpResult();
         }
 
         var realLogisticsId = doc.RootElement.GetProperty("LogisticsID").GetString()!;
@@ -45,6 +47,9 @@ public sealed class ShipOrderEndpoint : IGroupedEndpoint<AdminOrdersGroup>
         var result = await dispatcher.Send(new MarkOrderAsShippedCommand(orderId, realLogisticsId), ct);
         if (!result.IsSuccess) return result.ToHttpResult();
 
-        return Results.Ok(new { logisticsId = realLogisticsId, logisticsSubType = shipment.LogisticsSubType });
+        return Result<ShipOrderResponse>.Ok(
+            new ShipOrderResponse(realLogisticsId, shipment.LogisticsSubType)).ToHttpResult();
     }
 }
+
+public record ShipOrderResponse(string LogisticsId, string LogisticsSubType);

@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="CoreMesh.Mapper" Version="0.1.0" />
-    <PackageReference Include="CoreMesh.Result" Version="0.3.0" />
+    <PackageReference Include="CoreMesh.Result" Version="0.3.1" />
     <PackageReference Include="CoreMesh.Validation" Version="0.2.0" />
   </ItemGroup>
 

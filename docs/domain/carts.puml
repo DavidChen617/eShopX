@@ -1,0 +1,36 @@
+@startuml
+' Aggregate: Carts
+skinparam classAttributeIconSize 0
+skinparam classFontStyle Bold
+skinparam ArrowColor #555555
+skinparam ClassBorderColor #888888
+hide empty members
+
+class Cart <<AggregateRoot>> #D4E6F1 {
+  +UserId: Guid
+  +CreatedAt: DateTime
+  ..
+  +AddItem()
+  +RemoveItem()
+  +UpdateQuantity()
+  +Clear()
+}
+
+class CartItem <<Entity>> #D5F5E3 {
+  +CartId: Guid
+  +SkuId: Guid
+  +Quantity: int
+  ..
+  +UpdateQuantity()
+}
+
+' --- Inheritance ---
+Cart --|> AggregateRoot
+CartItem --|> Entity
+
+' --- Composition ---
+Cart "1" *-- "many" CartItem
+
+' --- Domain Events ---
+
+@enduml

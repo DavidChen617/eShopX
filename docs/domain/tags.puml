@@ -1,0 +1,32 @@
+@startuml
+' Aggregate: Tags
+skinparam classAttributeIconSize 0
+skinparam classFontStyle Bold
+skinparam ArrowColor #555555
+skinparam ClassBorderColor #888888
+hide empty members
+
+class Tag <<AggregateRoot>> #D4E6F1 {
+  +Name: string
+  +Type: TagType
+  +CreatedAt: DateTime
+  +UpdatedAt: DateTime
+  ..
+  +Rename()
+}
+
+enum TagType #FEF9E7 {
+  Season
+  Style
+  Feature
+}
+
+' --- Inheritance ---
+Tag --|> AggregateRoot
+
+' --- Composition ---
+Tag --> TagType
+
+' --- Domain Events ---
+
+@enduml

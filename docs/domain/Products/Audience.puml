@@ -1,6 +1,0 @@
-@startuml
-enum Audience {
-    Men,
-    Women,
-}
-@enduml

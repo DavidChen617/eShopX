@@ -1,6 +1,0 @@
-@startuml
-class Avatar <<sealed>> <<record>> {
-    + Url : string <<get>> <<init>>
-    + PublicId : string <<get>> <<init>>
-}
-@enduml

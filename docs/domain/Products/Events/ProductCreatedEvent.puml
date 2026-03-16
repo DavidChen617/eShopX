@@ -1,6 +1,0 @@
-@startuml
-class ProductCreatedEvent <<sealed>> <<record>> {
-}
-INotification <|-- ProductCreatedEvent
-ProductCreatedEvent --> "ProductId" Guid
-@enduml

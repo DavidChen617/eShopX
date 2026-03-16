@@ -1,7 +1,0 @@
-@startuml
-class ShipmentCompletedEvent <<sealed>> <<record>> {
-}
-INotification <|-- ShipmentCompletedEvent
-ShipmentCompletedEvent --> "ShipmentId" Guid
-ShipmentCompletedEvent --> "OrderId" Guid
-@enduml

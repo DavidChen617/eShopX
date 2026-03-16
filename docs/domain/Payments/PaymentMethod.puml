@@ -1,6 +1,0 @@
-@startuml
-enum PaymentMethod {
-    LinePay,
-    PayPal,
-}
-@enduml

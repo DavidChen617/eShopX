@@ -1,8 +1,0 @@
-@startuml
-enum OrderStatus {
-    PendingPayment,
-    Paid,
-    Shipped,
-    Completed,
-}
-@enduml

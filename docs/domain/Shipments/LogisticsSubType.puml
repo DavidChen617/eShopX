@@ -1,9 +1,0 @@
-@startuml
-enum LogisticsSubType {
-    UNIMART,
-    FAMI,
-    HILIFE,
-    TCAT,
-    POST,
-}
-@enduml

@@ -1,7 +1,0 @@
-@startuml
-enum Provider {
-    Local,
-    Google,
-    Line,
-}
-@enduml

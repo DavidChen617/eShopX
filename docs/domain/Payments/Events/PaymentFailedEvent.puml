@@ -1,7 +1,0 @@
-@startuml
-class PaymentFailedEvent <<sealed>> <<record>> {
-}
-INotification <|-- PaymentFailedEvent
-PaymentFailedEvent --> "PaymentId" Guid
-PaymentFailedEvent --> "OrderId" Guid
-@enduml

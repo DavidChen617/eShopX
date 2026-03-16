@@ -1,7 +1,0 @@
-@startuml
-enum TagType {
-    Season,
-    Style,
-    Feature,
-}
-@enduml

@@ -7,6 +7,7 @@ public sealed class UpdateCartItemEndpoint : IGroupedEndpoint<CartGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPut("/items/{skuId:guid}", Handle)
+            .Produces(204)
             .MapToApiVersion(1);
     }
 

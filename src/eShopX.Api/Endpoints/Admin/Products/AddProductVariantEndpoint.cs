@@ -7,6 +7,8 @@ public sealed class AddProductVariantEndpoint : IGroupedEndpoint<AdminProductsGr
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/{productId:guid}/variants", Handle)
+            .Produces<ApiResponse<AddProductVariantResponse>>(201)
+            .Produces<ApiResponse>(404)
             .MapToApiVersion(1);
     }
 

@@ -7,6 +7,7 @@ public sealed class CreateCategoryEndpoint : IGroupedEndpoint<AdminCategoriesGro
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/", Handle)
+            .Produces<ApiResponse<CategoryResponse>>(201)
             .MapToApiVersion(1);
     }
 

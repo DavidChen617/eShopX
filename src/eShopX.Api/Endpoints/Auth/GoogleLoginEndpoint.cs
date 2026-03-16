@@ -8,6 +8,7 @@ public sealed class GoogleLoginEndpoint : IGroupedEndpoint<AuthGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/google", Handle)
+            .Produces<ApiResponse<GoogleAuthResponse>>(200)
             .MapToApiVersion(1);
     }
 
@@ -17,6 +18,6 @@ public sealed class GoogleLoginEndpoint : IGroupedEndpoint<AuthGroup>
         CancellationToken ct)
     {
         var response = await googleAuth.AuthAsync(request, ct);
-        return Results.Ok(response);
+        return Results.Ok(ApiResponse<GoogleAuthResponse>.OnSuccess(response));
     }
 }

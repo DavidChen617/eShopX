@@ -7,6 +7,8 @@ public sealed class DeleteProductEndpoint : IGroupedEndpoint<AdminProductsGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapDelete("/{productId:guid}", Handle)
+            .Produces(204)
+            .Produces<ApiResponse>(404)
             .MapToApiVersion(1);
     }
 

@@ -7,6 +7,8 @@ public sealed class UpdateCategoryEndpoint : IGroupedEndpoint<AdminCategoriesGro
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPut("/{categoryId:guid}", Handle)
+            .Produces(204)
+            .Produces<ApiResponse>(404)
             .MapToApiVersion(1);
     }
 

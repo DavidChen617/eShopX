@@ -8,6 +8,7 @@ public sealed class SearchProductsEndpoint : IGroupedEndpoint<ProductsGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapGet("/search", Handle)
+            .Produces<ApiResponse<ProductSearchResponse>>(200)
             .MapToApiVersion(1);
     }
 
@@ -32,6 +33,7 @@ public sealed class SearchProductsEndpoint : IGroupedEndpoint<ProductsGroup>
             PageSize: pageSize <= 0 ? 20 : pageSize);
 
         var result = await searchService.SearchAsync(query, ct);
-        return Results.Ok(result);
+        
+        return result.ToHttpResult();
     }
 }

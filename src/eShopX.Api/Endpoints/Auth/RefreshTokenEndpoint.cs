@@ -7,6 +7,9 @@ public sealed class RefreshTokenEndpoint : IGroupedEndpoint<AuthGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/refresh", Handle)
+            .Produces<ApiResponse<RefreshTokenResponse>>(200)
+            .Produces<ApiResponse>(400)
+            .Produces<ApiResponse>(404)
             .MapToApiVersion(1);
     }
 

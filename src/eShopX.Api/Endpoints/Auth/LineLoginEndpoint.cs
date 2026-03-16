@@ -8,6 +8,7 @@ public sealed class LineLoginEndpoint : IGroupedEndpoint<AuthGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/line", Handle)
+            .Produces<ApiResponse<LineAuthResponse>>(200)
             .MapToApiVersion(1);
     }
 
@@ -17,6 +18,6 @@ public sealed class LineLoginEndpoint : IGroupedEndpoint<AuthGroup>
         CancellationToken ct)
     {
         var response = await lineAuth.AuthAsync(request, ct);
-        return Results.Ok(response);
+        return Results.Ok(ApiResponse<LineAuthResponse>.OnSuccess(response));
     }
 }

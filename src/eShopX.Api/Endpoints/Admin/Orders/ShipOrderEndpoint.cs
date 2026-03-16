@@ -9,6 +9,9 @@ public sealed class ShipOrderEndpoint : IGroupedEndpoint<AdminOrdersGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/{orderId:guid}/ship", Handle)
+            .Produces(200)
+            .Produces<ApiResponse>(400)
+            .Produces<ApiResponse>(404)
             .MapToApiVersion(1);
     }
 

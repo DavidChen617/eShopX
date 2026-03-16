@@ -4,6 +4,8 @@ using System.Threading.RateLimiting;
 using Asp.Versioning;
 using CoreMesh.Dispatching.Extensions;
 using CoreMesh.Endpoints.Extensions;
+using CoreMesh.Mapper.Extensions;
+using CoreMesh.Validation.Extensions;
 using Infrastructure.Search.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +25,8 @@ builder.Services
 
 builder.Services
     .AddDispatching([typeof(eShopX.Application.AssemblyMarker).Assembly])
+    .AddCoreMeshMapper([typeof(eShopX.Application.AssemblyMarker).Assembly])
+    .AddValidatable()
     .AddCoreMeshExceptionHandling()
     .AddInfrastructureServices(builder.Configuration);
 
@@ -83,11 +87,11 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var esInit = scope.ServiceProvider.GetRequiredService<EsIndexInitializer>();
-    await esInit.EnsureIndexAsync();
-}
+// using (var scope = app.Services.CreateScope())
+// {
+//     var esInit = scope.ServiceProvider.GetRequiredService<EsIndexInitializer>();
+//     await esInit.EnsureIndexAsync();
+// }
 
 if (app.Environment.IsDevelopment())
 {

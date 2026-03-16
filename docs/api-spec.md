@@ -3,12 +3,42 @@
 > 前端重寫參考文件。所有端點皆使用版本前綴 `/api/v1/`。
 > 需要 JWT 的端點請在 Header 帶上 `Authorization: Bearer <accessToken>`。
 
+## Response Envelope
+
+所有 JSON response 統一包在 `ApiResponse` / `ApiResponse<T>` 中：
+
+```json
+// 成功（有資料）
+{
+  "isSuccess": true,
+  "code": "ok",
+  "data": { ... }
+}
+
+// 成功（無資料）
+{
+  "isSuccess": true,
+  "code": "ok"
+}
+
+// 失敗
+{
+  "isSuccess": false,
+  "code": "error_code",
+  "problem": {
+    "status": 400,
+    "title": "error_code",
+    "detail": "human readable message"
+  }
+}
+```
+
 ---
 
 ## Auth
 
 | Method | URL | Auth | 說明 |
-|--------|-----|------|------|
+|--------|-----|:----:|------|
 | POST | `/api/v1/auth/register` | ✗ | 註冊 |
 | POST | `/api/v1/auth/login` | ✗ | 本地登入 |
 | POST | `/api/v1/auth/google` | ✗ | Google 登入 |
@@ -19,10 +49,12 @@
 ### POST `/api/v1/auth/register`
 ```json
 // Request
-{ "name": "string", "email": "string", "password": "string (min 8)" }
+{ "name": "string", "email": "string", "password": "string" }
 
-// Response 201
+// 201 ApiResponse<RegisterUserResponse>
 { "userId": "uuid", "email": "string", "createdAt": "datetime" }
+
+// 400 ApiResponse  →  email_conflict
 ```
 
 ### POST `/api/v1/auth/login`
@@ -30,25 +62,27 @@
 // Request
 { "email": "string", "password": "string" }
 
-// Response 200
+// 200 ApiResponse<LoginResponse>
 { "accessToken": "string", "refreshToken": "string", "userId": "uuid", "name": "string", "expiresAt": "datetime" }
+
+// 400 ApiResponse  →  credentials_invalid
 ```
 
 ### POST `/api/v1/auth/google`
 ```json
-// Request（前端先走 Google PKCE OAuth flow 取得 code + codeVerifier）
-{ "code": "string", "codeVerifier": "string" }
+// Request（前端先走 Google PKCE OAuth flow）
+{ "code": "string", "codeVerifier": "string", "state": "string" }
 
-// Response 200
+// 200 ApiResponse<GoogleAuthResponse>
 { "accessToken": "string", "refreshToken": "string", "userId": "uuid", "name": "string", "expiresAt": "datetime", "sub": "string", "email": "string", "picture": "string?" }
 ```
 
 ### POST `/api/v1/auth/line`
 ```json
-// Request（前端先走 LINE PKCE OAuth flow 取得 code + codeVerifier + nonce）
-{ "code": "string", "codeVerifier": "string", "nonce": "string" }
+// Request（前端先走 LINE PKCE OAuth flow）
+{ "code": "string", "codeVerifier": "string?", "nonce": "string?" }
 
-// Response 200
+// 200 ApiResponse<LineAuthResponse>
 { "accessToken": "string", "refreshToken": "string", "userId": "uuid", "name": "string", "expiresAt": "datetime", "sub": "string", "email": "string" }
 ```
 
@@ -57,8 +91,11 @@
 // Request
 { "refreshToken": "string" }
 
-// Response 200
+// 200 ApiResponse<RefreshTokenResponse>
 { "accessToken": "string", "refreshToken": "string", "expiresAt": "datetime" }
+
+// 400 ApiResponse  →  refresh_token_revoked / refresh_token_expired
+// 404 ApiResponse  →  refresh_token_not_found
 ```
 
 ### POST `/api/v1/auth/logout`
@@ -66,7 +103,7 @@
 // Request
 { "refreshToken": "string" }
 
-// Response 204
+// 204
 ```
 
 ---
@@ -74,7 +111,7 @@
 ## Users
 
 | Method | URL | Auth | 說明 |
-|--------|-----|------|------|
+|--------|-----|:----:|------|
 | POST | `/api/v1/users/me/avatar` | ✓ | 上傳頭像 |
 
 ### POST `/api/v1/users/me/avatar`
@@ -82,49 +119,92 @@
 // Request: multipart/form-data
 file: File
 
-// Response 200
+// 200 ApiResponse<UpdateUserAvatarResponse>
 { "url": "string" }
-```
 
-> ⚠️ 前端目前有 `GET /api/users/me`、`PUT /api/users/me`、`DELETE /api/users/me/avatar`，後端尚未實作。
+// 400 ApiResponse
+// 404 ApiResponse
+```
 
 ---
 
-## Products（公開）
+## Categories
 
 | Method | URL | Auth | 說明 |
-|--------|-----|------|------|
+|--------|-----|:----:|------|
+| GET | `/api/v1/categories` | ✗ | 取得分類列表 |
+
+### GET `/api/v1/categories`
+```json
+// 200 ApiResponse<CategoryResponse[]>
+[{ "id": "uuid", "name": "string", "createdAt": "datetime" }]
+```
+
+---
+
+## Sizes
+
+| Method | URL | Auth | 說明 |
+|--------|-----|:----:|------|
+| GET | `/api/v1/sizes` | ✗ | 取得尺寸列表 |
+
+### GET `/api/v1/sizes`
+```json
+// 200 ApiResponse<SizeResponse[]>
+[{ "id": "uuid", "name": "string", "type": "Clothing|Pants|Shoes|Hat", "createdAt": "datetime" }]
+```
+
+---
+
+## Tags
+
+| Method | URL | Auth | 說明 |
+|--------|-----|:----:|------|
+| GET | `/api/v1/tags` | ✗ | 取得標籤列表 |
+
+### GET `/api/v1/tags`
+```json
+// 200 ApiResponse<TagResponse[]>
+[{ "id": "uuid", "name": "string", "type": "Season|Style|Feature", "createdAt": "datetime" }]
+```
+
+---
+
+## Products
+
+| Method | URL | Auth | 說明 |
+|--------|-----|:----:|------|
 | GET | `/api/v1/products` | ✗ | 取得商品列表 |
 | GET | `/api/v1/products/{productId}` | ✗ | 取得單一商品 |
-| GET | `/api/v1/products/search` | ✗ | 搜尋商品（Elasticsearch） |
+| GET | `/api/v1/products/search` | ✗ | 搜尋商品 |
 
 ### GET `/api/v1/products`
 ```
 // Query Params
 ?categoryId=uuid&audience=0|1&isActive=bool&page=int&pageSize=int
 
-// Response 200
+// 200 ApiResponse<GetProductsResponse>
 {
-  "items": [{ "productId": "uuid", "name": "string", "isActive": "bool", ... }],
+  "items": [{ "id": "uuid", "name": "string", "audience": "string?", "isActive": bool, "categoryId": "uuid", "updatedAt": "datetime" }],
   "totalCount": int, "page": int, "pageSize": int
 }
 ```
 
 ### GET `/api/v1/products/{productId}`
 ```json
-// Response 200
+// 200 ApiResponse<ProductResponse>
 {
   "productId": "uuid", "name": "string", "description": "string?",
-  "audience": 0,
-  "categoryId": "uuid",
-  "isActive": "bool",
+  "audience": 0, "categoryId": "uuid", "isActive": false,
   "tags": [{ "tagId": "uuid" }],
   "variants": [{
     "variantId": "uuid", "color": "string",
     "skus": [{ "skuId": "uuid", "sizeId": "uuid?", "price": 0.0, "stock": 0 }],
-    "images": [{ "imageId": "uuid", "url": "string", "isPrimary": "bool", "sortOrder": 0 }]
+    "images": [{ "imageId": "uuid", "url": "string", "isPrimary": true, "sortOrder": 0 }]
   }]
 }
+
+// 404 ApiResponse  →  product_not_found
 ```
 
 ### GET `/api/v1/products/search`
@@ -132,10 +212,10 @@ file: File
 // Query Params
 ?keyword=string&categoryId=uuid&minPrice=decimal&maxPrice=decimal&isActive=bool&page=int&pageSize=int
 
-// Response 200
+// 200 ProductSearchResponse
 {
   "page": int, "pageSize": int, "totalCount": int, "totalPages": int,
-  "items": [{ "productId": "uuid", "name": "string", "price": 0.0, "primaryImageUrl": "string?", ... }]
+  "items": [{ "productId": "uuid", "name": "string", "price": 0.0, "primaryImageUrl": "string?" }]
 }
 ```
 
@@ -144,21 +224,18 @@ file: File
 ## Cart
 
 | Method | URL | Auth | 說明 |
-|--------|-----|------|------|
+|--------|-----|:----:|------|
 | GET | `/api/v1/cart` | ✓ | 取得購物車 |
 | POST | `/api/v1/cart/items` | ✓ | 加入商品 |
 | PUT | `/api/v1/cart/items/{skuId}` | ✓ | 更新數量 |
 | DELETE | `/api/v1/cart/items/{skuId}` | ✓ | 移除商品 |
 | DELETE | `/api/v1/cart` | ✓ | 清空購物車 |
 
-> ⚠️ 前端目前 URL 帶 `userId`（如 `/api/carts/{userId}/items`），後端不需要 userId，從 JWT 取得。
-
 ### GET `/api/v1/cart`
 ```json
-// Response 200
+// 200 ApiResponse<CartResponse>
 {
-  "cartId": "uuid?",
-  "userId": "uuid",
+  "cartId": "uuid?", "userId": "uuid",
   "items": [{
     "itemId": "uuid", "skuId": "uuid", "quantity": 0,
     "productName": "string", "color": "string", "sizeName": "string?",
@@ -172,24 +249,24 @@ file: File
 ```json
 // Request
 { "skuId": "uuid", "quantity": int }
-// Response 204
+// 204
 ```
 
 ### PUT `/api/v1/cart/items/{skuId}`
 ```json
 // Request
 { "quantity": int }
-// Response 204
+// 204
 ```
 
 ### DELETE `/api/v1/cart/items/{skuId}`
 ```
-// Response 204
+// 204
 ```
 
 ### DELETE `/api/v1/cart`
 ```
-// Response 204
+// 204
 ```
 
 ---
@@ -197,7 +274,7 @@ file: File
 ## Orders
 
 | Method | URL | Auth | 說明 |
-|--------|-----|------|------|
+|--------|-----|:----:|------|
 | POST | `/api/v1/orders/logistics/start` | ✓ | 開始物流選擇（ECPay） |
 | GET | `/api/v1/orders/logistics/status` | ✓ | 確認物流選擇狀態 |
 | POST | `/api/v1/orders` | ✓ | 建立訂單 |
@@ -209,16 +286,15 @@ file: File
 // Request
 { "receiverName": "string", "receiverPhone": "string", "goodsAmount": decimal }
 
-// Response 200：回傳 HTML，前端整頁導向 ECPay 門市選擇
-// Content-Type: text/html
+// 200 text/html  →  ECPay 門市選擇頁，前端整頁導向
 ```
 
 ### GET `/api/v1/orders/logistics/status`
 ```json
-// Response 200
+// 200
 {
   "isReady": bool,
-  "logisticsSubType": "string?",  // e.g. "UNIMART"
+  "logisticsSubType": "string?",
   "receiverStoreName": "string?",
   "receiverAddress": "string?"
 }
@@ -227,69 +303,159 @@ file: File
 ### POST `/api/v1/orders`
 ```json
 // Request
-{ "paymentMethod": 0, "receiverName": "string", "receiverPhone": "string" }
 // paymentMethod: 0=LinePay, 1=PayPal, 2=ECPay
+{ "paymentMethod": 0, "receiverName": "string", "receiverPhone": "string" }
 
-// Response 201
+// 201 ApiResponse<CreateOrderResponse>
 { "orderId": "uuid", "totalAmount": decimal, "paymentUrl": "string?", "createdAt": "datetime" }
+
+// 400 ApiResponse  →  stock_conflict
 ```
-> 前端收到 `paymentUrl` 後導向付款頁（LinePay / PayPal）。
+> 前端收到 `paymentUrl` 後直接導向付款頁。
 
 ### GET `/api/v1/orders`
 ```
 // Query Params
 ?status=string&page=int&pageSize=int
 
-// Response 200
+// 200 ApiResponse<GetOrdersResponse>
 {
-  "items": [{ "orderId": "uuid", "status": "string", "totalAmount": decimal, "createdAt": "datetime", ... }],
+  "items": [{ "orderId": "uuid", "status": "string", "totalAmount": decimal, "createdAt": "datetime" }],
   "totalCount": int, "page": int, "pageSize": int
 }
 ```
 
+### GET `/api/v1/orders/{orderId}`
+```json
+// 200 ApiResponse<OrderResponse>
+{ "orderId": "uuid", "status": "string", "totalAmount": decimal, "createdAt": "datetime", ... }
+
+// 404 ApiResponse  →  order_not_found
+```
+
 ---
 
-## Payments（Callback，瀏覽器跳轉，非前端主動呼叫）
+## Payments（Callback，非前端主動呼叫）
 
 | Method | URL | Auth | 說明 |
-|--------|-----|------|------|
-| GET | `/api/v1/payments/linepay/confirm` | ✗ | LinePay 付款成功 callback |
-| GET | `/api/v1/payments/linepay/cancel` | ✗ | LinePay 付款取消 callback |
-| GET | `/api/v1/payments/paypal/return` | ✗ | PayPal 付款成功 callback |
-| GET | `/api/v1/payments/paypal/cancel` | ✗ | PayPal 付款取消 callback |
+|--------|-----|:----:|------|
+| GET | `/api/v1/payments/linepay/confirm?transactionId=&orderId=` | ✗ | LinePay 付款成功 callback |
+| GET | `/api/v1/payments/linepay/cancel?orderId=` | ✗ | LinePay 付款取消 callback |
+| GET | `/api/v1/payments/paypal/return?token=&orderId=` | ✗ | PayPal 付款成功 callback |
+| GET | `/api/v1/payments/paypal/cancel?orderId=` | ✗ | PayPal 付款取消 callback |
 
-> 這些端點由付款閘道 redirect 瀏覽器過來，後端處理完後 redirect 至前端：
-> 成功：`{FrontendDomain}/orders/{orderId}?payment=success`
-> 取消/失敗：`{FrontendDomain}/orders/{orderId}?payment=cancel`
-
-> ⚠️ 前端不需要主動呼叫這些端點。LinePay `confirmUrl` / `cancelUrl`、PayPal `returnUrl` / `cancelUrl` 由**後端 PaymentGateway 自動產生**並帶給付款閘道，前端只需處理 redirect 後的結果 query param。
+> 付款閘道 redirect 瀏覽器至此，後端處理後再 redirect 至前端：
+> - 成功：`{FrontendDomain}/orders/{orderId}?payment=success`
+> - 取消/失敗：`{FrontendDomain}/orders/{orderId}?payment=cancel`
 
 ---
 
-## ECPay（Callback，非前端呼叫）
+## ECPay（Callback，非前端主動呼叫）
 
 | Method | URL | Auth | 說明 |
-|--------|-----|------|------|
-| POST | `/api/ecpay/client-reply` | ✗ | ECPay 門市選擇結果 callback |
+|--------|-----|:----:|------|
+| POST | `/api/ecpay/client-reply?token=` | ✗ | ECPay 門市選擇結果 callback |
 
-> ECPay 選完門市後瀏覽器會被 redirect 至 `{FrontendDomain}/checkout?logistics=done`
-> 前端偵測到 `?logistics=done` 後呼叫 `GET /api/v1/orders/logistics/status` 確認。
+> 選完門市後瀏覽器被 redirect 至 `{FrontendDomain}/checkout?logistics=done`
+> 前端再呼叫 `GET /api/v1/orders/logistics/status` 確認。
 
 ---
 
-## Admin - Orders
+## Admin - Sizes
 
 | Method | URL | Auth (Admin) | 說明 |
-|--------|-----|------|------|
-| GET | `/api/v1/admin/orders` | ✓ | 取得所有訂單 |
-| POST | `/api/v1/admin/orders/{orderId}/ship` | ✓ | 出貨 |
-| POST | `/api/v1/admin/orders/{orderId}/complete` | ✓ | 完成訂單 |
-| POST | `/api/v1/admin/orders/print-label` | ✓ | 列印標籤 |
+|--------|-----|:------------:|------|
+| POST | `/api/v1/admin/sizes` | ✓ | 建立尺寸 |
+| PUT | `/api/v1/admin/sizes/{sizeId}` | ✓ | 更新尺寸名稱 |
+| DELETE | `/api/v1/admin/sizes/{sizeId}` | ✓ | 刪除尺寸 |
 
-### GET `/api/v1/admin/orders`
+### POST `/api/v1/admin/sizes`
+```json
+// Request
+{ "name": "string", "type": "Clothing|Pants|Shoes|Hat" }
+
+// 201 ApiResponse<SizeResponse>
+{ "id": "uuid", "name": "string", "type": "string", "createdAt": "datetime" }
 ```
-// Query Params
-?status=string&page=int&pageSize=int
+
+### PUT `/api/v1/admin/sizes/{sizeId}`
+```json
+// Request
+{ "name": "string" }
+// 204
+// 404 ApiResponse  →  size_not_found
+```
+
+### DELETE `/api/v1/admin/sizes/{sizeId}`
+```
+// 204
+// 404 ApiResponse  →  size_not_found
+```
+
+---
+
+## Admin - Tags
+
+| Method | URL | Auth (Admin) | 說明 |
+|--------|-----|:------------:|------|
+| POST | `/api/v1/admin/tags` | ✓ | 建立標籤 |
+| PUT | `/api/v1/admin/tags/{tagId}` | ✓ | 更新標籤名稱 |
+| DELETE | `/api/v1/admin/tags/{tagId}` | ✓ | 刪除標籤 |
+
+### POST `/api/v1/admin/tags`
+```json
+// Request
+{ "name": "string", "type": "Season|Style|Feature" }
+
+// 201 ApiResponse<TagResponse>
+{ "id": "uuid", "name": "string", "type": "string", "createdAt": "datetime" }
+```
+
+### PUT `/api/v1/admin/tags/{tagId}`
+```json
+// Request
+{ "name": "string" }
+// 204
+// 404 ApiResponse  →  tag_not_found
+```
+
+### DELETE `/api/v1/admin/tags/{tagId}`
+```
+// 204
+// 404 ApiResponse  →  tag_not_found
+```
+
+---
+
+## Admin - Categories
+
+| Method | URL | Auth (Admin) | 說明 |
+|--------|-----|:------------:|------|
+| POST | `/api/v1/admin/categories` | ✓ | 建立分類 |
+| PUT | `/api/v1/admin/categories/{categoryId}` | ✓ | 更新分類 |
+| DELETE | `/api/v1/admin/categories/{categoryId}` | ✓ | 刪除分類 |
+
+### POST `/api/v1/admin/categories`
+```json
+// Request
+{ "name": "string" }
+
+// 201 ApiResponse<CategoryResponse>
+{ "id": "uuid", "name": "string", "createdAt": "datetime" }
+```
+
+### PUT `/api/v1/admin/categories/{categoryId}`
+```json
+// Request
+{ "name": "string" }
+// 204
+// 404 ApiResponse  →  category_not_found
+```
+
+### DELETE `/api/v1/admin/categories/{categoryId}`
+```
+// 204
+// 404 ApiResponse  →  category_not_found
 ```
 
 ---
@@ -297,7 +463,7 @@ file: File
 ## Admin - Products
 
 | Method | URL | Auth (Admin) | 說明 |
-|--------|-----|------|------|
+|--------|-----|:------------:|------|
 | POST | `/api/v1/admin/products/images` | ✓ | Pre-upload 圖片（multi-file） |
 | POST | `/api/v1/admin/products` | ✓ | 建立商品 |
 | PUT | `/api/v1/admin/products/{productId}` | ✓ | 更新商品 |
@@ -307,12 +473,12 @@ file: File
 | POST | `/api/v1/admin/products/{productId}/variants` | ✓ | 新增 Variant |
 | POST | `/api/v1/admin/products/{productId}/variants/{variantId}/images` | ✓ | 上傳圖片至 Variant |
 
-### POST `/api/v1/admin/products/images`（Pre-upload）
+### POST `/api/v1/admin/products/images`
 ```
 // Request: multipart/form-data
-files: File[]  （多檔）
+files: File[]
 
-// Response 200
+// 200
 [{ "fileName": "string", "url": "string", "publicId": "string" }]
 ```
 
@@ -329,7 +495,7 @@ files: File[]  （多檔）
   }]
 }
 
-// Response 201
+// 201 ApiResponse<CreateProductResponse>
 { "productId": "uuid", "name": "string", "isActive": false, "createdAt": "datetime" }
 ```
 
@@ -340,55 +506,104 @@ files: File[]  （多檔）
   "name": "string", "description": "string?", "audience": 0,
   "categoryId": "uuid", "tagIds": ["uuid"],
   "variants": [{
-    "variantId": "uuid?",  // null = 新增
+    "variantId": "uuid?",
     "color": "string",
     "skus": [{ "skuId": "uuid?", "sizeId": "uuid?", "price": decimal, "stock": int }],
     "images": [{ "url": "string", "publicId": "string", "isPrimary": bool, "sortOrder": int }]
   }]
 }
 
-// Response 204
+// 204
+// 404 ApiResponse  →  product_not_found
+```
+
+### DELETE `/api/v1/admin/products/{productId}`
+```
+// 204
+// 404 ApiResponse  →  product_not_found
+```
+
+### POST `/api/v1/admin/products/{productId}/publish`
+```
+// 204
+// 404 ApiResponse  →  product_not_found
+```
+
+### POST `/api/v1/admin/products/{productId}/unpublish`
+```
+// 204
+// 404 ApiResponse  →  product_not_found
+```
+
+### POST `/api/v1/admin/products/{productId}/variants`
+```json
+// Request
+{
+  "color": "string",
+  "skus": [{ "sizeId": "uuid?", "price": decimal, "stock": int }]
+}
+
+// 201 ApiResponse<AddProductVariantResponse>
+{ "variantId": "uuid" }
+
+// 404 ApiResponse  →  product_not_found
+```
+
+### POST `/api/v1/admin/products/{productId}/variants/{variantId}/images`
+```
+// Request: multipart/form-data
+file: File
+IsPrimary: bool  (query)
+SortOrder: int   (query)
+
+// 200 ApiResponse<UploadProductImageResponse>
+{ "imageId": "uuid", "url": "string" }
+
+// 400 ApiResponse
+// 404 ApiResponse  →  product_not_found / variant_not_found
 ```
 
 ---
 
-## 前端現有 URL 與後端對照
+## Admin - Orders
 
-| 前端 URL | 後端正確 URL | 狀態 |
-|---------|------------|------|
-| `POST /api/auth/login` | `POST /api/v1/auth/login` | ⚠️ 缺 /v1/ |
-| `POST /api/auth/register` | `POST /api/v1/auth/register` | ⚠️ 缺 /v1/ |
-| `POST /api/auth/google/callback` | `POST /api/v1/auth/google` | ⚠️ 路徑不同 |
-| `POST /api/auth/line/callback` | `POST /api/v1/auth/line` | ⚠️ 路徑不同 |
-| `POST /api/payments/line/request` | — | ❌ 不需要，paymentUrl 由建立訂單時回傳 |
-| `POST /api/payments/paypal/create-order` | — | ❌ 不需要，paymentUrl 由建立訂單時回傳 |
-| `GET /api/users/me` | — | ❌ 後端未實作 |
-| `PUT /api/users/me` | — | ❌ 後端未實作 |
-| `POST /api/users/me/avatar` | `POST /api/v1/users/me/avatar` | ⚠️ 缺 /v1/ |
-| `DELETE /api/users/me/avatar` | — | ❌ 後端未實作 |
-| `GET /api/orders` | `GET /api/v1/orders` | ⚠️ 缺 /v1/ |
-| `GET /api/orders/{orderId}` | `GET /api/v1/orders/{orderId}` | ⚠️ 缺 /v1/ |
-| `GET /api/products` | `GET /api/v1/products` | ⚠️ 缺 /v1/ |
-| `GET /api/products/{productId}` | `GET /api/v1/products/{productId}` | ⚠️ 缺 /v1/ |
-| `GET /api/carts/{userId}` | `GET /api/v1/cart` | ⚠️ 路徑不同，不需要 userId |
-| `POST /api/carts/{userId}/items` | `POST /api/v1/cart/items` | ⚠️ 路徑不同 |
-| `PUT /api/carts/{userId}/items/{productId}` | `PUT /api/v1/cart/items/{skuId}` | ⚠️ 路徑不同，用 skuId |
-| `DELETE /api/carts/{userId}/items/{productId}` | `DELETE /api/v1/cart/items/{skuId}` | ⚠️ 路徑不同，用 skuId |
-| `DELETE /api/carts/{userId}/items` | `DELETE /api/v1/cart` | ⚠️ 路徑不同 |
-| `POST /api/sellers/apply` | — | ❌ 無 Seller 概念 |
-| `GET /api/sellers/pending` | — | ❌ 無 Seller 概念 |
-| `POST /api/sellers/{userId}/approve` | — | ❌ 無 Seller 概念 |
-| `GET /api/homepage/banners` | — | ❌ 後端未實作 |
-| `GET /api/homepage/categories` | — | ❌ 後端未實作 |
-| `GET /api/homepage/flash-sale` | — | ❌ 後端未實作 |
-| `GET /api/homepage/recommend` | — | ❌ 後端未實作 |
-| `GET /api/homepage/reviews` | — | ❌ 後端未實作 |
-| `GET /api/products/{productId}/reviews` | — | ❌ 後端未實作 |
-| `POST /api/orders/{orderId}/review` | — | ❌ 後端未實作 |
-| `GET /api/products/mine` | — | ❌ 無 Seller 概念 |
-| `POST /api/products` | `POST /api/v1/admin/products` | ⚠️ 需加 /admin/ |
-| `PUT /api/products/{productId}` | `PUT /api/v1/admin/products/{productId}` | ⚠️ 需加 /admin/ |
-| `DELETE /api/products/{productId}` | `DELETE /api/v1/admin/products/{productId}` | ⚠️ 需加 /admin/ |
+| Method | URL | Auth (Admin) | 說明 |
+|--------|-----|:------------:|------|
+| GET | `/api/v1/admin/orders` | ✓ | 取得所有訂單 |
+| POST | `/api/v1/admin/orders/{orderId}/ship` | ✓ | 出貨 |
+| POST | `/api/v1/admin/orders/{orderId}/complete` | ✓ | 完成訂單 |
+| POST | `/api/v1/admin/orders/print-label` | ✓ | 列印標籤 |
+
+### GET `/api/v1/admin/orders`
+```
+// Query Params
+?status=string&page=int&pageSize=int
+
+// 200 ApiResponse<GetOrdersResponse>
+{
+  "items": [{ "orderId": "uuid", "status": "string", "totalAmount": decimal, "createdAt": "datetime" }],
+  "totalCount": int, "page": int, "pageSize": int
+}
+```
+
+### POST `/api/v1/admin/orders/{orderId}/ship`
+```
+// 200
+// 400 / 404
+```
+
+### POST `/api/v1/admin/orders/{orderId}/complete`
+```
+// 204
+// 404 ApiResponse  →  order_not_found
+```
+
+### POST `/api/v1/admin/orders/print-label`
+```json
+// Request
+{ "logisticsId": "string", "logisticsSubType": "string" }
+// 200
+```
 
 ---
 

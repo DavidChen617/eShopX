@@ -7,6 +7,8 @@ public sealed class PublishProductEndpoint : IGroupedEndpoint<AdminProductsGroup
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/{productId:guid}/publish", Handle)
+            .Produces(204)
+            .Produces<ApiResponse>(404)
             .MapToApiVersion(1);
     }
 

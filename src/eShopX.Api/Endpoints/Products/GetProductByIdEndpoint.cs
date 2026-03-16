@@ -7,6 +7,8 @@ public sealed class GetProductByIdEndpoint : IGroupedEndpoint<ProductsGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapGet("/{productId:guid}", Handle)
+            .Produces<ApiResponse<ProductResponse>>(200)
+            .Produces<ApiResponse>(404)
             .MapToApiVersion(1);
     }
 

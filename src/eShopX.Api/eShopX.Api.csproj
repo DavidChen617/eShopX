@@ -13,7 +13,9 @@
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1"/>
     <PackageReference Include="CoreMesh.Dispatching" Version="1.1.2"/>
     <PackageReference Include="CoreMesh.Endpoints" Version="0.1.0"/>
+    <PackageReference Include="CoreMesh.Mapper.Extensions" Version="0.1.1"/>
     <PackageReference Include="CoreMesh.Result.AspNetCore" Version="0.2.0"/>
+    <PackageReference Include="CoreMesh.Validation" Version="0.2.0"/>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2"/>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

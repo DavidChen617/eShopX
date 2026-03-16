@@ -9,6 +9,7 @@ public sealed class GetProductsEndpoint : IGroupedEndpoint<ProductsGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapGet("/", Handle)
+            .Produces<ApiResponse<GetProductsResponse>>(200)
             .MapToApiVersion(1);
     }
 

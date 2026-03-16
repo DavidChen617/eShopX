@@ -7,6 +7,8 @@ public sealed class CompleteOrderEndpoint : IGroupedEndpoint<AdminOrdersGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/{orderId:guid}/complete", Handle)
+            .Produces(204)
+            .Produces<ApiResponse>(404)
             .MapToApiVersion(1);
     }
 

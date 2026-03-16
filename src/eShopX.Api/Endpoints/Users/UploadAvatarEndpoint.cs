@@ -7,6 +7,9 @@ public sealed class UploadAvatarEndpoint : IGroupedEndpoint<UsersGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/me/avatar", Handle)
+            .Produces<ApiResponse<UpdateUserAvatarResponse>>(200)
+            .Produces<ApiResponse>(404)
+            .Produces<ApiResponse>(400)
             .DisableAntiforgery()
             .MapToApiVersion(1);
     }

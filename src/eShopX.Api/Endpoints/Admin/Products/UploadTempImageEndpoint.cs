@@ -7,6 +7,8 @@ public sealed class UploadTempImageEndpoint : IGroupedEndpoint<AdminProductsGrou
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/images", Handle)
+            .Produces(200)
+            .Produces<ApiResponse>(400)
             .DisableAntiforgery()
             .MapToApiVersion(1);
     }

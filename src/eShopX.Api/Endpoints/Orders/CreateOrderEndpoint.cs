@@ -8,6 +8,8 @@ public sealed class CreateOrderEndpoint : IGroupedEndpoint<OrdersGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/", Handle)
+            .Produces<ApiResponse<CreateOrderResponse>>(201)
+            .Produces<ApiResponse>(400)
             .MapToApiVersion(1);
     }
 

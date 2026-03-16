@@ -7,6 +7,8 @@ public sealed class DeleteCategoryEndpoint : IGroupedEndpoint<AdminCategoriesGro
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapDelete("/{categoryId:guid}", Handle)
+            .Produces(204)
+            .Produces<ApiResponse>(404)
             .MapToApiVersion(1);
     }
 

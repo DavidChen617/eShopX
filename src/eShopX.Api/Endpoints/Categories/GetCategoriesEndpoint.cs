@@ -7,6 +7,7 @@ public sealed class GetCategoriesEndpoint : IGroupedEndpoint<CategoriesGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapGet("/", Handle)
+            .Produces<ApiResponse<IReadOnlyList<CategoryResponse>>>(200)
             .MapToApiVersion(1);
     }
 

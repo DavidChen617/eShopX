@@ -7,6 +7,8 @@ public sealed class LoginEndpoint : IGroupedEndpoint<AuthGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/login", Handle)
+            .Produces<ApiResponse<LoginResponse>>(200)
+            .Produces<ApiResponse>(400)
             .MapToApiVersion(1);
     }
 

@@ -1,6 +1,4 @@
 using System.Text.Json;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
 using eShopX.Application.UseCases.Outbox;
 
 namespace Infrastructure.Messaging.Payments;

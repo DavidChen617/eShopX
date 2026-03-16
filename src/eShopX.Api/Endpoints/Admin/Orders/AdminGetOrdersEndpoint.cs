@@ -8,6 +8,7 @@ public sealed class AdminGetOrdersEndpoint : IGroupedEndpoint<AdminOrdersGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapGet("/", Handle)
+            .Produces<ApiResponse<GetOrdersResponse>>(200)
             .MapToApiVersion(1);
     }
 

@@ -7,6 +7,9 @@ public sealed class UploadImageEndpoint : IGroupedEndpoint<AdminProductsGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapPost("/{productId:guid}/variants/{variantId:guid}/images", Handle)
+            .Produces<ApiResponse<UploadProductImageResponse>>(200)
+            .Produces<ApiResponse>(404)
+            .Produces<ApiResponse>(400)
             .DisableAntiforgery()
             .MapToApiVersion(1);
     }

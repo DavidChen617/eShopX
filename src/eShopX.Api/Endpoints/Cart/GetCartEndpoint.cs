@@ -7,6 +7,7 @@ public sealed class GetCartEndpoint : IGroupedEndpoint<CartGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapGet("/", Handle)
+            .Produces<ApiResponse<CartResponse>>(200)
             .MapToApiVersion(1);
     }
 

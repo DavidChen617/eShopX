@@ -1,8 +1,10 @@
+using CoreMesh.Result;
+
 namespace eShopX.Application.Interfaces;
 
 public interface IProductSearcher
 {
-    Task<ProductSearchResponse> SearchAsync(ProductSearchQuery query, CancellationToken cancellationToken = default);
+    Task<Result<ProductSearchResponse>> SearchAsync(ProductSearchQuery query, CancellationToken cancellationToken = default);
 }
 
 public record ProductSearchQuery(

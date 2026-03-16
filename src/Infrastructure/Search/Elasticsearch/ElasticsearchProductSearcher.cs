@@ -1,3 +1,5 @@
+using CoreMesh.Result;
+using CoreMesh.Result.Extensions;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using eShopX.Application.Exceptions;
@@ -12,7 +14,7 @@ public class ElasticsearchProductSearcher(
 {
     private readonly string _index = options.Value.IndexName;
 
-    public async Task<ProductSearchResponse> SearchAsync(ProductSearchQuery query, CancellationToken cancellationToken = default)
+    public async Task<Result<ProductSearchResponse>> SearchAsync(ProductSearchQuery query, CancellationToken cancellationToken = default)
     {
         int page = query.Page > 0 ? query.Page : 1,
             size = query.PageSize > 0 ? Math.Min(query.PageSize, 50) : 10,
@@ -51,7 +53,7 @@ public class ElasticsearchProductSearcher(
                     .NumCandidates(100)
                     .Filter(filters.ToArray()))
                 .Query(q => q.Bool(b => b
-                    .Must(new MultiMatchQuery { Query = query.Keyword, Fields = Infer.Fields<ProductSearchDocument>(f => f.Name, f => f.Description) })
+                    .Must(new MultiMatchQuery { Query = query.Keyword!, Fields = Infer.Fields<ProductSearchDocument>(f => f.Name, f => f.Description) })
                     .Filter(filters.ToArray()))),
                 cancellationToken);
 
@@ -59,7 +61,7 @@ public class ElasticsearchProductSearcher(
                 throw new ExternalServiceException("Elasticsearch",
                     response.ElasticsearchServerError?.Error?.Reason ?? response.DebugInformation);
 
-            return BuildResponse(response, page, size);
+            return Result<ProductSearchResponse>.Ok(BuildResponse(response, page, size));
         }
         else
         {
@@ -78,8 +80,8 @@ public class ElasticsearchProductSearcher(
             if (!response.IsValidResponse)
                 throw new ExternalServiceException("Elasticsearch",
                     response.ElasticsearchServerError?.Error?.Reason ?? response.DebugInformation);
-
-            return BuildResponse(response, page, size);
+            
+            return Result<ProductSearchResponse>.Ok(BuildResponse(response, page, size));
         }
     }
 

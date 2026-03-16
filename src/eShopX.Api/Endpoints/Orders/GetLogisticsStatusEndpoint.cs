@@ -8,6 +8,7 @@ public sealed class GetLogisticsStatusEndpoint : IGroupedEndpoint<OrdersGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapGet("/logistics/status", Handle)
+            .Produces(200)
             .MapToApiVersion(1);
     }
 

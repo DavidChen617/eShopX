@@ -7,6 +7,8 @@ public sealed class GetOrderByIdEndpoint : IGroupedEndpoint<OrdersGroup>
     public void AddRoute(RouteGroupBuilder group)
     {
         group.MapGet("/{orderId:guid}", Handle)
+            .Produces<ApiResponse<OrderResponse>>(200)
+            .Produces<ApiResponse>(404)
             .MapToApiVersion(1);
     }
 

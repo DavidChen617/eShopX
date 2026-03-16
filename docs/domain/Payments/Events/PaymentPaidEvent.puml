@@ -1,0 +1,8 @@
+@startuml
+class PaymentPaidEvent <<sealed>> <<record>> {
+    + TransactionId : string <<get>> <<init>>
+}
+INotification <|-- PaymentPaidEvent
+PaymentPaidEvent --> "PaymentId" Guid
+PaymentPaidEvent --> "OrderId" Guid
+@enduml

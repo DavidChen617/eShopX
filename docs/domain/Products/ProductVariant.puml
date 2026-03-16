@@ -1,0 +1,22 @@
+@startuml
+class ProductVariant <<sealed>> {
+    + Color : string <<get>>
+    - ProductVariant()
+    + {static} Create(productId:Guid, color:string) : ProductVariant
+    + AddSku(sizeId:Guid?, price:Money, stock:int) : ProductSku
+    + UpdateColor(color:string) : void
+    + RemoveSku(skuId:Guid) : void
+    + AddImage(url:string, publicId:string, isPrimary:bool, sortOrder:int) : void
+    + RemoveImage(imageId:Guid) : void
+}
+class "List`1"<T> {
+}
+class "IReadOnlyList`1"<T> {
+}
+Entity <|-- ProductVariant
+ProductVariant o-> "_skus<ProductSku>" "List`1"
+ProductVariant o-> "_images<ProductImage>" "List`1"
+ProductVariant --> "ProductId" Guid
+ProductVariant --> "Skus<ProductSku>" "IReadOnlyList`1"
+ProductVariant --> "Images<ProductImage>" "IReadOnlyList`1"
+@enduml

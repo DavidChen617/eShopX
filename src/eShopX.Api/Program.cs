@@ -87,11 +87,11 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var esInit = scope.ServiceProvider.GetRequiredService<EsIndexInitializer>();
-//     await esInit.EnsureIndexAsync();
-// }
+using (var scope = app.Services.CreateScope())
+{
+    var esInit = scope.ServiceProvider.GetRequiredService<EsIndexInitializer>();
+    await esInit.EnsureIndexAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {

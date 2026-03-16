@@ -198,10 +198,10 @@ public static class Dependencies
             .AddSingleton<IAdminClient>(sp =>
                 new AdminClientBuilder(sp.GetRequiredService<AdminClientConfig>()).Build());
 
-        // services
-        //     .AddHostedService<MessageTopicInitializer>()
-        //     .AddHostedService<OutboxPublisherHostedService>()
-        //     .AddHostedService<OutboxConsumerHostedService>();
+        services
+            .AddHostedService<MessageTopicInitializer>()
+            .AddHostedService<OutboxPublisherHostedService>()
+            .AddHostedService<OutboxConsumerHostedService>();
 
         // HuggingFace Embedding
         services.Configure<HuggingFaceOptions>(configuration.GetSection(HuggingFaceOptions.OptionKey))

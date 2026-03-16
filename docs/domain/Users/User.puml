@@ -1,0 +1,21 @@
+@startuml
+class User <<sealed>> {
+    + Name : string <<get>>
+    + Email : string <<get>>
+    - User()
+    + {static} Create(name:string, email:string) : User
+    + UpdateProfile(name:string) : void
+    + UpdateAvatar(url:string, publicId:string) : void
+    + AddAuthProvider(provider:Provider, providerUserId:string?, passwordHash:string?) : void
+}
+class "List`1"<T> {
+}
+class "IReadOnlyList`1"<T> {
+}
+AggregateRoot <|-- User
+User o-> "_authProviders<UserAuthProvider>" "List`1"
+User --> "Roles" Role
+User --> "Avatar" Avatar
+User --> "CreatedAt" DateTime
+User --> "AuthProviders<UserAuthProvider>" "IReadOnlyList`1"
+@enduml

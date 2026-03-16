@@ -1,0 +1,11 @@
+@startuml
+class Category <<sealed>> {
+    + Name : string <<get>>
+    - Category()
+    + {static} Create(name:string) : Category
+    + Rename(name:string) : void
+}
+AggregateRoot <|-- Category
+Category --> "CreatedAt" DateTime
+Category --> "UpdatedAt" DateTime
+@enduml

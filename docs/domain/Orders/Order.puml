@@ -1,0 +1,20 @@
+@startuml
+class Order <<sealed>> {
+    - Order()
+    + {static} Create(userId:Guid, items:IEnumerable<(Guid SkuId, ProductSnapshot Snapshot, Money UnitPrice, int Quantity)>) : Order
+    + MarkAsPaid() : void
+    + MarkAsShipped() : void
+    + MarkAsCompleted() : void
+}
+class "List`1"<T> {
+}
+class "IReadOnlyList`1"<T> {
+}
+AggregateRoot <|-- Order
+Order o-> "_items<OrderItem>" "List`1"
+Order --> "UserId" Guid
+Order --> "Status" OrderStatus
+Order o-> "TotalAmount" Money
+Order --> "CreatedAt" DateTime
+Order --> "Items<OrderItem>" "IReadOnlyList`1"
+@enduml

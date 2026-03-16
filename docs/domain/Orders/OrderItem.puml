@@ -1,0 +1,13 @@
+@startuml
+class OrderItem <<sealed>> {
+    + Quantity : int <<get>>
+    - OrderItem()
+    + {static} Create(orderId:Guid, skuId:Guid, snapshot:ProductSnapshot, unitPrice:Money, quantity:int) : OrderItem
+}
+Entity <|-- OrderItem
+OrderItem --> "OrderId" Guid
+OrderItem --> "SkuId" Guid
+OrderItem o-> "Snapshot" ProductSnapshot
+OrderItem o-> "UnitPrice" Money
+OrderItem o-> "TotalPrice" Money
+@enduml

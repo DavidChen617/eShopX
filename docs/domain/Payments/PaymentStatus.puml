@@ -1,0 +1,7 @@
+@startuml
+enum PaymentStatus {
+    Pending,
+    Paid,
+    Failed,
+}
+@enduml

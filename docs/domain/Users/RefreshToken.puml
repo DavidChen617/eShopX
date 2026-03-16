@@ -1,0 +1,13 @@
+@startuml
+class RefreshToken <<sealed>> {
+    + Token : string <<get>>
+    + IsRevoked : bool <<get>>
+    - RefreshToken()
+    + {static} Create(userId:Guid, token:string, expireAt:DateTime) : RefreshToken
+    + Revoke() : void
+}
+RefreshToken --> "Id" Guid
+RefreshToken --> "UserId" Guid
+RefreshToken --> "ExpireAt" DateTime
+RefreshToken --> "CreatedAt" DateTime
+@enduml

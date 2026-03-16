@@ -1,0 +1,6 @@
+@startuml
+class ProductDeletedEvent <<sealed>> <<record>> {
+}
+INotification <|-- ProductDeletedEvent
+ProductDeletedEvent --> "ProductId" Guid
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+class Tag <<sealed>> {
+    + Name : string <<get>>
+    - Tag()
+    + {static} Create(name:string, type:TagType) : Tag
+    + Rename(name:string) : void
+}
+AggregateRoot <|-- Tag
+Tag --> "Type" TagType
+Tag --> "CreatedAt" DateTime
+Tag --> "UpdatedAt" DateTime
+@enduml

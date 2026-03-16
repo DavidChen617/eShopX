@@ -1,0 +1,7 @@
+@startuml
+class OrderShippedEvent <<sealed>> <<record>> {
+}
+INotification <|-- OrderShippedEvent
+OrderShippedEvent --> "OrderId" Guid
+OrderShippedEvent --> "UserId" Guid
+@enduml

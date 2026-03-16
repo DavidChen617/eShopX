@@ -82,7 +82,8 @@ User -> Browser : 導向 paymentUrl（LinePay / PayPal 付款頁）
 
 Browser -> API : GET /payments/linepay/confirm\n?transactionId=xxx&orderId=xxx
 API -> DB : GetByOrderIdAsync(payment)
-API -> PayGateway : ConfirmPaymentAsync(transactionId, amount)
+note right: 若 payment.Status == Paid → 302 直接 redirect（冪等防護）
+API -> PayGateway : ConfirmPaymentAsync(transactionId, { amount, currency="TWD" })
 PayGateway --> API : { returnCode: "0000" }
 API -> Handler : ConfirmPaymentCommand(orderId, transactionId)
 Handler -> Handler : payment.MarkAsPaid(transactionId)\norder.MarkAsPaid()
@@ -95,6 +96,7 @@ Kafka -> Email : payment.paid\n→ 寄送付款成功通知信
 
 Browser -> API : GET /payments/paypal/return\n?token=xxx&orderId=xxx
 API -> DB : GetByOrderIdAsync(payment)
+note right: 若 payment.Status == Paid → 302 直接 redirect（冪等防護）
 API -> PayGateway : ConfirmAsync(token)
 PayGateway --> API : { captureId }
 API -> Handler : ConfirmPaymentCommand(orderId, captureId)

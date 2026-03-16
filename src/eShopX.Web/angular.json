@@ -3,7 +3,7 @@
   "version": 1,
   "cli": {
     "packageManager": "pnpm",
-    "analytics": "c8e673c3-4a4b-4392-9f8c-07f53236dc0f"
+    "analytics": false
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -43,10 +43,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": "dist/e-shop-x.web",
-            "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": [],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
@@ -54,28 +51,20 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.css"],
-            "scripts": []
+            "styles": ["src/styles.css"]
           },
           "configurations": {
             "production": {
-              "sourceMap": true,
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "1MB",
-                  "maximumError": "2MB"
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "8kB",
-                  "maximumError": "16kB"
-                }
-              ],
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
                 }
               ],
               "outputHashing": "all"
@@ -90,64 +79,18 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
-          "options": {
-            "proxyConfig": "proxy.conf.json"
-          },
           "configurations": {
             "production": {
               "buildTarget": "eShopX.Web:build:production"
             },
             "development": {
-              "buildTarget": "eShopX.Web:build:development"
+              "buildTarget": "eShopX.Web:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
-        },
-        "extract-i18n": {
-          "builder": "@angular/build:extract-i18n"
-        },
-        "test": {
-          "builder": "@angular/build:karma",
-          "options": {
-            "polyfills": [],
-            "tsConfig": "tsconfig.spec.json",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
-            ],
-            "styles": ["src/styles.css"],
-            "scripts": []
-          }
         }
       }
-    }
-  },
-  "schematics": {
-    "@schematics/angular:component": {
-      "type": "component"
-    },
-    "@schematics/angular:directive": {
-      "type": "directive"
-    },
-    "@schematics/angular:service": {
-      "type": "service"
-    },
-    "@schematics/angular:guard": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:interceptor": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:module": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:pipe": {
-      "typeSeparator": "."
-    },
-    "@schematics/angular:resolver": {
-      "typeSeparator": "."
     }
   }
 }

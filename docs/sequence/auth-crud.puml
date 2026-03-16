@@ -6,20 +6,43 @@ actor User
 participant "API\n(Endpoint)" as API
 participant "Handler /\nService" as Handler
 participant "PostgreSQL" as DB
+participant "Redis" as Redis
+participant "Kafka /\nEmail" as Kafka
 participant "Google\nOAuth" as Google
 participant "LINE\nOAuth" as Line
 
+== Send OTP ==
+
+User -> API : POST /auth/send-otp\n{ email }
+API -> Handler : SendOtpCommand
+Handler -> Handler : Validate\n(email format)
+Handler -> DB : FindByEmailAsync(email)
+alt Email 已存在
+  Handler --> API : 400 email_conflict
+end
+Handler -> Handler : 產生 6 位數 OTP
+Handler -> Redis : SET otp:{email} = otp\n(TTL 10 分鐘)
+Handler -> DB : AddAsync(OutboxEvent: auth.otp) + SaveChanges
+note right: Kafka consumer 收到後寄驗證信
+Handler --> API : 200
+
 == Register ==
 
-User -> API : POST /auth/register\n{ name, email, password }
+User -> API : POST /auth/register\n{ name, email, otp, password }
 API -> Handler : RegisterUserCommand
-Handler -> Handler : Validate\n(name, email format, password min 8)
+Handler -> Handler : Validate\n(name, email format, password min 8, otp not empty)
+Handler -> Redis : GET otp:{email}
+alt OTP 不存在或不符
+  Handler --> API : 400 otp_invalid
+end
 Handler -> DB : FindByEmailAsync(email)
 alt Email 已存在
   Handler --> API : 400 email_conflict
 end
 Handler -> Handler : User.Create(name, email)\nuser.AddAuthProvider(Local, hash=bcrypt(password))
-Handler -> DB : AddAsync(user) + SaveChanges
+Handler -> DB : AddAsync(user)
+Handler -> Redis : DEL otp:{email}
+Handler -> DB : SaveChanges
 Handler --> API : 201 { userId, email, createdAt }
 
 == Login (Local) ==

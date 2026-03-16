@@ -1,94 +1,81 @@
 import { Routes } from '@angular/router';
 
-import { AppShellComponent } from './layout/app-shell/app-shell.component';
-import { AdminBannersPageComponent } from './features/admin/admin-banners.page';
-
 export const routes: Routes = [
   {
     path: '',
-    component: AppShellComponent,
+    loadComponent: () => import('./layout/main-layout.component').then(m => m.MainLayoutComponent),
     children: [
       {
         path: '',
-        loadChildren: () => import('./features/home/home.routes').then((m) => m.HOME_ROUTES),
+        loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
+      },
+      {
+        path: 'product/:id',
+        loadComponent: () => import('./features/products/product-detail.component').then(m => m.ProductDetailComponent)
       },
       {
         path: 'products',
-        loadChildren: () =>
-          import('./features/products/products.routes').then((m) => m.PRODUCTS_ROUTES),
+        loadComponent: () => import('./features/products/product-list.component').then(m => m.ProductListComponent)
       },
       {
-        path: 'cart',
-        loadChildren: () => import('./features/cart/cart.routes').then((m) => m.CART_ROUTES),
+        path: 'checkout',
+        loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent)
       },
       {
         path: 'orders',
-        loadChildren: () => import('./features/orders/orders.routes').then((m) => m.ORDERS_ROUTES),
+        loadComponent: () => import('./features/orders/orders.component').then(m => m.OrdersComponent)
       },
       {
-        path: 'account',
-        loadChildren: () =>
-          import('./features/account/account.routes').then((m) => m.ACCOUNT_ROUTES),
-      },
-      {
-        path: 'auth',
-        loadChildren: () => import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
-      },
-      {
-        path: 'pay/line/success',
-        loadComponent: () =>
-          import('./features/pay/line-pay-success.page').then((m) => m.LinePaySuccessPageComponent),
-      },
-      {
-        path: 'pay/line/fail',
-        loadComponent: () =>
-          import('./features/pay/line-pay-fail.page').then((m) => m.LinePayFailPageComponent),
-      },
-      {
-        path: 'pay/line/cancel',
-        loadComponent: () =>
-          import('./features/pay/line-pay-cancel.page').then((m) => m.LinePayCancelPageComponent),
-      },
-      {
-        path: 'pay/paypal/success',
-        loadComponent: () =>
-          import('./features/pay/paypal-success.page').then((m) => m.PayPalSuccessPageComponent),
-      },
-      {
-        path: 'pay/paypal/fail',
-        loadComponent: () =>
-          import('./features/pay/paypal-fail.page').then((m) => m.PayPalFailPageComponent),
-      },
-      {
-        path: 'pay/paypal/cancel',
-        loadComponent: () =>
-          import('./features/pay/paypal-cancel.page').then((m) => m.PayPalCancelPageComponent),
-      },
-      {
-        path: 'search',
-        loadComponent: () =>
-          import('./features/search/search.page').then((m) => m.SearchPageComponent),
-      },
-      {
-        path: 'dashboard/products',
-        loadComponent: () =>
-          import('./features/dashboard/products/dashboard-products.page').then(
-            (m) => m.DashboardProductsPageComponent,
-          ),
-      },
-      {
-        path: 'admin/sellers',
-        loadComponent: () =>
-          import('./features/admin/admin-sellers.page').then((m) => m.AdminSellersPageComponent),
-      },
-      {
-        path: 'admin/banners',
-        component: AdminBannersPageComponent,
-      },
-    ],
+        path: 'orders/:orderId',
+        loadComponent: () => import('./features/orders/order-detail.component').then(m => m.OrderDetailComponent)
+      }
+    ]
   },
   {
-    path: '**',
-    redirectTo: '',
+    path: 'login',
+    loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent)
   },
+  {
+    path: 'register',
+    loadComponent: () => import('./features/auth/register.component').then(m => m.RegisterComponent)
+  },
+  {
+    path: 'auth/google/callback',
+    loadComponent: () => import('./features/auth/google-callback.component').then(m => m.GoogleCallbackComponent)
+  },
+  {
+    path: 'auth/line/callback',
+    loadComponent: () => import('./features/auth/line-callback.component').then(m => m.LineCallbackComponent)
+  },
+  {
+    path: 'admin',
+    loadComponent: () => import('./layout/admin-layout.component').then(m => m.AdminLayoutComponent),
+    children: [
+      {
+        path: 'products',
+        loadComponent: () => import('./features/admin/product-management.component').then(m => m.ProductManagementComponent)
+      },
+      {
+        path: 'products/new',
+        loadComponent: () => import('./features/admin/product-form.component').then(m => m.ProductFormComponent)
+      },
+      {
+        path: 'products/:id/edit',
+        loadComponent: () => import('./features/admin/product-form.component').then(m => m.ProductFormComponent)
+      },
+      {
+        path: 'orders',
+        loadComponent: () => import('./features/admin/order-management.component').then(m => m.OrderManagementComponent)
+      },
+      {
+        path: 'categories',
+        loadComponent: () => import('./features/admin/category-size-management.component').then(m => m.CategorySizeManagementComponent)
+      },
+      {
+        path: '',
+        redirectTo: 'products',
+        pathMatch: 'full'
+      }
+    ]
+  }
 ];

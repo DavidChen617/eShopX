@@ -28,6 +28,7 @@
 | `POST` | `/api/v1/auth/logout` | ✗ |
 | `POST` | `/api/v1/auth/refresh` | ✗ |
 | `POST` | `/api/v1/auth/register` | ✗ |
+| `POST` | `/api/v1/auth/send-otp` | ✗ |
 
 ---
 
@@ -166,7 +167,8 @@
 {
   "name": "string",
   "email": "string",
-  "password": "string"
+  "password": "string",
+  "otp": "string"
 }
 ```
 
@@ -180,6 +182,23 @@
     "createdAt": "string"
   }
   ```
+- **400** `ApiResponse` Bad Request
+
+---
+
+### `POST` `/api/v1/auth/send-otp`
+
+**Request**
+
+```json
+{
+  "email": "string"
+}
+```
+
+**Responses**
+
+- **200** `ApiResponse` OK
 - **400** `ApiResponse` Bad Request
 
 ---
@@ -237,6 +256,10 @@ file: file (required)
 ---
 
 ### `GET` `/api/v1/sizes`
+
+| 參數 | 位置 | 類型 | 必填 | 說明 |
+|------|------|------|:----:|------|
+| `type` | query | string |  |  |
 
 **Responses**
 
@@ -793,7 +816,7 @@ ResultData: string (required)
 ```json
 {
   "name": "string",
-  "type": "Clothing" | "Pants" | "Shoes" | "Hat"
+  "type": "string"
 }
 ```
 

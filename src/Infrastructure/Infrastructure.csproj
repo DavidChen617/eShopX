@@ -5,6 +5,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Remove="**/*.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CloudinaryDotNet" Version="1.28.0" />
     <PackageReference Include="Confluent.Kafka" Version="2.13.0" />
     <PackageReference Include="Elastic.Clients.Elasticsearch" Version="9.3.0" />

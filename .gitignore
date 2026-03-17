@@ -495,3 +495,7 @@ trust-policy.json
 # Build outputs
 bin/
 obj/
+bin\\
+obj\\
+**/bin\\**
+**/obj\\**

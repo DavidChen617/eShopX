@@ -124,5 +124,16 @@ jobs:
         with:
           name: k8s
           path: k8s
+      - name: Create API secret
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: |
+          echo "$ENV_FILE" > /tmp/api.env
+          kubectl create secret generic eshopx-api-secret \
+            --from-env-file=/tmp/api.env \
+            --dry-run=client -o yaml | kubectl apply -f -
+          rm /tmp/api.env
       - name: Apply manifests
-        run: kubectl apply -f k8s/
+        run: |
+          find k8s/ -name "*.yaml" ! -name "api-deployment-secret.yaml" \
+            | xargs kubectl apply -f

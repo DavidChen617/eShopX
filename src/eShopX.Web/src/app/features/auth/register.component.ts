@@ -142,7 +142,7 @@ import { AuthService } from '../../services/auth.service';
               label="立即註冊"
               icon="pi pi-user-plus"
               [loading]="isSubmitting()"
-              [disabled]="isSubmitting() || registerForm.invalid || isGoogleLoading() || isLineLoading()"
+              [disabled]="isSubmitting() || isGoogleLoading() || isLineLoading()"
               class="w-full p-button-lg bg-indigo-600 text-white border-none rounded-xl py-4 font-bold shadow-lg hover:bg-indigo-700 transition-all"
             ></button>
 
@@ -225,6 +225,38 @@ export class RegisterComponent {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email.trim());
   }
 
+  private validateForm(): string | null {
+    if (!this.name.trim()) {
+      return '請輸入姓名。';
+    }
+
+    if (!this.email.trim()) {
+      return '請輸入電子郵件。';
+    }
+
+    if (!this.isEmailValid()) {
+      return '請輸入有效的電子郵件格式。';
+    }
+
+    if (!this.otp.trim()) {
+      return '請輸入驗證碼。';
+    }
+
+    if (!/^\d{6}$/.test(this.otp.trim())) {
+      return '驗證碼需為 6 位數字。';
+    }
+
+    if (!this.password) {
+      return '請輸入密碼。';
+    }
+
+    if (this.password.length < 8) {
+      return '密碼至少需要 8 個字元。';
+    }
+
+    return null;
+  }
+
   sendOtp(): void {
     if (!this.isEmailValid()) {
       this.errorMessage.set('請先輸入有效的電子郵件。');
@@ -249,8 +281,9 @@ export class RegisterComponent {
   }
 
   submit(): void {
-    if (!this.name.trim() || !this.isEmailValid() || !this.password || !this.otp.trim()) {
-      this.errorMessage.set('請完整填寫註冊資訊。');
+    const validationMessage = this.validateForm();
+    if (validationMessage) {
+      this.errorMessage.set(validationMessage);
       return;
     }
 

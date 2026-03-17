@@ -57,6 +57,14 @@ interface AdminProductItem {
               (valueChange)="onKeywordChange($event)"
             ></app-search-input>
           </div>
+          <button
+            pButton
+            type="button"
+            label="同步 Elasticsearch"
+            icon="pi pi-refresh"
+            (click)="syncElasticsearch()"
+            class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-700"
+          ></button>
           <app-admin-primary-button
             label="新增商品"
             icon="pi pi-plus"
@@ -310,6 +318,27 @@ export class ProductManagementComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: '商品刪除失敗',
+          detail: '請稍後再試，或確認後端 API 是否可用。',
+          life: 2600,
+        });
+      },
+    });
+  }
+
+  syncElasticsearch() {
+    this.adminProductService.reindexProducts().subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: '同步已送出',
+          detail: '商品索引同步已開始執行。',
+          life: 2200,
+        });
+      },
+      error: () => {
+        this.messageService.add({
+          severity: 'error',
+          summary: '同步失敗',
           detail: '請稍後再試，或確認後端 API 是否可用。',
           life: 2600,
         });

@@ -62,7 +62,7 @@ import { ProductService } from '../services/product.service';
               (mousedown)="onSearch()"
               class="flex w-full items-center justify-center gap-2 border-t border-slate-100 px-4 py-3 text-sm font-bold text-indigo-600 transition-colors hover:bg-indigo-50"
             >
-              <span>查看全部結果</span>
+              <span>查看「{{ keyword().trim() }}」全部結果</span>
               <i class="pi pi-arrow-right text-xs"></i>
             </button>
           } @else {

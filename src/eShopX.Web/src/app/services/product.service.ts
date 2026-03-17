@@ -2,13 +2,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { ApiResponse, Audience, Product, ProductSearchResponse, ProductSummary } from '../models/api.models';
+import { apiUrl } from '../shared/api.config';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api/v1/products';
+  private readonly baseUrl = apiUrl('/v1/products');
 
   search(params?: {
     keyword?: string;

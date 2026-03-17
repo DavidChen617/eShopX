@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 import { ApiResponse, Category } from '../models/api.models';
+import { apiUrl } from '../shared/api.config';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CategoryService {
   private http = inject(HttpClient);
-  private readonly baseUrl = '/api/v1';
+  private readonly baseUrl = apiUrl('/v1');
 
   categories = signal<Category[]>([]);
 

@@ -2,13 +2,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 import { ApiResponse, Size } from '../models/api.models';
+import { apiUrl } from '../shared/api.config';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SizeService {
   private http = inject(HttpClient);
-  private readonly baseUrl = '/api/v1';
+  private readonly baseUrl = apiUrl('/v1');
 
   sizes = signal<Size[]>([]);
 

@@ -12,6 +12,7 @@ import {
   UploadedProductImage,
 } from '../models/api.models';
 import { ProductService } from './product.service';
+import { apiUrl } from '../shared/api.config';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +20,7 @@ import { ProductService } from './product.service';
 export class AdminProductService {
   private http = inject(HttpClient);
   private productService = inject(ProductService);
-  private readonly baseUrl = '/api/v1';
+  private readonly baseUrl = apiUrl('/v1');
 
   products = signal<ProductListItemResponse[]>([]);
   totalCount = signal(0);
@@ -143,6 +144,12 @@ export class AdminProductService {
       formData
     ).pipe(
       map((response) => Array.isArray(response) ? response : response.data)
+    );
+  }
+
+  reindexProducts(): Observable<void> {
+    return this.http.post<ApiResponse<unknown> | void>(`${this.baseUrl}/admin/products/reindex`, {}).pipe(
+      map(() => void 0)
     );
   }
 

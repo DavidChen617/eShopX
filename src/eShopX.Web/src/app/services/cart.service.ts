@@ -3,6 +3,7 @@ import { Injectable, computed, effect, inject, signal } from '@angular/core';
 import { catchError, map, Observable, of, switchMap, tap } from 'rxjs';
 import { ApiResponse, Cart, CartItem } from '../models/api.models';
 import { AuthService } from './auth.service';
+import { apiUrl } from '../shared/api.config';
 
 type CartApiItem = Omit<CartItem, 'selected'>;
 type CartApiResponse = {
@@ -17,7 +18,7 @@ type CartApiResponse = {
 export class CartService {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
-  private readonly baseUrl = '/api/v1/cart';
+  private readonly baseUrl = apiUrl('/v1/cart');
 
   readonly isDrawerVisible = signal(false);
   readonly isLoading = signal(false);

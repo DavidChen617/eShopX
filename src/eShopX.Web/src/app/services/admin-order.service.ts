@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 import { ApiResponse } from '../models/api.models';
+import { apiUrl } from '../shared/api.config';
 
 export type AdminOrderStatus = 'PendingPayment' | 'Paid' | 'Shipped' | 'Completed';
 
@@ -37,7 +38,7 @@ interface ShipOrderResponse {
 })
 export class AdminOrderService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api/v1/admin/orders';
+  private readonly baseUrl = apiUrl('/v1/admin/orders');
 
   orders = signal<AdminOrderItem[]>([]);
   totalCount = signal(0);

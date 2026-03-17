@@ -10,13 +10,14 @@ import {
   OrderResponse,
   StartLogisticsRequest,
 } from '../models/api.models';
+import { apiUrl } from '../shared/api.config';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OrderService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api/v1/orders';
+  private readonly baseUrl = apiUrl('/v1/orders');
 
   startLogisticsSelection(request: StartLogisticsRequest): Observable<string> {
     return this.http

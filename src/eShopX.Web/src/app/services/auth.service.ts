@@ -17,6 +17,7 @@ import {
   RegisterResponse,
   SendOtpRequest,
 } from '../models/api.models';
+import { apiUrl } from '../shared/api.config';
 
 interface AuthSession {
   accessToken: string | null;
@@ -35,7 +36,7 @@ interface AuthSession {
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = '/api/v1/auth';
+  private readonly baseUrl = apiUrl('/v1/auth');
   private readonly googleClientId = '81840048967-d6k4331ks8sllq08qac4morq5877t843.apps.googleusercontent.com';
   private readonly googleScope = 'openid email profile';
   private readonly lineChannelId = '2009031910';
@@ -264,7 +265,7 @@ export class AuthService {
   }
 
   fetchCurrentUser(): Observable<GetMeResponse> {
-    return this.http.get<ApiResponse<GetMeResponse>>('/api/v1/users/me').pipe(
+    return this.http.get<ApiResponse<GetMeResponse>>(apiUrl('/v1/users/me')).pipe(
       map((response) => response.data),
       tap((response) => this.persistCurrentUser(response))
     );

@@ -2,23 +2,24 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { API_V1_BASE_URL } from '../shared/api.config';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
 
-  if (!req.url.startsWith('/api/v1')) {
+  if (!req.url.startsWith(API_V1_BASE_URL)) {
     return next(req);
   }
 
   const isPublicAuthRequest = [
-    '/api/v1/auth/login',
-    '/api/v1/auth/register',
-    '/api/v1/auth/send-otp',
-    '/api/v1/auth/refresh',
-    '/api/v1/auth/google',
-    '/api/v1/auth/line',
+    `${API_V1_BASE_URL}/auth/login`,
+    `${API_V1_BASE_URL}/auth/register`,
+    `${API_V1_BASE_URL}/auth/send-otp`,
+    `${API_V1_BASE_URL}/auth/refresh`,
+    `${API_V1_BASE_URL}/auth/google`,
+    `${API_V1_BASE_URL}/auth/line`,
   ].includes(req.url);
-  const isRefreshRequest = req.url === '/api/v1/auth/refresh';
+  const isRefreshRequest = req.url === `${API_V1_BASE_URL}/auth/refresh`;
   const canRefresh = !isPublicAuthRequest && !!authService.getRefreshToken();
   const expired = authService.isAccessTokenExpired();
   const withAuth = (token: string | null) =>
@@ -43,7 +44,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       return authService.refreshSession().pipe(
         switchMap((response) => next(withAuth(response.accessToken))),
         catchError((refreshError: unknown) => {
-          if (refreshError instanceof HttpErrorResponse && refreshError.url?.includes('/api/v1/auth/refresh')) {
+          if (refreshError instanceof HttpErrorResponse && refreshError.url?.includes(`${API_V1_BASE_URL}/auth/refresh`)) {
             authService.clearSession();
           }
 

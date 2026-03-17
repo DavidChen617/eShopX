@@ -66,7 +66,7 @@ import { CartService } from '../../services/cart.service';
           <div class="space-y-4">
             <div class="overflow-hidden rounded-3xl bg-slate-100 shadow-sm">
               <img
-                [src]="activeImage()?.url"
+                [src]="activeImage().url"
                 [alt]="product()!.name"
                 class="w-full aspect-[4/5] object-cover"
               />

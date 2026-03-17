@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { ApiResponse, Product, ProductSearchResponse, ProductSummary } from '../models/api.models';
+import { ApiResponse, Audience, Product, ProductSearchResponse, ProductSummary } from '../models/api.models';
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +13,7 @@ export class ProductService {
   search(params?: {
     keyword?: string;
     categoryId?: string;
+    audience?: Audience;
     minPrice?: number;
     maxPrice?: number;
     isActive?: boolean;
@@ -27,6 +28,10 @@ export class ProductService {
 
     if (params?.categoryId) {
       httpParams = httpParams.set('categoryId', params.categoryId);
+    }
+
+    if (params?.audience) {
+      httpParams = httpParams.set('audience', params.audience);
     }
 
     if (params?.minPrice !== undefined) {

@@ -10,7 +10,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { PaginatorState } from 'primeng/paginator';
 import { ProductCardComponent } from '../../components/product-card.component';
 import { CategoryService } from '../../services/category.service';
-import { ProductSummary } from '../../models/api.models';
+import { Audience, ProductSummary } from '../../models/api.models';
 import { ProductService } from '../../services/product.service';
 
 @Component({
@@ -66,6 +66,24 @@ import { ProductService } from '../../services/product.service';
             </div>
           </section>
 
+          <!-- Audience -->
+          <section>
+            <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest mb-4">受眾</h3>
+            <div class="flex flex-col gap-3">
+              @for (option of audienceOptions; track option.value ?? 'all') {
+                <div
+                  (click)="selectedAudience.set(option.value)"
+                  class="flex items-center justify-between group cursor-pointer"
+                >
+                  <span [class]="selectedAudience() === option.value ? 'text-indigo-600 font-bold' : 'text-slate-600 group-hover:text-slate-900'">
+                    {{ option.label }}
+                  </span>
+                  @if (selectedAudience() === option.value) { <div class="w-1.5 h-1.5 rounded-full bg-indigo-600"></div> }
+                </div>
+              }
+            </div>
+          </section>
+
           <!-- Price Range -->
           <section>
             <div class="flex justify-between items-center mb-4">
@@ -104,7 +122,6 @@ import { ProductService } from '../../services/product.service';
           <div class="flex items-center justify-between mb-8">
             <h2 class="text-2xl font-black text-slate-900">
               {{ currentCategoryName() }}
-              <span class="text-sm text-slate-400 font-normal ml-2">({{ filteredProducts().length }} 個結果)</span>
             </h2>
           </div>
 
@@ -122,7 +139,7 @@ import { ProductService } from '../../services/product.service';
             </div>
           } @else {
             <!-- Product Grid -->
-            @if (filteredProducts().length === 0) {
+            @if (displayProducts().length === 0) {
               <div class="flex flex-col items-center justify-center py-20 text-slate-400">
                 <i class="pi pi-search text-6xl mb-4"></i>
                 <p class="text-lg font-medium">找不到符合條件的商品</p>
@@ -133,7 +150,7 @@ import { ProductService } from '../../services/product.service';
               </div>
             } @else {
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                @for (prod of pagedProducts(); track prod.productId) {
+                @for (prod of displayProducts(); track prod.productId) {
                   <app-product-card [product]="mapToCardProduct(prod)"></app-product-card>
                 }
               </div>
@@ -143,7 +160,7 @@ import { ProductService } from '../../services/product.service';
                 <p-paginator 
                   [first]="first()"
                   [rows]="rows()"
-                  [totalRecords]="filteredProducts().length"
+                  [totalRecords]="totalCount()"
                   [showCurrentPageReport]="true"
                   currentPageReportTemplate="{first} - {last} / 共 {totalRecords} 個商品"
                   (onPageChange)="onPageChange($event)"
@@ -182,11 +199,21 @@ export class ProductListComponent implements OnInit {
 
   isLoading = signal(true);
   products = signal<ProductSummary[]>([]);
+  totalCount = signal(0);
+  initialized = signal(false);
+  keyword = signal('');
   selectedCategoryId = signal<string | null>(null);
+  selectedAudience = signal<Audience | null>(null);
   priceRange = signal<number[]>([0, 5000]);
   selectedSort = signal('newest');
   first = signal(0);
-  rows = signal(6);
+  rows = signal(10);
+
+  audienceOptions: Array<{ label: string; value: Audience | null }> = [
+    { label: '全部', value: null },
+    { label: '男裝', value: 'Men' },
+    { label: '女裝', value: 'Women' },
+  ];
 
   sortOptions = [
     { label: '最新上架', value: 'newest' },
@@ -194,14 +221,8 @@ export class ProductListComponent implements OnInit {
     { label: '價格：由高到低', value: 'price_desc' },
   ];
 
-  filteredProducts = computed(() => {
-    const filtered = this.products().filter((p) => {
-      const matchCategory = !this.selectedCategoryId() || p.categoryId === this.selectedCategoryId();
-      const matchPrice = p.price >= this.priceRange()[0] && p.price <= this.priceRange()[1];
-      return matchCategory && matchPrice;
-    });
-
-    const sorted = [...filtered];
+  displayProducts = computed(() => {
+    const sorted = [...this.products()];
 
     if (this.selectedSort() === 'price_asc') {
       sorted.sort((a, b) => a.price - b.price);
@@ -212,13 +233,11 @@ export class ProductListComponent implements OnInit {
     return sorted;
   });
 
-  pagedProducts = computed(() => {
-    const start = this.first();
-    const end = start + this.rows();
-    return this.filteredProducts().slice(start, end);
-  });
-
   currentCategoryName = computed(() => {
+    if (this.keyword()) {
+      return `搜尋「${this.keyword()}」`;
+    }
+
     return this.selectedCategoryId() 
       ? this.categoryService.getCategoryName(this.selectedCategoryId()!) 
       : '所有商品';
@@ -226,25 +245,52 @@ export class ProductListComponent implements OnInit {
 
   constructor() {
     effect(() => {
+      if (!this.initialized()) {
+        return;
+      }
+
       this.selectedCategoryId();
+      this.selectedAudience();
       this.priceRange();
-      this.selectedSort();
       this.first.set(0);
+    });
+
+    effect(() => {
+      if (!this.initialized()) {
+        return;
+      }
+
+      const keyword = this.keyword();
+      const categoryId = this.selectedCategoryId();
+      const audience = this.selectedAudience();
+      const [minPrice, maxPrice] = this.priceRange();
+      const first = this.first();
+      const rows = this.rows();
+
+      this.loadProducts({
+        keyword,
+        categoryId,
+        audience,
+        minPrice,
+        maxPrice,
+        page: Math.floor(first / rows) + 1,
+        pageSize: rows,
+      });
     });
   }
 
   ngOnInit() {
-    this.loadProducts();
-
-    // 監聽路由參數（如果有 category 參數）
     this.route.queryParams.subscribe(params => {
+      this.keyword.set((params['keyword'] ?? '').trim());
       this.selectedCategoryId.set(params['category'] ?? null);
-      this.first.set(0);
+      this.selectedAudience.set(params['audience'] === 'Men' || params['audience'] === 'Women' ? params['audience'] : null);
+      this.initialized.set(true);
     });
   }
 
   resetFilters() {
     this.selectedCategoryId.set(null);
+    this.selectedAudience.set(null);
     this.priceRange.set([0, 5000]);
     this.selectedSort.set('newest');
     this.first.set(0);
@@ -252,7 +298,7 @@ export class ProductListComponent implements OnInit {
 
   onPageChange(event: PaginatorState) {
     this.first.set(event.first ?? 0);
-    this.rows.set(event.rows ?? 6);
+    this.rows.set(event.rows ?? 10);
   }
 
   // 轉換格式以適應 ProductCardComponent 的 Input (因為目前 ProductCard 接口與 Summary 略有不同)
@@ -267,20 +313,35 @@ export class ProductListComponent implements OnInit {
     };
   }
 
-  private loadProducts() {
+  private loadProducts(params: {
+    keyword: string;
+    categoryId: string | null;
+    audience: Audience | null;
+    minPrice: number;
+    maxPrice: number;
+    page: number;
+    pageSize: number;
+  }) {
     this.isLoading.set(true);
 
     this.productService.search({
+      keyword: params.keyword || undefined,
+      categoryId: params.categoryId ?? undefined,
+      audience: params.audience ?? undefined,
+      minPrice: params.minPrice,
+      maxPrice: params.maxPrice,
       isActive: true,
-      page: 1,
-      pageSize: 100,
+      page: params.page,
+      pageSize: params.pageSize,
     }).subscribe({
       next: (response) => {
         this.products.set(response.items);
+        this.totalCount.set(response.totalCount);
         this.isLoading.set(false);
       },
       error: () => {
         this.products.set([]);
+        this.totalCount.set(0);
         this.isLoading.set(false);
       },
     });

@@ -2,7 +2,6 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { GalleriaModule } from 'primeng/galleria';
 import { Product, ProductImage, ProductVariant, SKU } from '../../models/api.models';
 import { CategoryService } from '../../services/category.service';
 import { ProductService } from '../../services/product.service';
@@ -13,7 +12,7 @@ import { CartService } from '../../services/cart.service';
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, ButtonModule, GalleriaModule],
+  imports: [CommonModule, RouterLink, ButtonModule],
   template: `
     <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
       @if (isLoading()) {
@@ -44,32 +43,56 @@ import { CartService } from '../../services/cart.service';
             <i class="pi pi-home text-[10px]"></i> 首頁
           </a>
           <i class="pi pi-chevron-right text-[8px] text-slate-300"></i>
-          <span>{{ audienceName() }}</span>
+          <a
+            routerLink="/products"
+            [queryParams]="audienceQueryParams()"
+            class="transition-colors hover:text-indigo-600"
+          >
+            {{ audienceName() }}
+          </a>
           <i class="pi pi-chevron-right text-[8px] text-slate-300"></i>
-          <a routerLink="/products" class="transition-colors hover:text-indigo-600">{{ categoryName() }}</a>
+          <a
+            routerLink="/products"
+            [queryParams]="categoryQueryParams()"
+            class="transition-colors hover:text-indigo-600"
+          >
+            {{ categoryName() }}
+          </a>
           <i class="pi pi-chevron-right text-[8px] text-slate-300"></i>
           <span class="font-bold text-slate-900">{{ product()!.name }}</span>
         </nav>
 
         <div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
           <div class="space-y-4">
-            <p-galleria
-              [value]="activeVariantImages()"
-              [responsiveOptions]="responsiveOptions"
-              [containerStyle]="{ 'max-width': '100%' }"
-              [numVisible]="5"
-              [showThumbnails]="activeVariantImages().length > 1"
-              thumbnailsPosition="bottom"
-            >
-              <ng-template pTemplate="item" let-item>
-                <img [src]="item.url" [alt]="product()!.name" class="w-full aspect-[4/5] rounded-3xl object-cover shadow-sm" />
-              </ng-template>
-              <ng-template pTemplate="thumbnail" let-item>
-                <div class="grid grid-cols-1 p-1">
-                  <img [src]="item.url" [alt]="product()!.name" class="w-full aspect-square rounded-xl object-cover" />
-                </div>
-              </ng-template>
-            </p-galleria>
+            <div class="overflow-hidden rounded-3xl bg-slate-100 shadow-sm">
+              <img
+                [src]="activeImage()?.url"
+                [alt]="product()!.name"
+                class="w-full aspect-[4/5] object-cover"
+              />
+            </div>
+
+            @if (activeVariantImages().length > 1) {
+              <div class="grid grid-cols-5 gap-3">
+                @for (image of activeVariantImages(); track image.id; let idx = $index) {
+                  <button
+                    type="button"
+                    (click)="activeImageIndex.set(idx)"
+                    class="overflow-hidden rounded-2xl border-2 bg-slate-100 transition-all"
+                    [class.border-indigo-600]="activeImageIndex() === idx"
+                    [class.shadow-lg]="activeImageIndex() === idx"
+                    [class.border-transparent]="activeImageIndex() !== idx"
+                    [attr.aria-label]="'切換到第 ' + (idx + 1) + ' 張圖片'"
+                  >
+                    <img
+                      [src]="image.url"
+                      [alt]="product()!.name"
+                      class="aspect-square w-full object-cover"
+                    />
+                  </button>
+                }
+              </div>
+            }
           </div>
 
           <div class="flex flex-col">
@@ -181,15 +204,6 @@ import { CartService } from '../../services/cart.service';
   styles: [
     `
       @reference "tailwindcss";
-      :host ::ng-deep .p-galleria-thumbnail-container {
-        @apply bg-transparent p-0 mt-4;
-      }
-      :host ::ng-deep .p-galleria-thumbnail-items-container {
-        @apply gap-2;
-      }
-      :host ::ng-deep .p-galleria-nav-button {
-        @apply bg-white/80 backdrop-blur-md text-slate-900 rounded-full shadow-lg hover:bg-white;
-      }
     `,
   ],
 })
@@ -222,10 +236,23 @@ export class ProductDetailComponent implements OnInit {
   protected readonly product = signal<Product | null>(null);
   protected readonly selectedVariant = signal<ProductVariant | null>(null);
   protected readonly selectedSKU = signal<SKU | null>(null);
+  protected readonly activeImageIndex = signal(0);
+  protected readonly activeVariantImages = signal<ProductImage[]>([]);
+  protected readonly activeImage = computed(() => this.activeVariantImages()[this.activeImageIndex()] ?? null);
 
   protected readonly categoryName = computed(() =>
     this.product() ? this.categoryService.getCategoryName(this.product()!.categoryId) : '商品'
   );
+
+  protected readonly audienceQueryParams = computed(() => {
+    const audience = this.product()?.audience;
+    return audience ? { audience } : {};
+  });
+
+  protected readonly categoryQueryParams = computed(() => {
+    const categoryId = this.product()?.categoryId;
+    return categoryId ? { category: categoryId } : {};
+  });
 
   protected readonly audienceName = computed(() => {
     const audience = this.product()?.audience;
@@ -237,15 +264,6 @@ export class ProductDetailComponent implements OnInit {
   protected readonly displayTags = computed(() =>
     (this.product()?.tagIds ?? []).map((id) => this.tagService.getTagName(id))
   );
-
-  protected readonly activeVariantImages = computed<ProductImage[]>(() => {
-    const variant = this.selectedVariant();
-    if (!variant) {
-      return [];
-    }
-
-    return [...variant.images].sort((a, b) => a.sortOrder - b.sortOrder);
-  });
 
   protected readonly activeSKU = computed(() => this.selectedSKU() ?? this.selectedVariant()?.skus[0] ?? null);
 
@@ -273,12 +291,6 @@ export class ProductDetailComponent implements OnInit {
       : 'text-rose-600 bg-rose-50'
   );
 
-  protected readonly responsiveOptions = [
-    { breakpoint: '1024px', numVisible: 5 },
-    { breakpoint: '768px', numVisible: 3 },
-    { breakpoint: '560px', numVisible: 1 },
-  ];
-
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
       const productId = params.get('id');
@@ -295,7 +307,9 @@ export class ProductDetailComponent implements OnInit {
 
   protected onVariantChange(variant: ProductVariant): void {
     this.selectedVariant.set(variant);
+    this.activeVariantImages.set([...variant.images].sort((a, b) => a.sortOrder - b.sortOrder));
     this.selectedSKU.set(variant.skus.find((sku) => sku.stock > 0) ?? variant.skus[0] ?? null);
+    this.activeImageIndex.set(0);
   }
 
   protected getColorHex(colorName: string): string {
@@ -317,6 +331,8 @@ export class ProductDetailComponent implements OnInit {
     this.product.set(null);
     this.selectedVariant.set(null);
     this.selectedSKU.set(null);
+    this.activeVariantImages.set([]);
+    this.activeImageIndex.set(0);
 
     this.productService.getById(productId).subscribe({
       next: (product) => {

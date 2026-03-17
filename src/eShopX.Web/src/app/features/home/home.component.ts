@@ -13,15 +13,21 @@ import { ProductService } from '../../services/product.service';
   template: `
     <div class="max-w-7xl mx-auto px-4 py-8">
       <!-- Hero Section -->
-      <div class="mb-12 rounded-3xl bg-indigo-600 p-8 md:p-16 text-white overflow-hidden relative">
-        <div class="relative z-10 max-w-lg">
-          <span class="inline-block px-3 py-1 rounded-full bg-white/20 text-sm font-medium mb-4 backdrop-blur-sm">{{ seasonalHeadline }}</span>
-          <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight">探索你的<br>極致生活風格</h1>
-          <p class="text-lg text-indigo-100 mb-8">精選男裝與女裝單品，兼顧版型、舒適與日常搭配。</p>
+      <div
+        class="mb-12 overflow-hidden rounded-3xl text-white relative bg-cover min-h-[320px] md:min-h-[440px] lg:min-h-[480px] bg-[center_top_24%] md:bg-[center_top_28%]"
+        style="background-image: url('/hero.png');"
+      >
+        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/78 via-rose-900/45 to-rose-500/20"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.14),transparent_28%)]"></div>
+        <div class="relative p-8 md:p-16">
+          <div class="relative z-10 max-w-lg">
+            <span class="inline-block px-3 py-1 rounded-full bg-white/20 text-sm font-medium mb-4 backdrop-blur-sm">{{ seasonalHeadline }}</span>
+            <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight">探索你的<br>極致生活風格</h1>
+            <p class="text-lg text-indigo-100 mb-8">精選男裝與女裝單品，兼顧版型、舒適與日常搭配。</p>
+          </div>
+          <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+          <div class="absolute bottom-0 right-0 w-96 h-96 bg-pink-400/30 rounded-full translate-y-1/3 translate-x-1/4 blur-3xl"></div>
         </div>
-        <!-- Decorative circles -->
-        <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
-        <div class="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/50 rounded-full translate-y-1/3 translate-x-1/4 blur-3xl"></div>
       </div>
 
       <!-- Product Grid Header -->

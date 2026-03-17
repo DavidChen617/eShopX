@@ -8,7 +8,6 @@ COPY global.json ./
 COPY src/Domain/Domain.csproj src/Domain/
 COPY src/Application/Application.csproj src/Application/
 COPY src/Infrastructure/Infrastructure.csproj src/Infrastructure/
-COPY src/eShopX.Common/eShopX.Common.csproj src/eShopX.Common/
 COPY src/eShopX.Api/eShopX.Api.csproj src/eShopX.Api/
 
 RUN dotnet restore src/eShopX.Api/eShopX.Api.csproj

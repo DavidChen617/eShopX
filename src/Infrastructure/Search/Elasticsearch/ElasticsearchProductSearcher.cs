@@ -32,7 +32,18 @@ public class ElasticsearchProductSearcher(
             });
 
         if (query.CategoryId.HasValue)
-            filters.Add(new TermQuery("categoryId", query.CategoryId.Value.ToString()));
+            filters.Add(new TermQuery("categoryId.keyword", query.CategoryId.Value.ToString()));
+
+        if (query.Audience.HasValue)
+            filters.Add(new BoolQuery
+            {
+                Should =
+                [
+                    new TermQuery("audience.keyword", query.Audience.Value.ToString()),
+                    new BoolQuery { MustNot = [new ExistsQuery { Field = "audience" }] }
+                ],
+                MinimumShouldMatch = 1
+            });
 
         var hasKeyword = !string.IsNullOrWhiteSpace(query.Keyword);
 
@@ -50,7 +61,7 @@ public class ElasticsearchProductSearcher(
                     .Field(f => f.Embedding)
                     .QueryVector(queryVector)
                     .K(size * 5)
-                    .NumCandidates(100)
+                    .NumCandidates(Math.Max(100, size * 5))
                     .Filter(filters.ToArray()))
                 .Query(q => q.Bool(b => b
                     .Must(new MultiMatchQuery { Query = query.Keyword!, Fields = Infer.Fields<ProductSearchDocument>(f => f.Name, f => f.Description) })
@@ -117,6 +128,7 @@ public class ProductSearchDocument
     public decimal Price { get; set; }
     public int StockQuantity { get; set; }
     public bool IsActive { get; set; }
+    public string? Audience { get; set; }
     public string? PrimaryImageUrl { get; set; }
     public DateTime CreatedAt { get; set; }
     public float[] Embedding { get; set; } = [];

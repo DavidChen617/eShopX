@@ -20,8 +20,17 @@ Handler -> DB : FindByEmailAsync(email)
 alt Email 已存在
   Handler --> API : 400 email_conflict
 end
+Handler -> Redis : GET otp:{email}
+alt OTP 尚未過期
+  Handler --> API : 400 otp_not_expired
+end
+Handler -> Redis : GET otp:count:{email}:{yyyyMMdd}
+alt 今日發送次數 >= 3
+  Handler --> API : 400 otp_limit_exceeded
+end
 Handler -> Handler : 產生 6 位數 OTP
 Handler -> Redis : SET otp:{email} = otp\n(TTL 10 分鐘)
+Handler -> Redis : SET otp:count:{email}:{yyyyMMdd} = count+1\n(TTL 到今天 UTC 午夜)
 Handler -> DB : AddAsync(OutboxEvent: auth.otp) + SaveChanges
 note right: Kafka consumer 收到後寄驗證信
 Handler --> API : 200
@@ -52,9 +61,10 @@ API -> Handler : LoginCommand
 Handler -> Handler : Validate
 Handler -> DB : FindByEmailAsync(email)
 alt User 不存在 or 無 Local provider or 密碼錯誤
-  Handler --> API : 400 credentials invalid
+  Handler --> API : 422 credentials invalid
 end
 Handler -> Handler : bcrypt.Verify(password, hash)
+Handler -> Handler : 從 User.Roles 取出所有 flags → roles[]
 Handler -> Handler : GenerateAccessToken(userId, email, name, roles)\nRefreshToken.Create(userId, token, expireAt)
 Handler -> DB : AddAsync(refreshToken) + SaveChanges
 Handler --> API : 200\n{ accessToken, refreshToken, userId, name, expiresAt }
@@ -76,6 +86,10 @@ end
 Handler -> Handler : existing.Revoke()
 Handler -> DB : Update(existing)
 Handler -> DB : GetByIdAsync(userId)
+alt User 不存在
+  Handler --> API : 404 user_not_found
+end
+Handler -> Handler : 從 User.Roles 取出所有 flags → roles[]
 Handler -> Handler : GenerateAccessToken(...)\nRefreshToken.Create(...) ← 新 token
 Handler -> DB : AddAsync(newRefreshToken) + SaveChanges
 note right: Rotation：舊 token revoke，發新 token

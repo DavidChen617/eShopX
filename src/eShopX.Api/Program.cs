@@ -48,13 +48,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "MyPolicy", policy =>
     {
-        var origins = builder.Configuration
-            .GetSection("Cors:AllowedOrigins")
-            .Get<string[]>();
+        var frontendDomain = builder.Configuration["Site:FrontendDomain"];
 
-        if (origins is { Length: > 0 })
+        if (!string.IsNullOrWhiteSpace(frontendDomain))
         {
-            policy.WithOrigins(origins)
+            policy.WithOrigins(frontendDomain)
                 .AllowAnyMethod()
                 .AllowAnyHeader();
             return;

@@ -1,4 +1,5 @@
 using CoreMesh.Result;
+using eShopX.Domain.Aggregates.Products;
 
 namespace eShopX.Application.Interfaces;
 
@@ -13,6 +14,7 @@ public record ProductSearchQuery(
     decimal? MinPrice = null,
     decimal? MaxPrice = null,
     bool? IsActive = null,
+    Audience? Audience = null,
     int Page = 1,
     int PageSize = 20);
 

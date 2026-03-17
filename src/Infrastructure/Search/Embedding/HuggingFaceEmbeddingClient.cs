@@ -8,7 +8,6 @@ public class HuggingFaceEmbeddingClient(HttpClient client) : IEmbeddingClient
 {
     public async Task<float[]> GetEmbeddingAsync(string text, CancellationToken ct = default)
     {
-
         var response = await client.PostAsJsonAsync(string.Empty, new { inputs = text }, ct);
 
         if (!response.IsSuccessStatusCode)
@@ -24,5 +23,21 @@ public class HuggingFaceEmbeddingClient(HttpClient client) : IEmbeddingClient
             return root[0].Deserialize<float[]>()!;
 
         return root.Deserialize<float[]>()!;
+    }
+
+    public async Task<float[][]> GetEmbeddingsAsync(IReadOnlyList<string> texts, CancellationToken ct = default)
+    {
+        var response = await client.PostAsJsonAsync(string.Empty, new { inputs = texts }, ct);
+
+        if (!response.IsSuccessStatusCode)
+            throw new ExternalServiceException("HuggingFace",
+                await response.Content.ReadAsStringAsync(ct));
+
+        var json = await response.Content.ReadAsStringAsync(ct);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        // batch always returns float[][]
+        return root.Deserialize<float[][]>()!;
     }
 }

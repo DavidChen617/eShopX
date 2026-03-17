@@ -1,4 +1,5 @@
 using eShopX.Application.Interfaces;
+using eShopX.Domain.Aggregates.Products;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShopX.Endpoints.Products;
@@ -18,6 +19,7 @@ public sealed class SearchProductsEndpoint : IGroupedEndpoint<ProductsGroup>
         [FromQuery] decimal? minPrice,
         [FromQuery] decimal? maxPrice,
         [FromQuery] bool? isActive,
+        [FromQuery] Audience? audience,
         [FromQuery] int page,
         [FromQuery] int pageSize,
         IProductSearcher searchService,
@@ -29,6 +31,7 @@ public sealed class SearchProductsEndpoint : IGroupedEndpoint<ProductsGroup>
             MinPrice: minPrice,
             MaxPrice: maxPrice,
             IsActive: isActive,
+            Audience: audience,
             Page: page <= 0 ? 1 : page,
             PageSize: pageSize <= 0 ? 20 : pageSize);
 

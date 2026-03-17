@@ -62,6 +62,7 @@ public class ProductSearchIndexSynchronizer(
             Price           = allSkus.Count > 0 ? allSkus.Min(s => s.Price.Amount) : 0,
             StockQuantity   = allSkus.Sum(s => s.StockQuantity),
             IsActive        = product.IsActive,
+            Audience        = product.Audience?.ToString(),
             PrimaryImageUrl = primaryImage?.Url,
             CreatedAt       = product.CreatedAt,
             Embedding       = embedding

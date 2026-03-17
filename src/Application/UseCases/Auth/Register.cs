@@ -76,6 +76,6 @@ public class RegisterUserHandler(
         await cacher.RemoveAsync(OtpCacheKeys.Otp(command.Email), cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result<RegisterUserResponse>.Ok(mapper.Map<User, RegisterUserResponse>(user));
+        return Result<RegisterUserResponse>.Created(mapper.Map<User, RegisterUserResponse>(user));
     }
 }

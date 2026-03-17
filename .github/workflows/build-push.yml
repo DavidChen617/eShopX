@@ -136,4 +136,4 @@ jobs:
       - name: Apply manifests
         run: |
           find k8s/ -name "*.yaml" ! -name "api-deployment-secret.yaml" \
-            | xargs kubectl apply -f
+            | xargs -I{} kubectl apply -f {}

@@ -16,6 +16,9 @@ public class SizeRepository(EShopContext db) : ISizeRepository
     public Task<Size?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => db.Sizes.FirstOrDefaultAsync(s => s.Id == id, cancellationToken);
 
+    public async Task<IReadOnlyList<Size>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+        => await db.Sizes.Where(s => ids.Contains(s.Id)).ToListAsync(cancellationToken);
+
     public async Task AddAsync(Size size, CancellationToken ct = default)
         => await db.Sizes.AddAsync(size, ct);
 

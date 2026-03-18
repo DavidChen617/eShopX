@@ -8,6 +8,7 @@ public interface IProductRepository
 {
     Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<SkuDetails?> GetSkuDetailsAsync(Guid skuId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<SkuDetails>> GetSkuDetailsByIdsAsync(IEnumerable<Guid> skuIds, CancellationToken cancellationToken = default);
     Task<(IReadOnlyList<Product> Items, int TotalCount)> GetPagedAsync(
         Guid? categoryId,
         Audience? audience,

@@ -1,8 +1,9 @@
+using Application.Interfaces.Repositories;
 using CoreMesh.Dispatching.Abstractions;
-using CoreMesh.Mapper;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
 using Domain.Aggregates.Orders;
+using Domain.Aggregates.Shipments;
 
 namespace Application.UseCases.Orders;
 
@@ -12,18 +13,21 @@ public record GetOrdersQuery(
     int Page = 1,
     int PageSize = 20) : IRequest<Result<GetOrdersResponse>>;
 
+public record ShipmentSummaryResponse(
+    string LogisticsSubType,
+    string LogisticsId,
+    string ReceiverName,
+    string ReceiverPhone,
+    string? StoreName,
+    string? Address);
+
 public record OrderSummaryResponse(
     Guid OrderId,
     Guid UserId,
     string Status,
     decimal TotalAmount,
-    DateTime CreatedAt) : IMapFrom<Order, OrderSummaryResponse>
-{
-    public OrderSummaryResponse() : this(default, default, null!, default, default) { }
-
-    public OrderSummaryResponse MapFrom(Order source) =>
-        new(source.Id, source.UserId, source.Status.ToString(), source.TotalAmount.Amount, source.CreatedAt);
-}
+    DateTime CreatedAt,
+    ShipmentSummaryResponse? Shipment);
 
 public record GetOrdersResponse(
     IReadOnlyList<OrderSummaryResponse> Items,
@@ -33,7 +37,7 @@ public record GetOrdersResponse(
 
 public class GetOrdersHandler(
     IOrderRepository orderRepository,
-    IMapper mapper) : IRequestHandler<GetOrdersQuery, Result<GetOrdersResponse>>
+    IShipmentRepository shipmentRepository) : IRequestHandler<GetOrdersQuery, Result<GetOrdersResponse>>
 {
     public async Task<Result<GetOrdersResponse>> Handle(
         GetOrdersQuery query,
@@ -46,7 +50,29 @@ public class GetOrdersHandler(
             query.PageSize,
             cancellationToken);
 
-        var responses = mapper.Map<Order, OrderSummaryResponse>(items).ToList();
+        var orderIds = items.Select(o => o.Id).ToList();
+        var shipments = await shipmentRepository.GetByOrderIdsAsync(orderIds, cancellationToken);
+        var shipmentMap = shipments.ToDictionary(s => s.OrderId);
+
+        var responses = items.Select(order =>
+        {
+            shipmentMap.TryGetValue(order.Id, out var shipment);
+            var shipmentSummary = shipment switch
+            {
+                CVSShipment cvs => new ShipmentSummaryResponse(
+                    cvs.LogisticsSubType.ToString(), cvs.LogisticsId,
+                    cvs.Receiver.Name, cvs.Receiver.CellPhone,
+                    cvs.StoreName, null),
+                HomeShipment home => new ShipmentSummaryResponse(
+                    home.LogisticsSubType.ToString(), home.LogisticsId,
+                    home.Receiver.Name, home.Receiver.CellPhone,
+                    null, home.Address),
+                _ => null
+            };
+            return new OrderSummaryResponse(
+                order.Id, order.UserId, order.Status.ToString(),
+                order.TotalAmount.Amount, order.CreatedAt, shipmentSummary);
+        }).ToList();
 
         return Result<GetOrdersResponse>.Ok(
             new GetOrdersResponse(responses, totalCount, query.Page, query.PageSize));

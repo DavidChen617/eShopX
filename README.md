@@ -41,7 +41,7 @@ The backend is organized around feature-oriented slices rather than traditional 
 
 - **Framework:** Angular
 - **Styling:** Tailwind CSS
-- **UI / Icons:** ng-zorro / Ant Design icons
+- **UI Components:** PrimeNG
 - **Reactive layer:** RxJS
 - **Production hosting:** Nginx
 
@@ -75,7 +75,6 @@ The backend is organized around feature-oriented slices rather than traditional 
 │   ├── ApplicationCore
 │   ├── Infrastructure
 │   ├── eShopX.Api
-│   ├── eShopX.Common
 │   └── eShopX.Web
 └── tests
 ```
@@ -88,8 +87,6 @@ The backend is organized around feature-oriented slices rather than traditional 
   - EF Core context, repositories, cache, messaging, search, third-party integrations
 - `src/eShopX.Api`
   - HTTP endpoints, app startup, DI wiring, environment configuration
-- `src/eShopX.Common`
-  - shared mediator, mapping, logging, exception handling
 - `src/eShopX.Web`
   - Angular frontend
 

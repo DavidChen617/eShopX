@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ProductSummary } from '../models/api.models';
 import { ProductService } from '../services/product.service';
@@ -15,19 +15,32 @@ import { ProductService } from '../services/product.service';
           class="pi pi-search pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-400"
         ></i>
         <input
+          #searchInput
           type="text"
           [value]="keyword()"
           [placeholder]="placeholder()"
+          [attr.aria-expanded]="shouldShowDropdown()"
+          [attr.aria-controls]="dropdownId"
+          aria-autocomplete="list"
+          aria-label="搜尋商品"
+          autocomplete="off"
           (input)="onInput($event)"
+          (compositionstart)="onCompositionStart()"
+          (compositionend)="onCompositionEnd($event)"
           (focus)="onFocus()"
           (blur)="onBlur()"
-          (keydown.enter)="onSearch()"
-          class="w-full rounded-2xl border-none bg-slate-100 py-2 pl-12 pr-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 hover:bg-slate-200 focus:bg-white focus:outline-none md:text-base"
+          (keydown.escape)="closeDropdown()"
+          (keydown.enter)="onEnter($event)"
+          class="w-full rounded-2xl border border-transparent bg-slate-100 py-2.5 pl-12 pr-4 text-sm text-slate-900 transition-all placeholder:text-slate-400 hover:bg-slate-200 focus:border-indigo-200 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-100 md:text-base"
         />
       </label>
 
       @if (shouldShowDropdown()) {
-        <div class="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10">
+        <div
+          [id]="dropdownId"
+          role="listbox"
+          class="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10"
+        >
           @if (isLoading()) {
             <div class="px-4 py-5 text-sm text-slate-500">搜尋中...</div>
           } @else if (results().length > 0) {
@@ -36,7 +49,7 @@ import { ProductService } from '../services/product.service';
                 <button
                   type="button"
                   (mousedown)="openProduct(product.productId, $event)"
-                  class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-slate-50"
+                  class="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 focus:bg-slate-50 focus:outline-none"
                 >
                   <img
                     [src]="product.primaryImageUrl"
@@ -85,19 +98,61 @@ export class SearchInputComponent {
   readonly valueChange = output<string>();
   readonly search = output<string>();
 
+  protected readonly dropdownId = `search-input-dropdown-${Math.random().toString(36).slice(2, 9)}`;
+
   protected readonly keyword = signal(this.value());
   protected readonly isFocused = signal(false);
   protected readonly isLoading = signal(false);
+  protected readonly isComposing = signal(false);
   protected readonly results = signal<ProductSummary[]>([]);
   protected readonly shouldShowDropdown = computed(() => {
     const keyword = this.keyword().trim();
-    return this.showSearchEntries() && this.isFocused() && keyword.length >= 2;
+    return this.showSearchEntries()
+      && this.isFocused()
+      && !this.isComposing()
+      && keyword.length >= 2;
   });
 
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
 
+  constructor() {
+    effect(() => {
+      this.keyword.set(this.value());
+    });
+  }
+
   protected onInput(event: Event): void {
+    const nativeEvent = event as InputEvent;
     const nextValue = (event.target as HTMLInputElement).value;
+    const isComposing = nativeEvent.isComposing;
+
+    this.isComposing.set(isComposing);
+    this.keyword.set(nextValue);
+
+    if (isComposing) {
+      this.isLoading.set(false);
+      this.results.set([]);
+      return;
+    }
+
+    this.valueChange.emit(nextValue);
+
+    if (!this.showSearchEntries()) {
+      return;
+    }
+
+    this.queueSearch(nextValue);
+  }
+
+  protected onCompositionStart(): void {
+    this.isComposing.set(true);
+    this.isLoading.set(false);
+    this.results.set([]);
+  }
+
+  protected onCompositionEnd(event: Event): void {
+    const nextValue = (event.target as HTMLInputElement).value;
+    this.isComposing.set(false);
     this.keyword.set(nextValue);
     this.valueChange.emit(nextValue);
 
@@ -122,6 +177,14 @@ export class SearchInputComponent {
     window.setTimeout(() => this.closeDropdown(), 120);
   }
 
+  protected onEnter(event: Event): void {
+    if ((event as KeyboardEvent).isComposing) {
+      return;
+    }
+
+    this.onSearch();
+  }
+
   protected onSearch(): void {
     const keyword = this.keyword().trim();
     this.closeDropdown();
@@ -138,6 +201,7 @@ export class SearchInputComponent {
 
   protected closeDropdown(): void {
     this.isFocused.set(false);
+    this.isComposing.set(false);
   }
 
   protected openProduct(productId: string, event: MouseEvent): void {

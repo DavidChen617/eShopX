@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, inject, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SliderModule } from 'primeng/slider';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -46,7 +46,7 @@ import { ProductService } from '../../services/product.service';
             <h3 class="text-sm font-black text-slate-900 uppercase tracking-widest mb-4">商品分類</h3>
             <div class="flex flex-col gap-3">
               <div 
-                (click)="selectedCategoryId.set(null)"
+                (click)="onSelectAllProducts()"
                 class="flex items-center justify-between group cursor-pointer"
               >
                 <span [class]="!selectedCategoryId() ? 'text-indigo-600 font-bold' : 'text-slate-600 group-hover:text-slate-900'">全部商品</span>
@@ -195,6 +195,7 @@ import { ProductService } from '../../services/product.service';
 export class ProductListComponent implements OnInit {
   categoryService = inject(CategoryService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private productService = inject(ProductService);
 
   isLoading = signal(true);
@@ -289,11 +290,25 @@ export class ProductListComponent implements OnInit {
   }
 
   resetFilters() {
+    this.keyword.set('');
     this.selectedCategoryId.set(null);
     this.selectedAudience.set(null);
     this.priceRange.set([0, 5000]);
     this.selectedSort.set('newest');
     this.first.set(0);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+    });
+  }
+
+  onSelectAllProducts() {
+    if (!this.selectedCategoryId()) {
+      this.resetFilters();
+      return;
+    }
+
+    this.selectedCategoryId.set(null);
   }
 
   onPageChange(event: PaginatorState) {

@@ -12,8 +12,18 @@ export interface AdminOrderItem {
   status: AdminOrderStatus;
   totalAmount: number;
   createdAt: string;
+  shipment?: ShipmentSummary;
   logisticsId?: string;
   logisticsSubType?: string;
+}
+
+interface ShipmentSummary {
+  logisticsSubType: string;
+  logisticsId: string;
+  receiverName: string;
+  receiverPhone: string;
+  storeName?: string;
+  address?: string;
 }
 
 interface GetAdminOrdersResponse {
@@ -56,14 +66,18 @@ export class AdminOrderService {
     }
 
     return this.http.get<ApiResponse<GetAdminOrdersResponse>>(this.baseUrl, { params }).pipe(
+      map((response) => ({
+        ...response.data,
+        items: response.data.items.map((order) => this.normalizeOrder(order)),
+      })),
       tap((response) => {
-        this.orders.set(response.data.items);
-        this.totalCount.set(response.data.totalCount);
-        this.currentPage.set(response.data.page);
-        this.pageSize.set(response.data.pageSize);
+        this.orders.set(response.items);
+        this.totalCount.set(response.totalCount);
+        this.currentPage.set(response.page);
+        this.pageSize.set(response.pageSize);
         this.currentStatus.set(status ?? null);
       }),
-      map((response) => response.data.items),
+      map((response) => response.items),
       catchError(() => {
         this.orders.set([]);
         this.totalCount.set(0);
@@ -101,5 +115,13 @@ export class AdminOrderService {
 
   printLabel(request: PrintLabelRequest): Observable<string> {
     return this.http.post(`${this.baseUrl}/print-label`, request, { responseType: 'text' });
+  }
+
+  private normalizeOrder(order: AdminOrderItem): AdminOrderItem {
+    return {
+      ...order,
+      logisticsId: order.shipment?.logisticsId,
+      logisticsSubType: order.shipment?.logisticsSubType,
+    };
   }
 }

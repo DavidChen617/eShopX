@@ -30,8 +30,9 @@ import { AuthService } from '../services/auth.service';
         </div>
 
         <!-- Search Bar (Visible on all screens, flexible width) -->
-        <div class="flex-1 max-w-md mx-2">
+        <div class="mx-2 min-w-0 flex-1 md:mx-4 md:max-w-xl lg:max-w-2xl">
           <app-search-input
+            placeholder="搜尋商品、分類、關鍵字"
             [showSearchEntries]="true"
             [autoNavigateOnEnter]="true"
           ></app-search-input>

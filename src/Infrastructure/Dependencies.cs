@@ -1,3 +1,4 @@
+using Application.Interfaces;
 using CoreMesh.Dispatching.Abstractions;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -161,6 +162,7 @@ public static class Dependencies
 
         // ECPay
         services.Configure<EcPayOptions>(configuration.GetSection(EcPayOptions.OptionKey))
+            .AddScoped<IShipmentFactory, EcPayShipmentFactory>()
             .AddScoped<EcPayLogisticsSelectionClient>()
             .AddScoped<EcPayCreateByTempTradeClient>()
             .AddScoped<EcPayPrintTradeDocumentClient>()

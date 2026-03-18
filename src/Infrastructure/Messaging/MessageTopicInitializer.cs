@@ -1,6 +1,5 @@
 using Confluent.Kafka;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Confluent.Kafka.Admin;
 namespace Infrastructure.Messaging;
 

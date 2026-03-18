@@ -55,7 +55,7 @@ public class ElasticsearchProductSearcher(
             });
 
         if (query.CategoryId.HasValue)
-            filters.Add(new TermQuery("categoryId.keyword", query.CategoryId.Value.ToString()));
+            filters.Add(new TermQuery("categoryId", query.CategoryId.Value.ToString()));
 
         if (query.Audience.HasValue)
             filters.Add(new BoolQuery

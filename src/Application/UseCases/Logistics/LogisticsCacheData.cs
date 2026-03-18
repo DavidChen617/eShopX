@@ -1,4 +1,4 @@
-namespace eShopX.Application.UseCases.Logistics;
+namespace Application.UseCases.Logistics;
 
 public record LogisticsCacheData(
     string TempLogisticsID,

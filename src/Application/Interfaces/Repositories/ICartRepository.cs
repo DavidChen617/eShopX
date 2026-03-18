@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Carts;
+using Domain.Aggregates.Carts;
 
-namespace eShopX.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public interface ICartRepository
 {

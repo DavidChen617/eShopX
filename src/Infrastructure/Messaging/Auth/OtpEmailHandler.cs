@@ -1,6 +1,4 @@
 using System.Text.Json;
-using eShopX.Application.Interfaces;
-using eShopX.Application.UseCases.Outbox;
 
 namespace Infrastructure.Messaging.Auth;
 

@@ -1,9 +1,11 @@
+using CoreMesh.Dispatching.Abstractions;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using CloudinaryDotNet;
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
+using CoreMesh.Result;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Transport;
 using Infrastructure.Auth;
@@ -227,7 +229,9 @@ public static class Dependencies
                 return new ElasticsearchClient(settings);
             })
             .AddScoped<EsIndexInitializer>()
-            .AddScoped<IProductSearcher, ElasticsearchProductSearcher>()
+            .AddScoped<ElasticsearchProductSearcher>()
+            .AddScoped<IProductSearcher>(sp => sp.GetRequiredService<ElasticsearchProductSearcher>())
+            .AddScoped<IRequestHandler<ProductSearchQuery, Result<ProductSearchResponse>>>(sp => sp.GetRequiredService<ElasticsearchProductSearcher>())
             .AddScoped<IProductSearchIndexService, ProductReindexer>()
             .AddScoped<IProductSearchIndexSynchronizer, ProductSearchIndexSynchronizer>()
             .AddScoped<IOutboxEventHandler, ProductIndexOutboxEventHandler>()

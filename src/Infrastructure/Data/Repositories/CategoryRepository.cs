@@ -1,6 +1,4 @@
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Categories;
-using Infrastructure.Data;
+using Domain.Aggregates.Categories;
 
 namespace Infrastructure.Data.Repositories;
 

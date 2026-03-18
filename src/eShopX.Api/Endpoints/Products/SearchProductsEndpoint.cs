@@ -1,5 +1,4 @@
-using eShopX.Application.Interfaces;
-using eShopX.Domain.Aggregates.Products;
+using Domain.Aggregates.Products;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShopX.Endpoints.Products;
@@ -22,6 +21,7 @@ public sealed class SearchProductsEndpoint : IGroupedEndpoint<ProductsGroup>
         [FromQuery] Audience? audience,
         [FromQuery] int page,
         [FromQuery] int pageSize,
+        IDispatcher dispatcher,
         IProductSearcher searchService,
         CancellationToken ct)
     {
@@ -35,8 +35,8 @@ public sealed class SearchProductsEndpoint : IGroupedEndpoint<ProductsGroup>
             Page: page <= 0 ? 1 : page,
             PageSize: pageSize <= 0 ? 20 : pageSize);
 
-        var result = await searchService.SearchAsync(query, ct);
-        
+        var result = await dispatcher.Send(query, ct);
+
         return result.ToHttpResult();
     }
 }

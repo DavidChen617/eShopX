@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Shipments;
+using Domain.Aggregates.Shipments;
 
-namespace eShopX.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public interface IShipmentRepository
 {

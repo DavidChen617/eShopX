@@ -1,5 +1,5 @@
 using System.Text.Json;
-using eShopX.Application.UseCases.Outbox;
+using Application.UseCases.Outbox;
 
 namespace Infrastructure.Messaging.Orders;
 

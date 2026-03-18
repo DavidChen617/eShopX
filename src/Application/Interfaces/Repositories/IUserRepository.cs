@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Users;
+using Domain.Aggregates.Users;
 
-namespace eShopX.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public interface IUserRepository
 {

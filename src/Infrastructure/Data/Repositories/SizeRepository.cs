@@ -1,5 +1,4 @@
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Sizes;
+using Domain.Aggregates.Sizes;
 using Infrastructure.Data;
 
 namespace Infrastructure.Data.Repositories;

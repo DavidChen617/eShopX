@@ -3,11 +3,9 @@ using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
 using CoreMesh.Validation.Abstractions;
 using CoreMesh.Validation.Abstractions.Extensions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Carts;
+using Domain.Aggregates.Carts;
 
-namespace eShopX.Application.UseCases.Carts;
+namespace Application.UseCases.Carts;
 
 public record AddCartItemCommand(
     Guid UserId,

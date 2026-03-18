@@ -4,12 +4,10 @@ using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
 using CoreMesh.Validation.Abstractions;
 using CoreMesh.Validation.Abstractions.Extensions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Products;
-using eShopX.Domain.ValueObjects;
+using Domain.Aggregates.Products;
+using Domain.ValueObjects;
 
-namespace eShopX.Application.UseCases.Products;
+namespace Application.UseCases.Products;
 
 public record CreateVariantRequest(
     string Color,

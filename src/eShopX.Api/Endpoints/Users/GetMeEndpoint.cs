@@ -1,4 +1,4 @@
-using eShopX.Application.UseCases.Users;
+using Application.UseCases.Users;
 
 namespace eShopX.Endpoints.Users;
 

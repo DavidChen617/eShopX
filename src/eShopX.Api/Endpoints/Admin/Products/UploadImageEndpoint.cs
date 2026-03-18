@@ -1,5 +1,4 @@
 using CoreMesh.Result;
-using eShopX.Application.UseCases.Products;
 
 namespace eShopX.Endpoints.Admin.Products;
 

@@ -1,4 +1,4 @@
-using eShopX.Application.UseCases.Auth;
+using Application.UseCases.Auth;
 
 namespace eShopX.Endpoints.Auth;
 

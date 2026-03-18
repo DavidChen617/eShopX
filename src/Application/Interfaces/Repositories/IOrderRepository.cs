@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders;
 
-namespace eShopX.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public interface IOrderRepository
 {

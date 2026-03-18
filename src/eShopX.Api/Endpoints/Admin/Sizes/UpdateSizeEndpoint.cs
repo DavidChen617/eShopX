@@ -1,4 +1,3 @@
-using eShopX.Application.UseCases.Sizes;
 
 namespace eShopX.Endpoints.Admin.Sizes;
 

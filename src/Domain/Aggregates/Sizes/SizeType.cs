@@ -1,4 +1,4 @@
-namespace eShopX.Domain.Aggregates.Sizes;
+namespace Domain.Aggregates.Sizes;
 
 [Flags]
 public enum SizeType

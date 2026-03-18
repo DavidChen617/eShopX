@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Categories;
+using Domain.Aggregates.Categories;
 
-namespace eShopX.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public interface ICategoryRepository
 {

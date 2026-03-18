@@ -1,5 +1,4 @@
-using eShopX.Application.UseCases.Products;
-using eShopX.Domain.Aggregates.Products;
+using Domain.Aggregates.Products;
 
 namespace eShopX.Endpoints.Admin.Products;
 

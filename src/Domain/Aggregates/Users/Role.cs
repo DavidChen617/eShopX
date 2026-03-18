@@ -1,4 +1,4 @@
-namespace eShopX.Domain.Aggregates.Users;
+namespace Domain.Aggregates.Users;
 
 [Flags]
 public enum Role

@@ -1,8 +1,8 @@
+using Application.Exceptions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using eShopX.Application.Exceptions;
 using Infrastructure.Search.Embedding;
 
 namespace Infrastructure.Search.Elasticsearch;
@@ -14,9 +14,31 @@ public class ElasticsearchProductSearcher(
 {
     private readonly string _index = options.Value.IndexName;
 
-    public async Task<Result<ProductSearchResponse>> SearchAsync(ProductSearchQuery query, CancellationToken cancellationToken = default)
+    private static ProductSearchResponse BuildResponse(SearchResponse<ProductSearchDocument> response, int page, int size)
     {
-        int page = query.Page > 0 ? query.Page : 1,
+        var total = (int)(response.HitsMetadata?.Total?.Match(
+            totalHits => totalHits?.Value,
+            totalAsLong => totalAsLong) ?? 0L);
+
+        var totalPages = total == 0 ? 0 : (int)Math.Ceiling((double)total / size);
+
+        var items = response.Documents.Select(d => new ProductSearchItem(
+            d.ProductId,
+            d.CategoryId,
+            d.Name,
+            d.Description,
+            d.Price,
+            d.StockQuantity,
+            d.IsActive,
+            d.PrimaryImageUrl
+        )).ToList();
+
+        return new ProductSearchResponse(page, size, total, totalPages, items);
+    }
+
+    public async Task<Result<ProductSearchResponse>> Handle(ProductSearchQuery query, CancellationToken cancellationToken = new CancellationToken())
+    {
+            int page = query.Page > 0 ? query.Page : 1,
             size = query.PageSize > 0 ? Math.Min(query.PageSize, 50) : 10,
             from = (page - 1) * size;
 
@@ -94,28 +116,6 @@ public class ElasticsearchProductSearcher(
             
             return Result<ProductSearchResponse>.Ok(BuildResponse(response, page, size));
         }
-    }
-
-    private static ProductSearchResponse BuildResponse(SearchResponse<ProductSearchDocument> response, int page, int size)
-    {
-        var total = (int)(response.HitsMetadata?.Total?.Match(
-            totalHits => totalHits?.Value,
-            totalAsLong => totalAsLong) ?? 0L);
-
-        var totalPages = total == 0 ? 0 : (int)Math.Ceiling((double)total / size);
-
-        var items = response.Documents.Select(d => new ProductSearchItem(
-            d.ProductId,
-            d.CategoryId,
-            d.Name,
-            d.Description,
-            d.Price,
-            d.StockQuantity,
-            d.IsActive,
-            d.PrimaryImageUrl
-        )).ToList();
-
-        return new ProductSearchResponse(page, size, total, totalPages, items);
     }
 }
 

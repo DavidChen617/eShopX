@@ -1,11 +1,8 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Application.UseCases.Outbox;
 
-namespace eShopX.Application.UseCases.Products;
+namespace Application.UseCases.Products;
 
 public record PublishProductCommand(Guid ProductId) : IRequest<Result>;
 

@@ -1,8 +1,5 @@
 using System.Text.Json;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Application.UseCases.Outbox;
-using eShopX.Domain.Aggregates.Shipments;
+using Domain.Aggregates.Shipments;
 
 namespace Infrastructure.Messaging.Shipments;
 

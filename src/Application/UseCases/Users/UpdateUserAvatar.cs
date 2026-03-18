@@ -1,10 +1,8 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
 
-namespace eShopX.Application.UseCases.Users;
+namespace Application.UseCases.Users;
 
 public record UpdateUserAvatarCommand(Guid UserId, string FileName, Stream Content)
     : IRequest<Result<UpdateUserAvatarResponse>>;

@@ -1,5 +1,4 @@
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Carts;
+using Domain.Aggregates.Carts;
 using Infrastructure.Data;
 
 namespace Infrastructure.Data.Repositories;

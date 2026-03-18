@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Sizes;
+using Domain.Aggregates.Sizes;
 
-namespace eShopX.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public interface ISizeRepository
 {

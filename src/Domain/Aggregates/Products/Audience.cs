@@ -1,4 +1,4 @@
-namespace eShopX.Domain.Aggregates.Products;
+namespace Domain.Aggregates.Products;
 
 public enum Audience
 {

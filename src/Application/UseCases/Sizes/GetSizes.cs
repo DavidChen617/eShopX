@@ -1,10 +1,9 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Sizes;
+using Domain.Aggregates.Sizes;
 
-namespace eShopX.Application.UseCases.Sizes;
+namespace Application.UseCases.Sizes;
 
 public record GetSizesQuery(SizeType? Filter = null) : IRequest<Result<IReadOnlyList<SizeResponse>>>;
 

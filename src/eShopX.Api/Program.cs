@@ -25,8 +25,8 @@ builder.Services
     });
 
 builder.Services
-    .AddDispatching([typeof(eShopX.Application.AssemblyMarker).Assembly])
-    .AddCoreMeshMapper([typeof(eShopX.Application.AssemblyMarker).Assembly])
+    .AddDispatching([typeof(Application.AssemblyMarker).Assembly])
+    .AddCoreMeshMapper([typeof(Application.AssemblyMarker).Assembly])
     .AddValidatable()
     .AddCoreMeshExceptionHandling()
     .AddInfrastructureServices(builder.Configuration);

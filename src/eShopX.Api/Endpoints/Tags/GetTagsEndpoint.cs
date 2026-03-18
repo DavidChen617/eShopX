@@ -1,4 +1,4 @@
-using eShopX.Application.UseCases.Tags;
+using Application.UseCases.Tags;
 
 namespace eShopX.Endpoints.Tags;
 

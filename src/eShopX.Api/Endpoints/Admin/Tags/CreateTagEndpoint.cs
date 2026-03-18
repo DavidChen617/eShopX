@@ -1,5 +1,4 @@
-using eShopX.Application.UseCases.Tags;
-using eShopX.Domain.Aggregates.Tags;
+using Domain.Aggregates.Tags;
 
 namespace eShopX.Endpoints.Admin.Tags;
 

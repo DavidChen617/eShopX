@@ -1,7 +1,7 @@
-using eShopX.Domain.Exceptions;
-using eShopX.Domain.ValueObjects;
+using Domain.Exceptions;
+using Domain.ValueObjects;
 
-namespace eShopX.Domain.Aggregates.Products;
+namespace Domain.Aggregates.Products;
 
 public sealed class ProductSku : Entity
 {

@@ -1,4 +1,3 @@
-using eShopX.Application.UseCases.Categories;
 
 namespace eShopX.Endpoints.Admin.Categories;
 

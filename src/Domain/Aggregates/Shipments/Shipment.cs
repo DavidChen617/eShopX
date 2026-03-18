@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Shipments.Events;
+using Domain.Aggregates.Shipments.Events;
 
-namespace eShopX.Domain.Aggregates.Shipments;
+namespace Domain.Aggregates.Shipments;
 
 public abstract class Shipment : AggregateRoot
 {

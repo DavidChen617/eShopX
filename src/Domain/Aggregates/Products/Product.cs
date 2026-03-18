@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Products.Events;
+using Domain.Aggregates.Products.Events;
 
-namespace eShopX.Domain.Aggregates.Products;
+namespace Domain.Aggregates.Products;
 
 public sealed class Product : AggregateRoot
 {

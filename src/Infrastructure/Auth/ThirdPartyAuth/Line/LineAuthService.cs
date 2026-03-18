@@ -1,6 +1,4 @@
-using eShopX.Application.Exceptions;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Users;
+using Domain.Aggregates.Users;
 using Infrastructure.Auth.ThirdPartyAuth.Line.Models;
 
 namespace Infrastructure.Auth.ThirdPartyAuth.Line;

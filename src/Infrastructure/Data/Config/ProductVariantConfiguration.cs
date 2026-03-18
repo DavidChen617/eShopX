@@ -1,4 +1,4 @@
-using eShopX.Domain.Aggregates.Products;
+using Domain.Aggregates.Products;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

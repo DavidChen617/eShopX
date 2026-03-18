@@ -1,9 +1,8 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces.Repositories;
 
-namespace eShopX.Application.UseCases.Shipments;
+namespace Application.UseCases.Shipments;
 
 public record GetShipmentByOrderIdQuery(Guid OrderId) : IRequest<Result<ShipmentResponse>>;
 

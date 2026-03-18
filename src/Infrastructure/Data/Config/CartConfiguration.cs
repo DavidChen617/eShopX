@@ -1,4 +1,4 @@
-using eShopX.Domain.Aggregates.Carts;
+using Domain.Aggregates.Carts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

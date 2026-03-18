@@ -1,5 +1,4 @@
 using CoreMesh.Result;
-using eShopX.Application.UseCases.Users;
 
 namespace eShopX.Endpoints.Users;
 

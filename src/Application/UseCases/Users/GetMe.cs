@@ -1,10 +1,9 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Users;
+using Domain.Aggregates.Users;
 
-namespace eShopX.Application.UseCases.Users;
+namespace Application.UseCases.Users;
 
 public record GetMeQuery(Guid UserId) : IRequest<Result<GetMeResponse>>;
 

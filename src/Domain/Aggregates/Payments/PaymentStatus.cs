@@ -1,4 +1,4 @@
-namespace eShopX.Domain.Aggregates.Payments;
+namespace Domain.Aggregates.Payments;
 
 public enum PaymentStatus
 {

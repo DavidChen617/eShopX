@@ -1,6 +1,6 @@
-using eShopX.Domain.Exceptions;
+using Domain.Exceptions;
 
-namespace eShopX.Domain.Aggregates.Carts;
+namespace Domain.Aggregates.Carts;
 
 public sealed class Cart : AggregateRoot
 {

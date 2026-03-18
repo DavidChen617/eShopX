@@ -1,18 +1,14 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Exceptions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Application.UseCases.Carts;
-using eShopX.Application.UseCases.Logistics;
-using eShopX.Domain.Aggregates.Orders;
-using eShopX.Domain.Aggregates.Payments;
-using eShopX.Domain.Aggregates.Products;
-using eShopX.Domain.Aggregates.Shipments;
-using eShopX.Domain.ValueObjects;
+using Application.UseCases.Carts;
+using Domain.Aggregates.Orders;
+using Domain.Aggregates.Payments;
+using Domain.Aggregates.Products;
+using Domain.Aggregates.Shipments;
+using Domain.ValueObjects;
 
-namespace eShopX.Application.UseCases.Orders;
+namespace Application.UseCases.Orders;
 
 public record CreateOrderCommand(
     Guid UserId,

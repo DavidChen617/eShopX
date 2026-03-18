@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Products;
+using Domain.Aggregates.Products;
 
-namespace eShopX.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public record SkuDetails(Product Product, ProductVariant Variant, ProductSku Sku);
 

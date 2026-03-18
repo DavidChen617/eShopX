@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using eShopX.Application.Exceptions;
 
 namespace Infrastructure.Search.Embedding;
 

@@ -1,4 +1,4 @@
-namespace eShopX.Domain.Aggregates.Tags;
+namespace Domain.Aggregates.Tags;
 
 public enum TagType
 {

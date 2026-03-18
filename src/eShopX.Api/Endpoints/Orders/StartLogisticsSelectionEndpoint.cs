@@ -1,6 +1,5 @@
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.UseCases.Logistics;
 using Infrastructure.Logistics.EcPay;
 using Infrastructure.Options;
 using Microsoft.Extensions.Options;

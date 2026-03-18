@@ -1,8 +1,8 @@
-using eShopX.Domain.Aggregates.Orders.Events;
-using eShopX.Domain.Exceptions;
-using eShopX.Domain.ValueObjects;
+using Domain.Aggregates.Orders.Events;
+using Domain.Exceptions;
+using Domain.ValueObjects;
 
-namespace eShopX.Domain.Aggregates.Orders;
+namespace Domain.Aggregates.Orders;
 
 public sealed class Order : AggregateRoot
 {

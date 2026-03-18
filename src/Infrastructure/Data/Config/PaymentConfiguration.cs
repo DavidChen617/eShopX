@@ -1,4 +1,4 @@
-using eShopX.Domain.Aggregates.Payments;
+using Domain.Aggregates.Payments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

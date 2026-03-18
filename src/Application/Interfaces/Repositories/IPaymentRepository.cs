@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Payments;
+using Domain.Aggregates.Payments;
 
-namespace eShopX.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public interface IPaymentRepository
 {

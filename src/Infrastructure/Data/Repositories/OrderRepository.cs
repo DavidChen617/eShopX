@@ -1,5 +1,4 @@
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders;
 using Infrastructure.Data;
 
 namespace Infrastructure.Data.Repositories;

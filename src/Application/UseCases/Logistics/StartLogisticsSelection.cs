@@ -1,9 +1,8 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces;
 
-namespace eShopX.Application.UseCases.Logistics;
+namespace Application.UseCases.Logistics;
 
 public record StartLogisticsSelectionCommand(Guid UserId) : IRequest<Result<StartLogisticsSelectionResponse>>;
 

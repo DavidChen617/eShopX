@@ -1,6 +1,6 @@
-using eShopX.Domain.ValueObjects;
+using Domain.ValueObjects;
 
-namespace eShopX.Domain.Aggregates.Products;
+namespace Domain.Aggregates.Products;
 
 public sealed class ProductVariant : Entity
 {

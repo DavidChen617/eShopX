@@ -1,5 +1,4 @@
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Tags;
+using Domain.Aggregates.Tags;
 using Infrastructure.Data;
 
 namespace Infrastructure.Data.Repositories;

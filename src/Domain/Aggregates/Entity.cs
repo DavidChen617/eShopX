@@ -1,4 +1,4 @@
-namespace eShopX.Domain.Aggregates;
+namespace Domain.Aggregates;
 
 public abstract class Entity
 {

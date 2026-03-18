@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Tags;
+using Domain.Aggregates.Tags;
 
-namespace eShopX.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public interface ITagRepository
 {

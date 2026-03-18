@@ -1,9 +1,9 @@
-using eShopX.Domain.Aggregates.Categories;
-using eShopX.Domain.Aggregates.Products;
-using eShopX.Domain.Aggregates.Sizes;
-using eShopX.Domain.Aggregates.Tags;
-using eShopX.Domain.Aggregates.Users;
-using eShopX.Domain.ValueObjects;
+using Domain.Aggregates.Categories;
+using Domain.Aggregates.Products;
+using Domain.Aggregates.Sizes;
+using Domain.Aggregates.Tags;
+using Domain.Aggregates.Users;
+using Domain.ValueObjects;
 
 namespace Infrastructure.Data;
 

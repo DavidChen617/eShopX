@@ -1,8 +1,8 @@
-using eShopX.Domain.Aggregates.Payments.Events;
-using eShopX.Domain.Exceptions;
-using eShopX.Domain.ValueObjects;
+using Domain.Aggregates.Payments.Events;
+using Domain.Exceptions;
+using Domain.ValueObjects;
 
-namespace eShopX.Domain.Aggregates.Payments;
+namespace Domain.Aggregates.Payments;
 
 public sealed class Payment : AggregateRoot
 {

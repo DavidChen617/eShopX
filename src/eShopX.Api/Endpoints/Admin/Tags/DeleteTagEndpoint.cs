@@ -1,4 +1,3 @@
-using eShopX.Application.UseCases.Tags;
 
 namespace eShopX.Endpoints.Admin.Tags;
 

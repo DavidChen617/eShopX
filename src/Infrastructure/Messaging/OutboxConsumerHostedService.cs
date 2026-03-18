@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Confluent.Kafka;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Messaging;
 
@@ -13,8 +12,8 @@ public class OutboxConsumerHostedService(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var scope = scopeFactory.CreateScope();
-        var consumer = scope.ServiceProvider.GetRequiredService<IConsumer<string, string>>();
+        var consumer = scopeFactory.CreateScope().ServiceProvider
+            .GetRequiredService<IConsumer<string, string>>();
         consumer.Subscribe(Topic);
         logger.LogInformation("Outbox consumer started, listening to {Topic}", Topic);
 
@@ -42,7 +41,8 @@ public class OutboxConsumerHostedService(
                     continue;
                 }
 
-                var handlers = scope.ServiceProvider.GetServices<IOutboxEventHandler>();
+                using var messageScope = scopeFactory.CreateScope();
+                var handlers = messageScope.ServiceProvider.GetServices<IOutboxEventHandler>();
                 var handler = handlers.FirstOrDefault(h => h.CanHandle(outboxEvent.EventType));
                 if (handler is null)
                 {

@@ -9,7 +9,6 @@ public record ConfirmPaymentCommand(Guid OrderId, string TransactionId) : IReque
 public class ConfirmPaymentHandler(
     IPaymentRepository paymentRepository,
     IOrderRepository orderRepository,
-    IOutboxEventRepository outboxEventRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<ConfirmPaymentCommand, Result>
 {
     public async Task<Result> Handle(
@@ -27,11 +26,8 @@ public class ConfirmPaymentHandler(
         payment.MarkAsPaid(command.TransactionId);
         order.MarkAsPaid();
 
-        var outboxEvent = OutboxEventFactory.CreatePaymentPaid(command.OrderId);
-
         paymentRepository.Update(payment);
         orderRepository.Update(order);
-        await outboxEventRepository.AddAsync(outboxEvent, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.NoContent();

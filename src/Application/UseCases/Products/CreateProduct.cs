@@ -41,6 +41,7 @@ public record CreateProductResponse(Guid ProductId, string Name, bool IsActive, 
 
 public class CreateProductHandler(
     IProductRepository productRepository,
+    IOutboxEventRepository outboxEventRepository,
     IUnitOfWork unitOfWork,
     IValidator validator,
     IMapper mapper) : IRequestHandler<CreateProductCommand, Result<CreateProductResponse>>
@@ -68,6 +69,7 @@ public class CreateProductHandler(
         }
 
         await productRepository.AddAsync(product, cancellationToken);
+        await outboxEventRepository.AddAsync(OutboxEventFactory.CreateProductUpsert(product.Id), cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result<CreateProductResponse>.Ok(mapper.Map<Product, CreateProductResponse>(product));

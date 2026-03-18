@@ -1,7 +1,6 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using eShopX.Application.Exceptions;
 using Infrastructure.Options;
 using Infrastructure.Payments.PayPal.Models;
 using Microsoft.Extensions.Options;

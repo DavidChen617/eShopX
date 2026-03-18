@@ -1,0 +1,41 @@
+@startuml order-logistics
+
+title Order - 物流選擇流程
+
+actor User
+participant "Browser" as Browser
+participant "API\n(Endpoint)" as API
+participant "Handler\n(Use Case)" as Handler
+participant "Redis\n(ICacher)" as Redis
+participant "ECPay\nLogistics" as ECPay
+
+== 發起物流選擇 ==
+
+User -> API : POST /orders/logistics/start\n{ receiverName, receiverPhone, goodsAmount }
+API -> Handler : StartLogisticsSelectionCommand(userId)
+Handler -> Redis : SetAsync(session:{token} → userId, TTL 15min)
+Handler --> API : { token }
+API -> ECPay : GetSelectionFormHtmlAsync\n(clientReplyUrl = /ecpay/client-reply?token=xxx)
+ECPay --> API : HTML form
+API --> Browser : 200 text/html
+
+== 使用者選擇門市 ==
+
+Browser -> ECPay : 整頁導向 ECPay 門市選擇頁
+User -> ECPay : 選擇門市
+ECPay -> API : POST /ecpay/client-reply?token=xxx\n(browser POST, FormData: ResultData)
+API -> Redis : GetAsync(session:{token}) → userId
+API -> ECPay : DecryptClientReply(ResultData)
+API -> Redis : SetAsync(logistics:{userId} → LogisticsCacheData, TTL 15min)
+API -> Redis : RemoveAsync(session:{token})
+note right: token 一次性使用，防止重播攻擊
+API --> Browser : 302 Redirect → {FrontendDomain}/checkout?logistics=done
+
+== 前端查詢物流狀態 ==
+
+Browser -> API : GET /orders/logistics/status
+API -> Redis : GetAsync(logistics:{userId})
+Redis --> API : LogisticsCacheData
+API --> Browser : 200 { isReady: true, logisticsSubType, storeName/address }
+
+@enduml

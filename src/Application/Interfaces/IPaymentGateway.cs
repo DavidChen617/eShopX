@@ -1,7 +1,7 @@
-using eShopX.Domain.Aggregates.Orders;
-using eShopX.Domain.Aggregates.Payments;
+using Domain.Aggregates.Orders;
+using Domain.Aggregates.Payments;
 
-namespace eShopX.Application.Interfaces;
+namespace Application.Interfaces;
 
 public interface IPaymentGateway
 {

@@ -1,7 +1,4 @@
-using eShopX.Application.Exceptions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Users;
+using Domain.Aggregates.Users;
 using Google.Apis.Auth;
 using Infrastructure.Auth.ThirdPartyAuth.Google.Models;
 using Infrastructure.Options;

@@ -1,4 +1,4 @@
-using eShopX.Domain.Aggregates.Tags;
+using Domain.Aggregates.Tags;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

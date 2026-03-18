@@ -1,0 +1,29 @@
+@startuml payment-linepay
+
+title Payment - LinePay 付款回調流程
+
+actor User
+participant "Browser" as Browser
+participant "API\n(Endpoint)" as API
+participant "Handler\n(Use Case)" as Handler
+participant "PostgreSQL" as DB
+participant "LinePay" as LinePay
+participant "Kafka\n(Outbox)" as Kafka
+participant "Email\nService" as Email
+
+Browser -> API : GET /payments/linepay/confirm\n?transactionId=xxx&orderId=xxx
+API -> DB : GetByOrderIdAsync(payment)
+note right: 若 payment.Status == Paid → 302 直接 redirect（冪等防護）
+API -> LinePay : ConfirmPaymentAsync(transactionId, { amount, currency="TWD" })
+LinePay --> API : { returnCode: "0000" }
+API -> Handler : ConfirmPaymentCommand(orderId, transactionId)
+Handler -> DB : GetByOrderIdAsync(payment)
+Handler -> DB : GetByIdAsync(order)
+Handler -> Handler : payment.MarkAsPaid(transactionId)\norder.MarkAsPaid()
+Handler -> DB : AddAsync(OutboxEvent: payment.paid)
+Handler -> DB : SaveChangesAsync
+API --> Browser : 302 Redirect → {FrontendDomain}/orders/{orderId}?payment=success
+
+Kafka -> Email : payment.paid\n→ 寄送付款成功通知信
+
+@enduml

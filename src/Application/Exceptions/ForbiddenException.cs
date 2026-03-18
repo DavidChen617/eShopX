@@ -1,7 +1,7 @@
 using System.Net;
 using CoreMesh.Result.Exceptions;
 
-namespace eShopX.Application.Exceptions;
+namespace Application.Exceptions;
 
 /// <summary>
 /// 已驗證身份但無操作權限（HTTP 403），例如：使用者存取他人訂單

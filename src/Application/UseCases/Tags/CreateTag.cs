@@ -1,11 +1,9 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Tags;
+using Domain.Aggregates.Tags;
 
-namespace eShopX.Application.UseCases.Tags;
+namespace Application.UseCases.Tags;
 
 public record CreateTagCommand(string Name, TagType Type) : IRequest<Result<TagResponse>>;
 

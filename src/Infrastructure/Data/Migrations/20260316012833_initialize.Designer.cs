@@ -25,7 +25,7 @@ namespace Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Carts.Cart", b =>
+            modelBuilder.Entity("Domain.Aggregates.Carts.Cart", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -46,7 +46,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Carts.CartItem", b =>
+            modelBuilder.Entity("Domain.Aggregates.Carts.CartItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -74,7 +74,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Categories.Category", b =>
+            modelBuilder.Entity("Domain.Aggregates.Categories.Category", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -103,7 +103,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Orders.Order", b =>
+            modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -128,7 +128,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Orders.OrderItem", b =>
+            modelBuilder.Entity("Domain.Aggregates.Orders.OrderItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -156,7 +156,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Payments.Payment", b =>
+            modelBuilder.Entity("Domain.Aggregates.Payments.Payment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -197,7 +197,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Products.Product", b =>
+            modelBuilder.Entity("Domain.Aggregates.Products.Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -239,7 +239,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Products.ProductImage", b =>
+            modelBuilder.Entity("Domain.Aggregates.Products.ProductImage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -277,7 +277,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Products.ProductSku", b =>
+            modelBuilder.Entity("Domain.Aggregates.Products.ProductSku", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -311,7 +311,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Products.ProductTag", b =>
+            modelBuilder.Entity("Domain.Aggregates.Products.ProductTag", b =>
                 {
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid")
@@ -329,7 +329,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Products.ProductVariant", b =>
+            modelBuilder.Entity("Domain.Aggregates.Products.ProductVariant", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -355,7 +355,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Shipments.Shipment", b =>
+            modelBuilder.Entity("Domain.Aggregates.Shipments.Shipment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -408,7 +408,7 @@ namespace Infrastructure.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Sizes.Size", b =>
+            modelBuilder.Entity("Domain.Aggregates.Sizes.Size", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -438,7 +438,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Tags.Tag", b =>
+            modelBuilder.Entity("Domain.Aggregates.Tags.Tag", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -471,7 +471,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Users.RefreshToken", b =>
+            modelBuilder.Entity("Domain.Aggregates.Users.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -509,7 +509,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Users.User", b =>
+            modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -545,7 +545,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Users.UserAuthProvider", b =>
+            modelBuilder.Entity("Domain.Aggregates.Users.UserAuthProvider", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -580,7 +580,7 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Outbox.OutboxEvent", b =>
+            modelBuilder.Entity("Domain.Outbox.OutboxEvent", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -622,9 +622,9 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Shipments.CVSShipment", b =>
+            modelBuilder.Entity("Domain.Aggregates.Shipments.CVSShipment", b =>
                 {
-                    b.HasBaseType("eShopX.Domain.Aggregates.Shipments.Shipment");
+                    b.HasBaseType("Domain.Aggregates.Shipments.Shipment");
 
                     b.Property<string>("CVSPaymentNo")
                         .HasColumnType("text")
@@ -643,9 +643,9 @@ namespace Infrastructure.Migrations
                     b.HasDiscriminator().HasValue("CVS");
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Shipments.HomeShipment", b =>
+            modelBuilder.Entity("Domain.Aggregates.Shipments.HomeShipment", b =>
                 {
-                    b.HasBaseType("eShopX.Domain.Aggregates.Shipments.Shipment");
+                    b.HasBaseType("Domain.Aggregates.Shipments.Shipment");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -664,18 +664,18 @@ namespace Infrastructure.Migrations
                     b.HasDiscriminator().HasValue("Home");
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Carts.CartItem", b =>
+            modelBuilder.Entity("Domain.Aggregates.Carts.CartItem", b =>
                 {
-                    b.HasOne("eShopX.Domain.Aggregates.Carts.Cart", null)
+                    b.HasOne("Domain.Aggregates.Carts.Cart", null)
                         .WithMany("Items")
                         .HasForeignKey("CartId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Orders.Order", b =>
+            modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
                 {
-                    b.OwnsOne("eShopX.Domain.ValueObjects.Money", "TotalAmount", b1 =>
+                    b.OwnsOne("Domain.ValueObjects.Money", "TotalAmount", b1 =>
                         {
                             b1.Property<Guid>("OrderId")
                                 .HasColumnType("uuid");
@@ -697,15 +697,15 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Orders.OrderItem", b =>
+            modelBuilder.Entity("Domain.Aggregates.Orders.OrderItem", b =>
                 {
-                    b.HasOne("eShopX.Domain.Aggregates.Orders.Order", null)
+                    b.HasOne("Domain.Aggregates.Orders.Order", null)
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("eShopX.Domain.ValueObjects.Money", "TotalPrice", b1 =>
+                    b.OwnsOne("Domain.ValueObjects.Money", "TotalPrice", b1 =>
                         {
                             b1.Property<Guid>("OrderItemId")
                                 .HasColumnType("uuid");
@@ -723,7 +723,7 @@ namespace Infrastructure.Migrations
                                 .HasForeignKey("OrderItemId");
                         });
 
-                    b.OwnsOne("eShopX.Domain.ValueObjects.Money", "UnitPrice", b1 =>
+                    b.OwnsOne("Domain.ValueObjects.Money", "UnitPrice", b1 =>
                         {
                             b1.Property<Guid>("OrderItemId")
                                 .HasColumnType("uuid");
@@ -741,7 +741,7 @@ namespace Infrastructure.Migrations
                                 .HasForeignKey("OrderItemId");
                         });
 
-                    b.OwnsOne("eShopX.Domain.ValueObjects.ProductSnapshot", "Snapshot", b1 =>
+                    b.OwnsOne("Domain.ValueObjects.ProductSnapshot", "Snapshot", b1 =>
                         {
                             b1.Property<Guid>("OrderItemId")
                                 .HasColumnType("uuid");
@@ -781,9 +781,9 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Payments.Payment", b =>
+            modelBuilder.Entity("Domain.Aggregates.Payments.Payment", b =>
                 {
-                    b.OwnsOne("eShopX.Domain.ValueObjects.Money", "Amount", b1 =>
+                    b.OwnsOne("Domain.ValueObjects.Money", "Amount", b1 =>
                         {
                             b1.Property<Guid>("PaymentId")
                                 .HasColumnType("uuid");
@@ -805,24 +805,24 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Products.ProductImage", b =>
+            modelBuilder.Entity("Domain.Aggregates.Products.ProductImage", b =>
                 {
-                    b.HasOne("eShopX.Domain.Aggregates.Products.ProductVariant", null)
+                    b.HasOne("Domain.Aggregates.Products.ProductVariant", null)
                         .WithMany("Images")
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Products.ProductSku", b =>
+            modelBuilder.Entity("Domain.Aggregates.Products.ProductSku", b =>
                 {
-                    b.HasOne("eShopX.Domain.Aggregates.Products.ProductVariant", null)
+                    b.HasOne("Domain.Aggregates.Products.ProductVariant", null)
                         .WithMany("Skus")
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("eShopX.Domain.ValueObjects.Money", "Price", b1 =>
+                    b.OwnsOne("Domain.ValueObjects.Money", "Price", b1 =>
                         {
                             b1.Property<Guid>("ProductSkuId")
                                 .HasColumnType("uuid");
@@ -844,27 +844,27 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Products.ProductTag", b =>
+            modelBuilder.Entity("Domain.Aggregates.Products.ProductTag", b =>
                 {
-                    b.HasOne("eShopX.Domain.Aggregates.Products.Product", null)
+                    b.HasOne("Domain.Aggregates.Products.Product", null)
                         .WithMany("Tags")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Products.ProductVariant", b =>
+            modelBuilder.Entity("Domain.Aggregates.Products.ProductVariant", b =>
                 {
-                    b.HasOne("eShopX.Domain.Aggregates.Products.Product", null)
+                    b.HasOne("Domain.Aggregates.Products.Product", null)
                         .WithMany("Variants")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Users.User", b =>
+            modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
-                    b.OwnsOne("eShopX.Domain.Aggregates.Users.Avatar", "Avatar", b1 =>
+                    b.OwnsOne("Domain.Aggregates.Users.Avatar", "Avatar", b1 =>
                         {
                             b1.Property<Guid>("UserId")
                                 .HasColumnType("uuid");
@@ -890,18 +890,18 @@ namespace Infrastructure.Migrations
                     b.Navigation("Avatar");
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Users.UserAuthProvider", b =>
+            modelBuilder.Entity("Domain.Aggregates.Users.UserAuthProvider", b =>
                 {
-                    b.HasOne("eShopX.Domain.Aggregates.Users.User", null)
+                    b.HasOne("Domain.Aggregates.Users.User", null)
                         .WithMany("AuthProviders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Shipments.CVSShipment", b =>
+            modelBuilder.Entity("Domain.Aggregates.Shipments.CVSShipment", b =>
                 {
-                    b.OwnsOne("eShopX.Domain.ValueObjects.ReceiverInfo", "Receiver", b1 =>
+                    b.OwnsOne("Domain.ValueObjects.ReceiverInfo", "Receiver", b1 =>
                         {
                             b1.Property<Guid>("CVSShipmentId")
                                 .HasColumnType("uuid");
@@ -932,9 +932,9 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Shipments.HomeShipment", b =>
+            modelBuilder.Entity("Domain.Aggregates.Shipments.HomeShipment", b =>
                 {
-                    b.OwnsOne("eShopX.Domain.ValueObjects.ReceiverInfo", "Receiver", b1 =>
+                    b.OwnsOne("Domain.ValueObjects.ReceiverInfo", "Receiver", b1 =>
                         {
                             b1.Property<Guid>("HomeShipmentId")
                                 .HasColumnType("uuid");
@@ -965,31 +965,31 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Carts.Cart", b =>
+            modelBuilder.Entity("Domain.Aggregates.Carts.Cart", b =>
                 {
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Orders.Order", b =>
+            modelBuilder.Entity("Domain.Aggregates.Orders.Order", b =>
                 {
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Products.Product", b =>
+            modelBuilder.Entity("Domain.Aggregates.Products.Product", b =>
                 {
                     b.Navigation("Tags");
 
                     b.Navigation("Variants");
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Products.ProductVariant", b =>
+            modelBuilder.Entity("Domain.Aggregates.Products.ProductVariant", b =>
                 {
                     b.Navigation("Images");
 
                     b.Navigation("Skus");
                 });
 
-            modelBuilder.Entity("eShopX.Domain.Aggregates.Users.User", b =>
+            modelBuilder.Entity("Domain.Aggregates.Users.User", b =>
                 {
                     b.Navigation("AuthProviders");
                 });

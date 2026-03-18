@@ -1,4 +1,4 @@
-namespace eShopX.Application.UseCases.Carts;
+namespace Application.UseCases.Carts;
 
 internal static class CartCacheKeys
 {

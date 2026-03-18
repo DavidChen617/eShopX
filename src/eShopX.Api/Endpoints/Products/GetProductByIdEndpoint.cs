@@ -1,4 +1,4 @@
-using eShopX.Application.UseCases.Products;
+using Application.UseCases.Products;
 
 namespace eShopX.Endpoints.Products;
 

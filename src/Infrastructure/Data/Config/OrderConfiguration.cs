@@ -1,4 +1,4 @@
-using eShopX.Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

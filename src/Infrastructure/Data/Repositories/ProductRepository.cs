@@ -1,5 +1,4 @@
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Products;
+using Domain.Aggregates.Products;
 using Infrastructure.Data;
 
 namespace Infrastructure.Data.Repositories;
@@ -27,6 +26,39 @@ public class ProductRepository(EShopContext db) : IProductRepository
         if (product is null) return null;
 
         return new SkuDetails(product, variant, sku);
+    }
+
+    public async Task<IReadOnlyList<SkuDetails>> GetSkuDetailsByIdsAsync(
+        IEnumerable<Guid> skuIds, CancellationToken cancellationToken = default)
+    {
+        var ids = skuIds.ToList();
+
+        var skus = await db.ProductSkus
+            .Where(s => ids.Contains(s.Id))
+            .ToListAsync(cancellationToken);
+
+        var variantIds = skus.Select(s => s.ProductVariantId).Distinct().ToList();
+        var variants = await db.ProductVariants
+            .Include(v => v.Images)
+            .Where(v => variantIds.Contains(v.Id))
+            .ToListAsync(cancellationToken);
+
+        var productIds = variants.Select(v => v.ProductId).Distinct().ToList();
+        var products = await db.Products
+            .Where(p => productIds.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+
+        var variantMap = variants.ToDictionary(v => v.Id);
+        var productMap = products.ToDictionary(p => p.Id);
+
+        return skus
+            .Where(s => variantMap.ContainsKey(s.ProductVariantId) &&
+                        productMap.ContainsKey(variantMap[s.ProductVariantId].ProductId))
+            .Select(s => new SkuDetails(
+                productMap[variantMap[s.ProductVariantId].ProductId],
+                variantMap[s.ProductVariantId],
+                s))
+            .ToList();
     }
 
     public async Task<(IReadOnlyList<Product> Items, int TotalCount)> GetPagedAsync(

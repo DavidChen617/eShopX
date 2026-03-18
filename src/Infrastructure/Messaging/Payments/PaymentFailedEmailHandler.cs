@@ -1,5 +1,4 @@
 using System.Text.Json;
-using eShopX.Application.UseCases.Outbox;
 
 namespace Infrastructure.Messaging.Payments;
 

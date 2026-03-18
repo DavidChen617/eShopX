@@ -85,7 +85,8 @@
     "name": "string",
     "expiresAt": "string",
     "lineSub": "string",
-    "email": "string"
+    "email": "string",
+    "avatarUrl": "string"
   }
   ```
 
@@ -206,7 +207,30 @@
 
 | Method | URL | Auth |
 |--------|-----|:----:|
+| `GET` | `/api/v1/users/me` | ✓ |
 | `POST` | `/api/v1/users/me/avatar` | ✓ |
+
+---
+
+### `GET` `/api/v1/users/me`
+> 需要 `Bearer` Token
+
+**Responses**
+
+- **200** `ApiResponse<GetMeResponse>`
+  ```json
+  {
+    "id": "string",
+    "name": "string",
+    "email": "string",
+    "avatarUrl": "string",
+    "roles": [
+      "string"
+    ],
+    "isLocalUser": true
+  }
+  ```
+- **404** `ApiResponse` Not Found
 
 ---
 
@@ -363,7 +387,12 @@ file: file (required)
         "audience": "string",
         "isActive": true,
         "categoryId": "string",
-        "updatedAt": "string"
+        "updatedAt": "string",
+        "primaryImageUrl": "string",
+        "startingPrice": 0.0,
+        "colors": [
+          "string"
+        ]
       }
     ],
     "totalCount": 0,
@@ -383,6 +412,7 @@ file: file (required)
 | `minPrice` | query | ['number', 'string'] |  |  |
 | `maxPrice` | query | ['number', 'string'] |  |  |
 | `isActive` | query | boolean |  |  |
+| `audience` | query | string |  |  |
 | `page` | query | ['integer', 'string'] | ✓ |  |
 | `pageSize` | query | ['integer', 'string'] | ✓ |  |
 
@@ -542,7 +572,15 @@ file: file (required)
         "userId": "string",
         "status": "string",
         "totalAmount": 0.0,
-        "createdAt": "string"
+        "createdAt": "string",
+        "shipment": {
+          "logisticsSubType": "string",
+          "logisticsId": "string",
+          "receiverName": "string",
+          "receiverPhone": "string",
+          "storeName": "string",
+          "address": "string"
+        }
       }
     ],
     "totalCount": 0,
@@ -574,7 +612,10 @@ file: file (required)
     "orderId": "string",
     "totalAmount": 0.0,
     "paymentUrl": "string",
-    "createdAt": "string"
+    "createdAt": "string",
+    "logisticsSubType": "string",
+    "storeName": "string",
+    "address": "string"
   }
   ```
 - **400** `ApiResponse` Bad Request
@@ -586,7 +627,15 @@ file: file (required)
 
 **Responses**
 
-- **200** OK
+- **200** `ApiResponse<LogisticsStatusDto>`
+  ```json
+  {
+    "isReady": true,
+    "logisticsSubType": "string",
+    "storeName": "string",
+    "address": "string"
+  }
+  ```
 
 ---
 
@@ -640,7 +689,7 @@ file: file (required)
 
 **Responses**
 
-- **200** OK
+- **200** `ApiResponse<string>` OK
 
 ---
 ## Payments
@@ -949,6 +998,7 @@ ResultData: string (required)
 | `PUT` | `/api/v1/admin/products/{productId}` | ✓ |
 | `DELETE` | `/api/v1/admin/products/{productId}` | ✓ |
 | `POST` | `/api/v1/admin/products/{productId}/publish` | ✓ |
+| `POST` | `/api/v1/admin/products/reindex` | ✓ |
 | `POST` | `/api/v1/admin/products/{productId}/unpublish` | ✓ |
 | `POST` | `/api/v1/admin/products/{productId}/variants/{variantId}/images` | ✓ |
 | `POST` | `/api/v1/admin/products/images` | ✓ |
@@ -1119,6 +1169,22 @@ ResultData: string (required)
 
 ---
 
+### `POST` `/api/v1/admin/products/reindex`
+> 需要 `Admin` Token
+
+**Responses**
+
+- **200** `ApiResponse<ReindexProductsResult>`
+  ```json
+  {
+    "totalCount": 0,
+    "indexed": 0,
+    "failed": 0
+  }
+  ```
+
+---
+
 ### `POST` `/api/v1/admin/products/{productId}/unpublish`
 > 需要 `Admin` Token
 
@@ -1176,7 +1242,7 @@ files: file (required)
 
 **Responses**
 
-- **200** OK
+- **200** `ApiResponse<TempImageUploadResult[]>` OK
 - **400** `ApiResponse` Bad Request
 
 ---
@@ -1211,7 +1277,15 @@ files: file (required)
         "userId": "string",
         "status": "string",
         "totalAmount": 0.0,
-        "createdAt": "string"
+        "createdAt": "string",
+        "shipment": {
+          "logisticsSubType": "string",
+          "logisticsId": "string",
+          "receiverName": "string",
+          "receiverPhone": "string",
+          "storeName": "string",
+          "address": "string"
+        }
       }
     ],
     "totalCount": 0,
@@ -1263,7 +1337,13 @@ files: file (required)
 
 **Responses**
 
-- **200** OK
+- **200** `ApiResponse<ShipOrderResponse>`
+  ```json
+  {
+    "logisticsId": "string",
+    "logisticsSubType": "string"
+  }
+  ```
 - **400** `ApiResponse` Bad Request
 - **404** `ApiResponse` Not Found
 

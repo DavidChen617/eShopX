@@ -1,5 +1,4 @@
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders;
 using Infrastructure.Data;
 
 namespace Infrastructure.Data.Repositories;
@@ -39,4 +38,7 @@ public class OrderRepository(EShopContext db) : IOrderRepository
 
     public void Update(Order order)
         => db.Orders.Update(order);
+
+    public void Delete(Order order)
+        => db.Orders.Remove(order);
 }

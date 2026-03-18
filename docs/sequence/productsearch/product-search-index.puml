@@ -1,44 +1,11 @@
-@startuml product-search
+@startuml product-search-index
 
-title Product Search Flow
+title Product Search - Index 同步流程
 
-actor User
-participant "API\n(Endpoint)" as API
-participant "ElasticsearchProductSearcher" as Searcher
-participant "EmbeddingClient\n(OpenAI)" as Embedding
+participant "ProductSearchIndexSynchronizer" as Sync
+participant "EmbeddingClient\n(HuggingFace BAAI/bge-m3)" as Embedding
 participant "Elasticsearch" as ES
-
-== Search with Keyword (Hybrid Search) ==
-
-User -> API : GET /products/search\n?keyword=xxx&categoryId=&minPrice=&maxPrice=&isActive=&page=&pageSize=
-API -> Searcher : SearchAsync(ProductSearchQuery)
-
-Searcher -> Embedding : GetEmbeddingAsync(keyword)
-note right: 將 keyword 轉成 1024 維向量
-Embedding --> Searcher : float[] queryVector
-
-Searcher -> ES : SearchAsync\n(\n  kNN: field=embedding, queryVector, k=size*5, numCandidates=100\n  query: bool.must MultiMatch(name, description)\n  filter: isActive / price range / categoryId\n)
-note right
-  Hybrid Search：
-  kNN（語意搜尋）+ BM25（關鍵字搜尋）
-  ES 自動合併兩者分數排序
-  embedding 欄位從 source 中排除（不回傳）
-end note
-
-ES --> Searcher : SearchResponse<ProductSearchDocument>
-Searcher --> API : ProductSearchResponse
-API --> User : 200\n{ page, pageSize, totalCount, totalPages,\n  items[{ productId, categoryId, name, description,\n          price, stockQuantity, isActive, primaryImageUrl }] }
-
-== Search without Keyword (Filter Only) ==
-
-User -> API : GET /products/search\n?categoryId=&minPrice=&maxPrice=&isActive=&page=&pageSize=
-API -> Searcher : SearchAsync(ProductSearchQuery)
-
-Searcher -> ES : SearchAsync\n(\n  query: bool.must MatchAll + filter\n  sort: createdAt DESC\n)
-
-ES --> Searcher : SearchResponse<ProductSearchDocument>
-Searcher --> API : ProductSearchResponse
-API --> User : 200 ProductSearchResponse
+participant "PostgreSQL" as DB
 
 == Index Sync (Product Created / Updated) ==
 
@@ -46,9 +13,6 @@ note over ES
   Outbox → Kafka → ProductIndexOutboxEventHandler
   → UpsertProductAsync(productId)
 end note
-
-participant "ProductSearchIndexSynchronizer" as Sync
-participant "PostgreSQL" as DB
 
 Sync -> DB : GetByIdAsync(productId)\n→ Product + Variants + Skus + Images + Tags
 Sync -> DB : Query Category.Name

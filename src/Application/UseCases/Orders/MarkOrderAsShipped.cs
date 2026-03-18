@@ -1,12 +1,10 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Application.UseCases.Outbox;
-using eShopX.Domain.Aggregates.Shipments;
+using Application.UseCases.Outbox;
+using Domain.Aggregates.Shipments;
 
-namespace eShopX.Application.UseCases.Orders;
+namespace Application.UseCases.Orders;
 
 public record MarkOrderAsShippedCommand(Guid OrderId, string RealLogisticsId) : IRequest<Result>;
 

@@ -1,4 +1,4 @@
-using eShopX.Domain.Outbox;
+using Domain.Outbox;
 
 namespace Infrastructure.Messaging;
 

@@ -104,6 +104,76 @@ resource "aws_security_group_rule" "master_vxlan_from_workers" {
   security_group_id        = aws_security_group.master.id
 }
 
+resource "aws_security_group_rule" "master_bgp_from_workers" {
+  type                     = "ingress"
+  description              = "Calico BGP from workers"
+  from_port                = 179
+  to_port                  = 179
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.worker.id
+  security_group_id        = aws_security_group.master.id
+}
+
+resource "aws_security_group_rule" "worker_all_from_master" {
+  type                     = "ingress"
+  description              = "All traffic from master (pod routing)"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
+  source_security_group_id = aws_security_group.master.id
+  security_group_id        = aws_security_group.worker.id
+}
+
+resource "aws_security_group_rule" "worker_all_from_workers" {
+  type                     = "ingress"
+  description              = "All traffic between workers (pod routing)"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
+  source_security_group_id = aws_security_group.worker.id
+  security_group_id        = aws_security_group.worker.id
+}
+
+resource "aws_security_group_rule" "worker_bgp_from_master" {
+  type                     = "ingress"
+  description              = "Calico BGP from master"
+  from_port                = 179
+  to_port                  = 179
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.master.id
+  security_group_id        = aws_security_group.worker.id
+}
+
+resource "aws_security_group_rule" "worker_bgp_from_workers" {
+  type                     = "ingress"
+  description              = "Calico BGP between workers"
+  from_port                = 179
+  to_port                  = 179
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.worker.id
+  security_group_id        = aws_security_group.worker.id
+}
+
+resource "aws_security_group_rule" "worker_http" {
+  type              = "ingress"
+  description       = "HTTP"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.worker.id
+}
+
+resource "aws_security_group_rule" "worker_https" {
+  type              = "ingress"
+  description       = "HTTPS"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.worker.id
+}
+
 resource "aws_security_group_rule" "worker_ssh_from_master" {
   type                     = "ingress"
   description              = "SSH from master"

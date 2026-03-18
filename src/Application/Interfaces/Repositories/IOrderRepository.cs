@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders;
 
-namespace eShopX.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public interface IOrderRepository
 {
@@ -13,4 +13,5 @@ public interface IOrderRepository
         CancellationToken cancellationToken = default);
     Task AddAsync(Order order, CancellationToken cancellationToken = default);
     void Update(Order order);
+    void Delete(Order order);
 }

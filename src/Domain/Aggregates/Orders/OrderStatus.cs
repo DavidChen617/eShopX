@@ -1,4 +1,4 @@
-namespace eShopX.Domain.Aggregates.Orders;
+namespace Domain.Aggregates.Orders;
 
 public enum OrderStatus
 {

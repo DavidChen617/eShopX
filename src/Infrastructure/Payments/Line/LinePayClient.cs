@@ -1,7 +1,6 @@
 using System.Net.Mime;
 using System.Security.Cryptography;
 using System.Text;
-using eShopX.Application.Exceptions;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Payments.Line;

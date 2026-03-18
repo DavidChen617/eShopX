@@ -1,6 +1,6 @@
 using CoreMesh.Dispatching.Abstractions;
 
-namespace eShopX.Domain.Aggregates;
+namespace Domain.Aggregates;
 
 public abstract class AggregateRoot
 {

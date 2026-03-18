@@ -1,7 +1,7 @@
 using System.Net;
 using CoreMesh.Result.Exceptions;
 
-namespace eShopX.Application.Exceptions;
+namespace Application.Exceptions;
 
 /// <summary>
 /// 外部服務呼叫失敗（HTTP 502），例如：LinePay、PayPal、ECPay、Google、LINE 回傳錯誤

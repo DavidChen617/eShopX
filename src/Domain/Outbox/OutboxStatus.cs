@@ -1,4 +1,4 @@
-namespace eShopX.Domain.Outbox;
+namespace Domain.Outbox;
 
 public enum OutboxStatus
 {

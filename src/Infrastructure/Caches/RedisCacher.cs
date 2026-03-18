@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Application.Interfaces;
 using StackExchange.Redis;
 
 namespace Infrastructure.Caches;

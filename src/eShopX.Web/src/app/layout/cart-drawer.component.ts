@@ -22,18 +22,25 @@ import { CartService } from '../services/cart.service';
         <!-- Header Actions: Select All -->
         @if (cartService.cart().items.length > 0) {
           <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-            <div class="flex items-center gap-3 cursor-pointer" (click)="cartService.toggleAll(!cartService.isAllSelected())">
-              <p-checkbox 
-                [binary]="true" 
+            <div
+              class="flex items-center gap-3 cursor-pointer"
+              (click)="cartService.toggleAll(!cartService.isAllSelected())"
+            >
+              <p-checkbox
+                [binary]="true"
                 [ngModel]="cartService.isAllSelected()"
                 (click)="$event.stopPropagation()"
-                (ngModelChange)="cartService.toggleAll($event)">
+                (ngModelChange)="cartService.toggleAll($event)"
+              >
               </p-checkbox>
-              <span class="text-sm font-bold text-slate-700">全選 ({{ cartService.cart().items.length }})</span>
+              <span class="text-sm font-bold text-slate-700"
+                >全選 ({{ cartService.cart().items.length }})</span
+              >
             </div>
-            <button 
+            <button
               class="text-xs font-bold text-rose-500 hover:text-rose-600"
-              (click)="cartService.clearCart()">
+              (click)="cartService.clearCart()"
+            >
               清空購物車
             </button>
           </div>
@@ -51,15 +58,22 @@ import { CartService } from '../services/cart.service';
               @for (item of cartService.cart().items; track item.skuId) {
                 <div class="flex items-center gap-4 group">
                   <!-- Checkbox -->
-                  <p-checkbox 
-                    [binary]="true" 
+                  <p-checkbox
+                    [binary]="true"
                     [(ngModel)]="item.selected"
-                    (ngModelChange)="cartService.toggleItemSelection(item.skuId)">
+                    (ngModelChange)="cartService.toggleItemSelection(item.skuId)"
+                  >
                   </p-checkbox>
 
                   <!-- Image -->
-                  <div class="w-20 h-24 bg-slate-100 rounded-xl overflow-hidden shrink-0 shadow-sm relative">
-                    <img [src]="item.primaryImageUrl" class="w-full h-full object-cover" [class.grayscale]="!item.selected" />
+                  <div
+                    class="w-20 h-24 bg-slate-100 rounded-xl overflow-hidden shrink-0 shadow-sm relative"
+                  >
+                    <img
+                      [src]="item.primaryImageUrl"
+                      class="w-full h-full object-cover"
+                      [class.grayscale]="!item.selected"
+                    />
                     @if (!item.selected) {
                       <div class="absolute inset-0 bg-white/40"></div>
                     }
@@ -69,7 +83,10 @@ import { CartService } from '../services/cart.service';
                   <div class="flex-1 min-w-0 flex flex-col justify-between h-24 py-1">
                     <div>
                       <div class="flex justify-between items-start gap-2">
-                        <h4 class="font-bold text-slate-900 truncate tracking-tight" [class.text-slate-400]="!item.selected">
+                        <h4
+                          class="font-bold text-slate-900 truncate tracking-tight"
+                          [class.text-slate-400]="!item.selected"
+                        >
                           {{ item.productName }}
                         </h4>
                         <button
@@ -86,7 +103,10 @@ import { CartService } from '../services/cart.service';
 
                     <div class="flex items-center justify-between">
                       <!-- Quantity -->
-                      <div class="flex items-center bg-slate-50 border border-slate-100 rounded-lg px-2 py-1 gap-3" [class.opacity-50]="!item.selected">
+                      <div
+                        class="flex items-center bg-slate-50 border border-slate-100 rounded-lg px-2 py-1 gap-3"
+                        [class.opacity-50]="!item.selected"
+                      >
                         <button
                           (click)="cartService.updateQuantity(item.skuId, -1)"
                           [disabled]="!item.selected || cartService.isMutating()"
@@ -94,7 +114,9 @@ import { CartService } from '../services/cart.service';
                         >
                           <i class="pi pi-minus text-[8px]"></i>
                         </button>
-                        <span class="text-xs font-bold w-4 text-center text-slate-700">{{ item.quantity }}</span>
+                        <span class="text-xs font-bold w-4 text-center text-slate-700">{{
+                          item.quantity
+                        }}</span>
                         <button
                           (click)="cartService.updateQuantity(item.skuId, 1)"
                           [disabled]="!item.selected || cartService.isMutating()"
@@ -103,8 +125,11 @@ import { CartService } from '../services/cart.service';
                           <i class="pi pi-plus text-[8px]"></i>
                         </button>
                       </div>
-                      <span class="font-black text-slate-900" [class.text-slate-400]="!item.selected">
-                        {{ item.unitPrice * item.quantity | currency : 'USD' }}
+                      <span
+                        class="font-black text-slate-900"
+                        [class.text-slate-400]="!item.selected"
+                      >
+                        {{ item.unitPrice * item.quantity | currency: 'USD' }}
                       </span>
                     </div>
                   </div>
@@ -118,11 +143,13 @@ import { CartService } from '../services/cart.service';
         <div class="pt-8 border-t border-slate-100 space-y-4 bg-white">
           <div class="flex items-center justify-between text-lg font-bold text-slate-900">
             <div class="flex flex-col">
-              <span class="text-sm text-slate-500 font-normal">已選擇 {{ cartService.totalCount() }} 件商品</span>
+              <span class="text-sm text-slate-500 font-normal"
+                >已選擇 {{ cartService.totalCount() }} 件商品</span
+              >
               <span>合計</span>
             </div>
             <span class="text-3xl font-black text-indigo-600">{{
-              cartService.totalAmount() | currency : 'USD'
+              cartService.totalAmount() | currency: 'USD'
             }}</span>
           </div>
           <a
@@ -133,7 +160,11 @@ import { CartService } from '../services/cart.service';
             class="flex items-center justify-center gap-2 w-full bg-indigo-600 text-white rounded-2xl py-4 font-bold shadow-xl hover:bg-indigo-700 transition-all"
           >
             <i class="pi pi-credit-card"></i>
-            {{ cartService.totalCount() > 0 ? '前往結帳 (' + cartService.totalCount() + ')' : '請選擇商品' }}
+            {{
+              cartService.totalCount() > 0
+                ? '前往結帳 (' + cartService.totalCount() + ')'
+                : '請選擇商品'
+            }}
           </a>
           <button
             pButton

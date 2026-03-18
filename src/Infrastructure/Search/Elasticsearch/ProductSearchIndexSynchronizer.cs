@@ -1,10 +1,7 @@
 using Elastic.Clients.Elasticsearch;
-using eShopX.Application.Exceptions;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Products;
+using Domain.Aggregates.Products;
 using Infrastructure.Data;
 using Infrastructure.Search.Embedding;
-using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Search.Elasticsearch;
 

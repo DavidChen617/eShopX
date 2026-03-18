@@ -1,12 +1,10 @@
+using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
-using eShopX.Domain.Aggregates.Products;
+using Domain.Aggregates.Products;
 
-namespace eShopX.Application.Interfaces;
+namespace Application.Interfaces;
 
-public interface IProductSearcher
-{
-    Task<Result<ProductSearchResponse>> SearchAsync(ProductSearchQuery query, CancellationToken cancellationToken = default);
-}
+public interface IProductSearcher : IRequestHandler<ProductSearchQuery, Result<ProductSearchResponse>>;
 
 public record ProductSearchQuery(
     string? Keyword = null,
@@ -16,7 +14,7 @@ public record ProductSearchQuery(
     bool? IsActive = null,
     Audience? Audience = null,
     int Page = 1,
-    int PageSize = 20);
+    int PageSize = 20): IRequest<Result<ProductSearchResponse>>;
 
 public record ProductSearchResponse(
     int Page,

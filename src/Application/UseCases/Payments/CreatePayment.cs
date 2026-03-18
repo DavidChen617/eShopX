@@ -1,11 +1,9 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Payments;
+using Domain.Aggregates.Payments;
 
-namespace eShopX.Application.UseCases.Payments;
+namespace Application.UseCases.Payments;
 
 public record CreatePaymentCommand(
     Guid OrderId,

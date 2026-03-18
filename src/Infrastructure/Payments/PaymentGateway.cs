@@ -1,5 +1,4 @@
-using eShopX.Application.Interfaces;
-using eShopX.Domain.Aggregates.Payments;
+using Domain.Aggregates.Payments;
 using Infrastructure.Options;
 using Infrastructure.Payments.Line;
 using Infrastructure.Payments.Line.Models;

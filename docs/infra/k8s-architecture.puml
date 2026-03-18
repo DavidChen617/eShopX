@@ -1,0 +1,65 @@
+@startuml k8s-architecture
+!theme plain
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 80
+
+title eShopX Kubernetes Architecture
+
+actor "External User" as user
+
+cloud "Internet" {
+  node "eshop-x.com\n35.77.94.13" as domain
+}
+
+package "AWS ap-northeast-1" {
+
+  package "k8s-control (master)\n10.0.1.208 | 35.77.94.13" <<Node>> {
+    component "ingress-nginx\n(hostNetwork)" as ingress
+    component "cert-manager" as certmgr
+    component "GitHub Actions\nself-hosted runner" as runner
+  }
+
+  package "k8s-work1\n10.0.1.131" <<Node>> {
+    component "eshopx-api" as api
+    component "eshopx-web" as web
+    component "eshopx-redis" as redis
+  }
+
+  package "k8s-work2\n10.0.1.195" <<Node>> {
+    component "eshopx-postgres\n(StatefulSet + EBS PVC)" as postgres
+    component "eshopx-elasticsearch\n(StatefulSet + EBS PVC)" as es
+    component "eshopx-kafka\n(StatefulSet + EBS PVC)" as kafka
+  }
+
+  database "AWS EBS\ngp3" as ebs
+}
+
+cloud "Let's Encrypt" as le
+cloud "Docker Hub" as dockerhub
+cloud "GitHub" as github
+
+user --> domain : HTTPS
+domain --> ingress : port 80/443\n(hostNetwork)
+ingress --> api : /api
+ingress --> web : /
+
+certmgr --> le : HTTP-01 challenge
+certmgr --> ingress : TLS secret
+
+api --> postgres
+api --> redis
+api --> es
+api --> kafka
+
+kafka --> api : consume events
+
+runner --> dockerhub : pull image
+runner --> ingress : kubectl apply
+github --> runner : trigger on push to main
+
+postgres --> ebs
+es --> ebs
+kafka --> ebs
+
+@enduml

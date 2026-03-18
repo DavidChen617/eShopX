@@ -1,10 +1,8 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
 
-namespace eShopX.Application.UseCases.Sizes;
+namespace Application.UseCases.Sizes;
 
 public record DeleteSizeCommand(Guid SizeId) : IRequest<Result>;
 

@@ -1,4 +1,4 @@
-namespace eShopX.Domain.Aggregates.Users;
+namespace Domain.Aggregates.Users;
 
 public sealed class User : AggregateRoot
 {

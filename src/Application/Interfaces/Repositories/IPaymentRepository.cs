@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Payments;
+using Domain.Aggregates.Payments;
 
-namespace eShopX.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public interface IPaymentRepository
 {
@@ -8,4 +8,5 @@ public interface IPaymentRepository
     Task<Payment?> GetByOrderIdAsync(Guid orderId, CancellationToken cancellationToken = default);
     Task AddAsync(Payment payment, CancellationToken cancellationToken = default);
     void Update(Payment payment);
+    void Delete(Payment payment);
 }

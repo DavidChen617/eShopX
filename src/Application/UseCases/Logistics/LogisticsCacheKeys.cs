@@ -1,4 +1,4 @@
-namespace eShopX.Application.UseCases.Logistics;
+namespace Application.UseCases.Logistics;
 
 public static class LogisticsCacheKeys
 {

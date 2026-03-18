@@ -1,4 +1,4 @@
-using eShopX.Application.UseCases.Categories;
+using Application.UseCases.Categories;
 
 namespace eShopX.Endpoints.Categories;
 

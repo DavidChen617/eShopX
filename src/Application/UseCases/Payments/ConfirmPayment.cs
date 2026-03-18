@@ -1,18 +1,14 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Application.UseCases.Outbox;
 
-namespace eShopX.Application.UseCases.Payments;
+namespace Application.UseCases.Payments;
 
 public record ConfirmPaymentCommand(Guid OrderId, string TransactionId) : IRequest<Result>;
 
 public class ConfirmPaymentHandler(
     IPaymentRepository paymentRepository,
     IOrderRepository orderRepository,
-    IOutboxEventRepository outboxEventRepository,
     IUnitOfWork unitOfWork) : IRequestHandler<ConfirmPaymentCommand, Result>
 {
     public async Task<Result> Handle(
@@ -30,11 +26,8 @@ public class ConfirmPaymentHandler(
         payment.MarkAsPaid(command.TransactionId);
         order.MarkAsPaid();
 
-        var outboxEvent = OutboxEventFactory.CreatePaymentPaid(command.OrderId);
-
         paymentRepository.Update(payment);
         orderRepository.Update(order);
-        await outboxEventRepository.AddAsync(outboxEvent, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.NoContent();

@@ -1,5 +1,4 @@
 using System.Net.Http.Json;
-using eShopX.Application.Exceptions;
 using Infrastructure.Auth.ThirdPartyAuth.Line.Models;
 
 namespace Infrastructure.Auth.ThirdPartyAuth.Line;

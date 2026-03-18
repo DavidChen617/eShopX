@@ -1,3 +1,3 @@
-namespace eShopX.Domain.ValueObjects;
+namespace Domain.ValueObjects;
 
 public sealed record ProductSnapshot(string ProductName, string Color, string? Size);

@@ -1,4 +1,4 @@
-namespace eShopX.Domain.Aggregates.Shipments;
+namespace Domain.Aggregates.Shipments;
 
 public enum LogisticsSubType
 {

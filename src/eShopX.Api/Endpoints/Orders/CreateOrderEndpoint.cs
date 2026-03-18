@@ -1,5 +1,5 @@
-using eShopX.Application.UseCases.Orders;
-using eShopX.Domain.Aggregates.Payments;
+using Application.UseCases.Orders;
+using Domain.Aggregates.Payments;
 
 namespace eShopX.Endpoints.Orders;
 

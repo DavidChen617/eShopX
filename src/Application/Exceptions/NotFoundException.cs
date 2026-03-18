@@ -1,7 +1,7 @@
 using System.Net;
 using CoreMesh.Result.Exceptions;
 
-namespace eShopX.Application.Exceptions;
+namespace Application.Exceptions;
 
 /// <summary>
 /// 資源不存在（HTTP 404）

@@ -1,5 +1,3 @@
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Application.UseCases.Payments;
 using Infrastructure.Options;
 using Microsoft.Extensions.Options;
 

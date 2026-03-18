@@ -1,5 +1,4 @@
-using eShopX.Application.UseCases.Orders;
-using eShopX.Domain.Aggregates.Orders;
+using Domain.Aggregates.Orders;
 
 namespace eShopX.Endpoints.Admin.Orders;
 

@@ -1,7 +1,6 @@
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.UseCases.Orders;
-using eShopX.Application.UseCases.Shipments;
+using Application.UseCases.Shipments;
 using Infrastructure.Logistics.EcPay;
 
 namespace eShopX.Endpoints.Admin.Orders;

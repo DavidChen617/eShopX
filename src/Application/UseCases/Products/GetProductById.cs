@@ -2,11 +2,9 @@ using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Mapper;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Products;
+using Domain.Aggregates.Products;
 
-namespace eShopX.Application.UseCases.Products;
+namespace Application.UseCases.Products;
 
 public record GetProductByIdQuery(Guid ProductId) : IRequest<Result<ProductResponse>>;
 

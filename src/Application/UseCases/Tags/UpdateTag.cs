@@ -1,10 +1,8 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
 
-namespace eShopX.Application.UseCases.Tags;
+namespace Application.UseCases.Tags;
 
 public record UpdateTagCommand(Guid TagId, string Name) : IRequest<Result>;
 

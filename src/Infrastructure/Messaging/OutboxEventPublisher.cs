@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Confluent.Kafka;
-using eShopX.Domain.Outbox;
+using Domain.Outbox;
 
 namespace Infrastructure.Messaging;
 

@@ -1,6 +1,6 @@
-using eShopX.Domain.Outbox;
+using Domain.Outbox;
 
-namespace eShopX.Application.Interfaces.Repositories;
+namespace Application.Interfaces.Repositories;
 
 public interface IOutboxEventRepository
 {

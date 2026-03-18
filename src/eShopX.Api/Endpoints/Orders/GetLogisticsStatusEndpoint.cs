@@ -1,6 +1,5 @@
 using CoreMesh.Result;
-using eShopX.Application.Interfaces;
-using eShopX.Application.UseCases.Logistics;
+using Application.UseCases.Logistics;
 
 namespace eShopX.Endpoints.Orders;
 

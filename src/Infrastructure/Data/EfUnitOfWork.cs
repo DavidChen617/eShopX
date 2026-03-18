@@ -1,4 +1,3 @@
-using eShopX.Application.Exceptions;
 
 namespace Infrastructure.Data;
 

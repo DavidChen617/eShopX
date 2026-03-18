@@ -1,5 +1,4 @@
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Payments;
+using Domain.Aggregates.Payments;
 
 namespace Infrastructure.Data.Repositories;
 
@@ -16,4 +15,7 @@ public class PaymentRepository(EShopContext db) : IPaymentRepository
 
     public void Update(Payment payment)
         => db.Payments.Update(payment);
+
+    public void Delete(Payment payment)
+        => db.Payments.Remove(payment);
 }

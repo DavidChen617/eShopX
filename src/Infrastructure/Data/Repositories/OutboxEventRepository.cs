@@ -1,5 +1,4 @@
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Outbox;
+using Domain.Outbox;
 using Infrastructure.Data;
 
 namespace Infrastructure.Data.Repositories;

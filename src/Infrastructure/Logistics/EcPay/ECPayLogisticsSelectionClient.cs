@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using eShopX.Application.Exceptions;
-using eShopX.Application.UseCases.Logistics;
+using Application.Exceptions;
+using Application.UseCases.Logistics;
 
 namespace Infrastructure.Logistics.EcPay;
 

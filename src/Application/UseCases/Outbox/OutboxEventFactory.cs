@@ -1,7 +1,7 @@
 using System.Text.Json;
-using eShopX.Domain.Outbox;
+using Domain.Outbox;
 
-namespace eShopX.Application.UseCases.Outbox;
+namespace Application.UseCases.Outbox;
 
 public static class OutboxEventFactory
 {

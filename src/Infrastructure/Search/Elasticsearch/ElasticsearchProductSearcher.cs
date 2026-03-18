@@ -2,7 +2,6 @@ using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using eShopX.Application.Exceptions;
 using Infrastructure.Search.Embedding;
 
 namespace Infrastructure.Search.Elasticsearch;
@@ -14,7 +13,31 @@ public class ElasticsearchProductSearcher(
 {
     private readonly string _index = options.Value.IndexName;
 
-    public async Task<Result<ProductSearchResponse>> SearchAsync(ProductSearchQuery query, CancellationToken cancellationToken = default)
+    private static ProductSearchResponse BuildResponse(SearchResponse<ProductSearchDocument> response, int page,
+        int size)
+    {
+        var total = (int)(response.HitsMetadata?.Total?.Match(
+            totalHits => totalHits?.Value,
+            totalAsLong => totalAsLong) ?? 0L);
+
+        var totalPages = total == 0 ? 0 : (int)Math.Ceiling((double)total / size);
+
+        var items = response.Documents.Select(d => new ProductSearchItem(
+            d.ProductId,
+            d.CategoryId,
+            d.Name,
+            d.Description,
+            d.Price,
+            d.StockQuantity,
+            d.IsActive,
+            d.PrimaryImageUrl
+        )).ToList();
+
+        return new ProductSearchResponse(page, size, total, totalPages, items);
+    }
+
+    public async Task<Result<ProductSearchResponse>> Handle(ProductSearchQuery query,
+        CancellationToken cancellationToken = new CancellationToken())
     {
         int page = query.Page > 0 ? query.Page : 1,
             size = query.PageSize > 0 ? Math.Min(query.PageSize, 50) : 10,
@@ -53,19 +76,23 @@ public class ElasticsearchProductSearcher(
             var queryVector = await embeddingClient.GetEmbeddingAsync(query.Keyword!, cancellationToken);
 
             var response = await esClient.SearchAsync<ProductSearchDocument>(s => s
-                .Indices(_index)
-                .From(from)
-                .Size(size)
-                .Source(src => src.Filter(f => f.Excludes(x => x.Embedding)))
-                .Knn(k => k
-                    .Field(f => f.Embedding)
-                    .QueryVector(queryVector)
-                    .K(size * 5)
-                    .NumCandidates(Math.Max(100, size * 5))
-                    .Filter(filters.ToArray()))
-                .Query(q => q.Bool(b => b
-                    .Must(new MultiMatchQuery { Query = query.Keyword!, Fields = Infer.Fields<ProductSearchDocument>(f => f.Name, f => f.Description) })
-                    .Filter(filters.ToArray()))),
+                    .Indices(_index)
+                    .From(from)
+                    .Size(size)
+                    .Source(src => src.Filter(f => f.Excludes(x => x.Embedding)))
+                    .Knn(k => k
+                        .Field(f => f.Embedding)
+                        .QueryVector(queryVector)
+                        .K(size * 5)
+                        .NumCandidates(Math.Max(100, size * 5))
+                        .Filter(filters.ToArray()))
+                    .Query(q => q.Bool(b => b
+                        .Must(new MultiMatchQuery
+                        {
+                            Query = query.Keyword!,
+                            Fields = Infer.Fields<ProductSearchDocument>(f => f.Name, f => f.Description)
+                        })
+                        .Filter(filters.ToArray()))),
                 cancellationToken);
 
             if (!response.IsValidResponse)
@@ -78,44 +105,22 @@ public class ElasticsearchProductSearcher(
         {
             // No keyword: filter only, sorted by createdAt
             var response = await esClient.SearchAsync<ProductSearchDocument>(s => s
-                .Indices(_index)
-                .From(from)
-                .Size(size)
-                .Source(src => src.Filter(f => f.Excludes(x => x.Embedding)))
-                .Query(q => q.Bool(b => b
-                    .Must(new MatchAllQuery())
-                    .Filter(filters.ToArray())))
-                .Sort(so => so.Field(f => f.Field("createdAt").Order(SortOrder.Desc))),
+                    .Indices(_index)
+                    .From(from)
+                    .Size(size)
+                    .Source(src => src.Filter(f => f.Excludes(x => x.Embedding)))
+                    .Query(q => q.Bool(b => b
+                        .Must(new MatchAllQuery())
+                        .Filter(filters.ToArray())))
+                    .Sort(so => so.Field(f => f.Field("createdAt").Order(SortOrder.Desc))),
                 cancellationToken);
 
             if (!response.IsValidResponse)
                 throw new ExternalServiceException("Elasticsearch",
                     response.ElasticsearchServerError?.Error?.Reason ?? response.DebugInformation);
-            
+
             return Result<ProductSearchResponse>.Ok(BuildResponse(response, page, size));
         }
-    }
-
-    private static ProductSearchResponse BuildResponse(SearchResponse<ProductSearchDocument> response, int page, int size)
-    {
-        var total = (int)(response.HitsMetadata?.Total?.Match(
-            totalHits => totalHits?.Value,
-            totalAsLong => totalAsLong) ?? 0L);
-
-        var totalPages = total == 0 ? 0 : (int)Math.Ceiling((double)total / size);
-
-        var items = response.Documents.Select(d => new ProductSearchItem(
-            d.ProductId,
-            d.CategoryId,
-            d.Name,
-            d.Description,
-            d.Price,
-            d.StockQuantity,
-            d.IsActive,
-            d.PrimaryImageUrl
-        )).ToList();
-
-        return new ProductSearchResponse(page, size, total, totalPages, items);
     }
 }
 

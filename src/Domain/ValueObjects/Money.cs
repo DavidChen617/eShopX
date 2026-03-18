@@ -1,6 +1,6 @@
-using eShopX.Domain.Exceptions;
+using Domain.Exceptions;
 
-namespace eShopX.Domain.ValueObjects;
+namespace Domain.ValueObjects;
 
 public sealed record Money
 {

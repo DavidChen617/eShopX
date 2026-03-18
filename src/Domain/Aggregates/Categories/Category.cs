@@ -1,4 +1,4 @@
-namespace eShopX.Domain.Aggregates.Categories;
+namespace Domain.Aggregates.Categories;
 
 public sealed class Category : AggregateRoot
 {

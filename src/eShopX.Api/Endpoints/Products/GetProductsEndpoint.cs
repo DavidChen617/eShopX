@@ -1,5 +1,4 @@
-using eShopX.Application.UseCases.Products;
-using eShopX.Domain.Aggregates.Products;
+using Domain.Aggregates.Products;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShopX.Endpoints.Products;

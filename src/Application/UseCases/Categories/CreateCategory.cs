@@ -1,11 +1,9 @@
 using CoreMesh.Dispatching.Abstractions;
 using CoreMesh.Result;
 using CoreMesh.Result.Extensions;
-using eShopX.Application.Interfaces;
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Domain.Aggregates.Categories;
+using Domain.Aggregates.Categories;
 
-namespace eShopX.Application.UseCases.Categories;
+namespace Application.UseCases.Categories;
 
 public record CreateCategoryCommand(string Name) : IRequest<Result<CategoryResponse>>;
 

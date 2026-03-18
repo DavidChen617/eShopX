@@ -1,6 +1,6 @@
-using eShopX.Domain.ValueObjects;
+using Domain.ValueObjects;
 
-namespace eShopX.Domain.Aggregates.Shipments;
+namespace Domain.Aggregates.Shipments;
 
 public sealed class CVSShipment : Shipment
 {

@@ -1,19 +1,18 @@
 using CoreMesh.Dispatching.Abstractions;
-using eShopX.Application.UseCases.Outbox;
-using eShopX.Domain.Aggregates;
-using eShopX.Domain.Aggregates.Carts;
-using eShopX.Domain.Aggregates.Categories;
-using eShopX.Domain.Aggregates.Orders;
-using eShopX.Domain.Aggregates.Payments;
-using eShopX.Domain.Aggregates.Products;
-using eShopX.Domain.Aggregates.Payments.Events;
-using eShopX.Domain.Aggregates.Products.Events;
-using eShopX.Domain.Aggregates.Shipments.Events;
-using eShopX.Domain.Aggregates.Shipments;
-using eShopX.Domain.Aggregates.Sizes;
-using eShopX.Domain.Aggregates.Tags;
-using eShopX.Domain.Aggregates.Users;
-using eShopX.Domain.Outbox;
+using Domain.Aggregates;
+using Domain.Aggregates.Carts;
+using Domain.Aggregates.Categories;
+using Domain.Aggregates.Orders;
+using Domain.Aggregates.Payments;
+using Domain.Aggregates.Products;
+using Domain.Aggregates.Payments.Events;
+using Domain.Aggregates.Products.Events;
+using Domain.Aggregates.Shipments.Events;
+using Domain.Aggregates.Shipments;
+using Domain.Aggregates.Sizes;
+using Domain.Aggregates.Tags;
+using Domain.Aggregates.Users;
+using Domain.Outbox;
 
 namespace Infrastructure.Data;
 

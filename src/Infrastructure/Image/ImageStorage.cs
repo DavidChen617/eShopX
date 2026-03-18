@@ -1,7 +1,6 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using eShopX.Application.Exceptions;
-using AppImageUploadResult = eShopX.Application.Interfaces.ImageUploadResult;
+using AppImageUploadResult = Application.Interfaces.ImageUploadResult;
 
 namespace Infrastructure.Image;
 

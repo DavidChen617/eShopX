@@ -1,0 +1,41 @@
+@startuml product-read
+
+title Product - 查詢流程
+
+actor Admin
+participant "API\n(Endpoint)" as API
+participant "Handler\n(Use Case)" as Handler
+participant "Redis\n(ICacher)" as Redis
+participant "PostgreSQL\n(IProductRepository)" as DB
+
+== Read Product (by ID) ==
+
+Admin -> API : GET /products/{productId}
+API -> Handler : GetProductByIdQuery
+Handler -> Redis : GetAsync(product:{id})
+alt Cache Hit
+  Redis --> Handler : ProductResponse
+else Cache Miss
+  Handler -> DB : GetByIdAsync(productId)
+  DB --> Handler : Product
+  Handler -> Redis : SetAsync(product:{id}, TTL 30min)
+end
+Handler --> API : ProductResponse
+API --> Admin : 200 ProductResponse
+
+== Read Products (list) ==
+
+Admin -> API : GET /products?categoryId=&page=&pageSize=
+API -> Handler : GetProductsQuery
+Handler -> Redis : GetAsync(products:{filters}:{page}:{size})
+alt Cache Hit
+  Redis --> Handler : PagedResponse
+else Cache Miss
+  Handler -> DB : GetPagedAsync(filters, page, size)
+  DB --> Handler : (items, totalCount)
+  Handler -> Redis : SetAsync(products:..., TTL 5min)
+end
+Handler --> API : PagedResponse
+API --> Admin : 200 PagedResponse
+
+@enduml

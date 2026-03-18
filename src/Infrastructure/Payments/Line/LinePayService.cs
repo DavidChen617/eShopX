@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using eShopX.Application.Exceptions;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Payments.Line;

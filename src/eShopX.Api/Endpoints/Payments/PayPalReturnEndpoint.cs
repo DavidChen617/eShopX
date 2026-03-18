@@ -1,6 +1,4 @@
-using eShopX.Application.Interfaces.Repositories;
-using eShopX.Application.UseCases.Payments;
-using eShopX.Domain.Aggregates.Payments;
+using Domain.Aggregates.Payments;
 using Infrastructure.Options;
 using Infrastructure.Payments.PayPal;
 using Infrastructure.Payments.PayPal.Models;

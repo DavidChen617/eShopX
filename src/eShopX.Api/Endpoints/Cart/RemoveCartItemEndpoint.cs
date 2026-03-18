@@ -1,4 +1,3 @@
-using eShopX.Application.UseCases.Carts;
 
 namespace eShopX.Endpoints.Cart;
 

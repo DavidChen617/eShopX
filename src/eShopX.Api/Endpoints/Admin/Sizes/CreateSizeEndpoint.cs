@@ -1,5 +1,4 @@
-using eShopX.Application.UseCases.Sizes;
-using eShopX.Domain.Aggregates.Sizes;
+using Domain.Aggregates.Sizes;
 
 namespace eShopX.Endpoints.Admin.Sizes;
 

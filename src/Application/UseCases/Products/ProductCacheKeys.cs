@@ -1,6 +1,6 @@
-using eShopX.Domain.Aggregates.Products;
+using Domain.Aggregates.Products;
 
-namespace eShopX.Application.UseCases.Products;
+namespace Application.UseCases.Products;
 
 internal static class ProductCacheKeys
 {

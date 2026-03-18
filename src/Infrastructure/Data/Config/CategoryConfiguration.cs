@@ -1,4 +1,4 @@
-using eShopX.Domain.Aggregates.Categories;
+using Domain.Aggregates.Categories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -1,0 +1,63 @@
+@startuml auth-session
+
+title Auth - Login / Refresh / Logout 流程
+
+actor User
+participant "API\n(Endpoint)" as API
+participant "Handler /\nService" as Handler
+participant "PostgreSQL" as DB
+
+== Login (Local) ==
+
+User -> API : POST /auth/login\n{ email, password }
+API -> Handler : LoginCommand
+Handler -> Handler : Validate
+Handler -> DB : FindByEmailAsync(email)
+alt User 不存在 or 無 Local provider or 密碼錯誤
+  Handler --> API : 400 credentials invalid
+end
+Handler -> Handler : bcrypt.Verify(password, hash)
+Handler -> Handler : 從 User.Roles 取出所有 flags → roles[]
+Handler -> Handler : GenerateAccessToken(userId, email, name, roles)\nRefreshToken.Create(userId, token, expireAt)
+Handler -> DB : AddAsync(refreshToken) + SaveChanges
+Handler --> API : 200\n{ accessToken, refreshToken, userId, name, expiresAt }
+
+== Refresh Token ==
+
+User -> API : POST /auth/refresh\n{ refreshToken }
+API -> Handler : RefreshTokenCommand
+Handler -> DB : FindByTokenAsync(refreshToken)
+alt Token 不存在
+  Handler --> API : 404 refresh_token_not_found
+end
+alt Token 已 revoked
+  Handler --> API : 400 refresh_token_revoked
+end
+alt Token 已過期
+  Handler --> API : 400 refresh_token_expired
+end
+Handler -> Handler : existing.Revoke()
+Handler -> DB : Update(existing)
+Handler -> DB : GetByIdAsync(userId)
+alt User 不存在
+  Handler --> API : 404 user_not_found
+end
+Handler -> Handler : 從 User.Roles 取出所有 flags → roles[]
+Handler -> Handler : GenerateAccessToken(...)\nRefreshToken.Create(...) ← 新 token
+Handler -> DB : AddAsync(newRefreshToken) + SaveChanges
+note right: Rotation：舊 token revoke，發新 token
+Handler --> API : 200\n{ accessToken, refreshToken, expiresAt }
+
+== Logout ==
+
+User -> API : POST /auth/logout\n{ refreshToken }
+API -> Handler : LogoutCommand
+Handler -> DB : FindByTokenAsync(refreshToken)
+alt Token 不存在 or 已 revoked
+  Handler --> API : 204（idempotent）
+end
+Handler -> Handler : refreshToken.Revoke()
+Handler -> DB : Update + SaveChanges
+Handler --> API : 204
+
+@enduml

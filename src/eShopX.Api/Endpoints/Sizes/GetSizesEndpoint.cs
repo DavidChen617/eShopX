@@ -1,5 +1,5 @@
-using eShopX.Application.UseCases.Sizes;
-using eShopX.Domain.Aggregates.Sizes;
+using Application.UseCases.Sizes;
+using Domain.Aggregates.Sizes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eShopX.Endpoints.Sizes;

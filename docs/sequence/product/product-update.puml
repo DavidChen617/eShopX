@@ -1,6 +1,6 @@
-@startuml product-crud
+@startuml product-update
 
-title Product CRUD Flow
+title Product - 更新 & 圖片上傳流程
 
 actor Admin
 participant "API\n(Endpoint)" as API
@@ -10,56 +10,6 @@ participant "PostgreSQL\n(IProductRepository)" as DB
 participant "Cloudinary\n(IImageStorage)" as Cloudinary
 participant "Kafka\n(Outbox)" as Kafka
 participant "Elasticsearch" as ES
-
-== Create Product ==
-
-group Pre-upload Images (optional, per variant)
-  Admin -> API : POST /admin/products/images\nmultipart files[]
-  API -> Cloudinary : UploadAsync(files)
-  Cloudinary --> API : [{ fileName, url, publicId }]
-  API --> Admin : 200 [{ fileName, url, publicId }]
-end
-
-Admin -> API : POST /admin/products\n{ name, description, audience, categoryId,\n  tagIds, variants[{ color, skus, images }] }
-API -> Handler : CreateProductCommand
-Handler -> Handler : Validate
-Handler -> DB : AddAsync(product)\n+ variants + skus + images
-Handler -> DB : SaveChanges\n→ ProductCreatedEvent → OutboxEvent
-DB --> Handler : OK
-Handler --> API : CreateProductResponse
-API --> Admin : 201 { productId, name, isActive, createdAt }
-
-Kafka -> ES : product.upsert\n→ index product
-
-== Read Product (by ID) ==
-
-Admin -> API : GET /products/{productId}
-API -> Handler : GetProductByIdQuery
-Handler -> Redis : GetAsync(product:{id})
-alt Cache Hit
-  Redis --> Handler : ProductResponse
-else Cache Miss
-  Handler -> DB : GetByIdAsync(productId)
-  DB --> Handler : Product
-  Handler -> Redis : SetAsync(product:{id}, TTL 30min)
-end
-Handler --> API : ProductResponse
-API --> Admin : 200 ProductResponse
-
-== Read Products (list) ==
-
-Admin -> API : GET /products?categoryId=&page=&pageSize=
-API -> Handler : GetProductsQuery
-Handler -> Redis : GetAsync(products:{filters}:{page}:{size})
-alt Cache Hit
-  Redis --> Handler : PagedResponse
-else Cache Miss
-  Handler -> DB : GetPagedAsync(filters, page, size)
-  DB --> Handler : (items, totalCount)
-  Handler -> Redis : SetAsync(products:..., TTL 5min)
-end
-Handler --> API : PagedResponse
-API --> Admin : 200 PagedResponse
 
 == Update Product ==
 
@@ -137,21 +87,5 @@ Handler --> API : UploadProductImageResponse
 API --> Admin : 200 { imageId, url }
 
 Kafka -> ES : product.upsert\n→ re-index product
-
-== Delete Product ==
-
-Admin -> API : DELETE /admin/products/{productId}
-API -> Handler : DeleteProductCommand
-Handler -> DB : GetByIdAsync(productId)
-DB --> Handler : Product
-Handler -> Handler : product.Delete()\n→ ProductDeletedEvent → OutboxEvent
-Handler -> DB : Delete(product)
-Handler -> DB : SaveChanges
-Handler -> Redis : RemoveAsync(product:{id})
-DB --> Handler : OK
-Handler --> API : NoContent
-API --> Admin : 204
-
-Kafka -> ES : product.delete\n→ remove from index
 
 @enduml

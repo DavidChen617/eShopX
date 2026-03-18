@@ -1,0 +1,29 @@
+@startuml payment-paypal
+
+title Payment - PayPal 付款回調流程
+
+actor User
+participant "Browser" as Browser
+participant "API\n(Endpoint)" as API
+participant "Handler\n(Use Case)" as Handler
+participant "PostgreSQL" as DB
+participant "PayPal" as PayPal
+participant "Kafka\n(Outbox)" as Kafka
+participant "Email\nService" as Email
+
+Browser -> API : GET /payments/paypal/return\n?token=xxx&orderId=xxx
+API -> DB : GetByOrderIdAsync(payment)
+note right: 若 payment.Status == Paid → 302 直接 redirect（冪等防護）
+API -> PayPal : ConfirmAsync(token)
+PayPal --> API : { captureId }
+API -> Handler : ConfirmPaymentCommand(orderId, captureId)
+Handler -> DB : GetByOrderIdAsync(payment)
+Handler -> DB : GetByIdAsync(order)
+Handler -> Handler : payment.MarkAsPaid(captureId)\norder.MarkAsPaid()
+Handler -> DB : AddAsync(OutboxEvent: payment.paid)
+Handler -> DB : SaveChangesAsync
+API --> Browser : 302 Redirect → {FrontendDomain}/orders/{orderId}?payment=success
+
+Kafka -> Email : payment.paid\n→ 寄送付款成功通知信
+
+@enduml

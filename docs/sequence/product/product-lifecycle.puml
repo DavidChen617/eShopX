@@ -1,0 +1,61 @@
+@startuml product-lifecycle
+
+title Product - Publish / Unpublish / Delete 流程
+
+actor Admin
+participant "API\n(Endpoint)" as API
+participant "Handler\n(Use Case)" as Handler
+participant "Redis\n(ICacher)" as Redis
+participant "PostgreSQL\n(IProductRepository)" as DB
+participant "Kafka\n(Outbox)" as Kafka
+participant "Elasticsearch" as ES
+
+== Publish Product ==
+
+Admin -> API : POST /admin/products/{productId}/publish
+API -> Handler : PublishProductCommand
+Handler -> DB : GetByIdAsync(productId)
+DB --> Handler : Product
+Handler -> Handler : product.Publish()\n→ IsActive = true
+Handler -> DB : Update(product)
+Handler -> DB : AddAsync(OutboxEvent: product.upsert)
+Handler -> DB : SaveChanges
+DB --> Handler : OK
+Handler --> API : NoContent
+API --> Admin : 204
+
+Kafka -> ES : product.upsert\n→ index product
+
+== Unpublish Product ==
+
+Admin -> API : POST /admin/products/{productId}/unpublish
+API -> Handler : UnpublishProductCommand
+Handler -> DB : GetByIdAsync(productId)
+DB --> Handler : Product
+Handler -> Handler : product.Unpublish()\n→ IsActive = false
+Handler -> DB : Update(product)
+Handler -> DB : AddAsync(OutboxEvent: product.delete)
+Handler -> DB : SaveChanges
+DB --> Handler : OK
+Handler --> API : NoContent
+API --> Admin : 204
+
+Kafka -> ES : product.delete\n→ remove from index
+
+== Delete Product ==
+
+Admin -> API : DELETE /admin/products/{productId}
+API -> Handler : DeleteProductCommand
+Handler -> DB : GetByIdAsync(productId)
+DB --> Handler : Product
+Handler -> Handler : product.Delete()\n→ ProductDeletedEvent → OutboxEvent
+Handler -> DB : Delete(product)
+Handler -> DB : SaveChanges
+Handler -> Redis : RemoveAsync(product:{id})
+DB --> Handler : OK
+Handler --> API : NoContent
+API --> Admin : 204
+
+Kafka -> ES : product.delete\n→ remove from index
+
+@enduml

@@ -1,0 +1,86 @@
+@startuml outbox
+
+title Outbox Pattern Flow
+
+participant "Use Case\nHandler" as Handler
+participant "EShopContext\n(SaveChangesAsync)" as DB
+participant "OutboxPublisher\nHostedService\n(每 5 秒輪詢)" as Publisher
+participant "Kafka\n(outbox-events)" as Kafka
+participant "OutboxConsumer\nHostedService" as Consumer
+participant "IOutboxEventHandler" as EventHandler
+participant "Email / ES" as Downstream
+
+== 寫入階段（業務事務）==
+
+note over Handler
+  兩種觸發方式：
+  1. 直接呼叫 outboxEventRepository.AddAsync()
+  2. Aggregate 拋出 DomainEvent → EShopContext 自動轉換
+end note
+
+Handler -> DB : SaveChangesAsync()\n（含 OutboxEvent INSERT，Status=Pending）
+note right
+  同一 DB 事務確保業務資料與
+  OutboxEvent 一起寫入或一起失敗
+end note
+DB --> Handler : OK
+
+== 發送階段（OutboxPublisher 5 秒輪詢）==
+
+Publisher -> DB : GetPendingAsync(batchSize=50)\nWHERE Status=Pending ORDER BY CreatedAt
+DB --> Publisher : OutboxEvent[]
+
+loop 每個 Pending 事件
+  Publisher -> Kafka : ProduceAsync(topic=outbox-events,\n  key=EventId,\n  value=OutboxEventEnvelope { Id, EventType, Payload, Timestamp })
+  alt 發送成功
+    Publisher -> DB : event.MarkAsProcessed()
+  else 發送失敗
+    Publisher -> DB : event.IncrementRetry()
+    note right: RetryCount >= 3 → MarkAsFailed()
+  end
+end
+
+Publisher -> DB : SaveChangesAsync()
+
+== 消費階段（OutboxConsumer 持續監聽）==
+
+Kafka -> Consumer : Consume(topic=outbox-events)
+Consumer -> Consumer : Deserialize OutboxEventEnvelope\n取得 EventType
+Consumer -> EventHandler : 根據 EventType\n找到對應的 IOutboxEventHandler
+
+note over EventHandler
+  EventType → Handler 對應：
+  ┌──────────────────────┬──────────────────────────────┐
+  │ product.upsert       │ ProductIndexOutboxEventHandler│
+  │ product.delete       │ ProductIndexOutboxEventHandler│
+  │ payment.paid         │ PaymentPaidEmailHandler       │
+  │ payment.failed       │ PaymentFailedEmailHandler     │
+  │ order.shipped        │ OrderShippedEmailHandler      │
+  │ shipment.completed   │ ShipmentCompletedEmailHandler │
+  │ auth.otp             │ OtpEmailHandler               │
+  └──────────────────────┴──────────────────────────────┘
+end note
+
+EventHandler -> Downstream : 執行對應業務邏輯\n（ES index / 寄信）
+Downstream --> EventHandler : OK
+Consumer -> Kafka : Commit offset
+
+== DomainEvent 自動轉換（EShopContext）==
+
+note over DB
+  SaveChangesAsync() 內部呼叫 ConvertDomainEventsToOutboxEvents()
+
+  DomainEvent → OutboxEvent：
+  ┌──────────────────────┬──────────────────────────────┐
+  │ ProductCreatedEvent  │ product.upsert               │
+  │ ProductUpdatedEvent  │ product.upsert               │
+  │ ProductDeletedEvent  │ product.delete               │
+  │ PaymentPaidEvent     │ payment.paid                 │
+  │ PaymentFailedEvent   │ payment.failed               │
+  │ ShipmentCompletedEvent│ shipment.completed          │
+  └──────────────────────┴──────────────────────────────┘
+  注意：order.shipped 和 auth.otp 沒有對應 DomainEvent，
+  由 Handler 直接呼叫 outboxEventRepository.AddAsync()
+end note
+
+@enduml

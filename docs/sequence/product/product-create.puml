@@ -1,0 +1,34 @@
+@startuml product-create
+
+title Product - 建立流程
+
+actor Admin
+participant "API\n(Endpoint)" as API
+participant "Handler\n(Use Case)" as Handler
+participant "PostgreSQL\n(IProductRepository)" as DB
+participant "Cloudinary\n(IImageStorage)" as Cloudinary
+participant "Kafka\n(Outbox)" as Kafka
+participant "Elasticsearch" as ES
+
+== Create Product ==
+
+group Pre-upload Images (optional, per variant)
+  Admin -> API : POST /admin/products/images\nmultipart files[]
+  API -> Cloudinary : UploadAsync(files)
+  Cloudinary --> API : [{ fileName, url, publicId }]
+  API --> Admin : 200 [{ fileName, url, publicId }]
+end
+
+Admin -> API : POST /admin/products\n{ name, description, audience, categoryId,\n  tagIds, variants[{ color, skus, images }] }
+API -> Handler : CreateProductCommand
+Handler -> Handler : Validate
+Handler -> DB : AddAsync(product)\n+ variants + skus + images
+Handler -> DB : AddAsync(OutboxEvent: product.upsert)
+Handler -> DB : SaveChanges
+DB --> Handler : OK
+Handler --> API : CreateProductResponse
+API --> Admin : 201 { productId, name, isActive, createdAt }
+
+Kafka -> ES : product.upsert\n→ index product
+
+@enduml

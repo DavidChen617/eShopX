@@ -1,0 +1,46 @@
+@startuml auth-line
+
+title Auth - LINE OAuth 登入流程
+
+actor User
+participant "API\n(Endpoint)" as API
+participant "Handler /\nService" as Handler
+participant "PostgreSQL" as DB
+participant "LINE\nOAuth" as Line
+
+note over User, Line
+  前端先走 LINE OAuth PKCE flow：
+  → 取得 code + codeVerifier + nonce
+end note
+
+User -> API : POST /auth/line\n{ code, codeVerifier, nonce }
+API -> Handler : LineAuthService.AuthAsync
+
+Handler -> Line : POST /token\n{ grantType, code, redirectUri, clientId, clientSecret, codeVerifier }
+Line --> Handler : { idToken }
+
+Handler -> Line : POST /verify\n{ idToken, clientId, nonce }
+Line --> Handler : { sub, email, name, picture }
+
+Handler -> DB : FindByProviderAsync(Line, sub)
+alt 找不到
+  Handler -> DB : FindByEmailAsync(email)
+  alt Email 也找不到
+    Handler -> Handler : User.Create(name, email)
+    Handler -> DB : AddAsync(user)
+  end
+  Handler -> Handler : user.AddAuthProvider(Line, sub)
+end
+Handler -> Handler : user.UpdateAvatar(picture, sub)
+Handler -> DB : Update(user)
+
+Handler -> Handler : GenerateAccessToken(...)\nRefreshToken.Create(...)
+Handler -> DB : AddAsync(refreshToken) + SaveChanges
+Handler --> API : 200\n{ accessToken, refreshToken, userId, name, expiresAt, sub, email }
+
+note over DB
+  User.AuthProviders 支援多 provider 綁定：
+  同一個 email 可同時有 Local + Google + LINE
+end note
+
+@enduml

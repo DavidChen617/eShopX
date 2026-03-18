@@ -1,0 +1,65 @@
+@startuml order-create
+
+title Order - 下訂單流程
+
+actor User
+participant "API\n(Endpoint)" as API
+participant "Handler\n(Use Case)" as Handler
+participant "Redis\n(ICacher)" as Redis
+participant "PostgreSQL" as DB
+participant "LinePay /\nPayPal" as PayGateway
+
+User -> API : POST /orders\n{ paymentMethod, receiverName, receiverPhone }
+API -> Handler : CreateOrderCommand
+
+Handler -> Redis : GetAsync(logistics:{userId})
+Redis --> Handler : LogisticsCacheData
+
+Handler -> DB : GetByUserIdAsync(cart)
+DB --> Handler : Cart + Items
+
+Handler -> DB : GetSkuDetailsByIdsAsync(skuIds[])
+DB --> Handler : SkuDetails[]
+Handler -> DB : GetByIdsAsync(sizeIds[])
+DB --> Handler : Size[]
+
+loop Each cart item (in-memory)
+  Handler -> Handler : validate sku exists & product.IsActive
+  Handler -> Handler : check stockQuantity >= quantity\n不足 → return insufficient_stock
+  Handler -> Handler : sku.DeductStock(quantity)
+end
+
+Handler -> DB : AddAsync(Order)
+Handler -> DB : AddAsync(Payment, status=Pending, url=null)
+Handler -> DB : AddAsync(Shipment CVS/Home)
+Handler -> DB : cart.Clear()
+
+Handler -> DB : SaveChangesAsync\n(含樂觀鎖重試，最多 3 次)
+note right: 若全部失敗 → 回傳 stock_conflict 錯誤\n此時 gateway 尚未呼叫
+
+Handler -> PayGateway : RequestAsync(paymentMethod, order)
+
+alt Gateway 成功
+  PayGateway --> Handler : { paymentUrl }
+  Handler -> Handler : payment.SetPaymentUrl(url)
+  Handler -> DB : SaveChangesAsync
+  Handler -> Redis : RemoveAsync(cart:{userId})
+  Handler -> Redis : RemoveAsync(logistics:{userId})
+  Handler -> Redis : RemoveAsync(product:{productId}) x N
+  Handler --> API : { orderId, totalAmount, paymentUrl,\n  logisticsSubType, storeName, address }
+  API --> User : 201
+else Gateway 失敗（補償回滾）
+  Handler -> Handler : sku.AddStock(quantity) x N
+  Handler -> DB : Delete(order / payment / shipment)
+  Handler -> DB : cart.AddItem() x N
+  Handler -> DB : SaveChangesAsync
+  Handler -> Redis : RemoveAsync(product:{productId}) x N
+  Handler --> API : BadRequest
+  API --> User : 400
+end
+
+note over User
+  導向 paymentUrl（LinePay / PayPal 付款頁）
+end note
+
+@enduml

@@ -1,0 +1,55 @@
+@startuml auth-register
+
+title Auth - OTP 驗證 & 註冊流程
+
+actor User
+participant "API\n(Endpoint)" as API
+participant "Handler /\nService" as Handler
+participant "PostgreSQL" as DB
+participant "Redis" as Redis
+participant "Kafka /\nEmail" as Kafka
+
+== Send OTP ==
+
+User -> API : POST /auth/send-otp\n{ email }
+API -> Handler : SendOtpCommand
+Handler -> Handler : Validate\n(email format)
+Handler -> DB : FindByEmailAsync(email)
+alt Email 已存在
+  Handler --> API : 400 email_conflict
+end
+Handler -> Redis : GET otp:{email}
+alt OTP 尚未過期
+  Handler --> API : 400 otp_not_expired
+end
+Handler -> Redis : GET otp:count:{email}:{yyyyMMdd}
+alt 今日發送次數 >= 3
+  Handler --> API : 400 otp_limit_exceeded
+end
+Handler -> Handler : 產生 6 位數 OTP
+Handler -> Redis : SET otp:{email} = otp\n(TTL 10 分鐘)
+Handler -> Redis : SET otp:count:{email}:{yyyyMMdd} = count+1\n(TTL 到今天 UTC 午夜)
+Handler -> DB : AddAsync(OutboxEvent: auth.otp) + SaveChanges
+note right: Kafka consumer 收到後寄驗證信
+Handler --> API : 200
+
+== Register ==
+
+User -> API : POST /auth/register\n{ name, email, otp, password }
+API -> Handler : RegisterUserCommand
+Handler -> Handler : Validate\n(name, email format, password min 8, otp not empty)
+Handler -> Redis : GET otp:{email}
+alt OTP 不存在或不符
+  Handler --> API : 400 otp_invalid
+end
+Handler -> DB : FindByEmailAsync(email)
+alt Email 已存在
+  Handler --> API : 400 email_conflict
+end
+Handler -> Handler : User.Create(name, email)\nuser.AddAuthProvider(Local, hash=bcrypt(password))
+Handler -> DB : AddAsync(user)
+Handler -> Redis : DEL otp:{email}
+Handler -> DB : SaveChanges
+Handler --> API : 201 { userId, email, createdAt }
+
+@enduml

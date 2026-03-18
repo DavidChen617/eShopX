@@ -1,40 +1,12 @@
-@startuml cart-crud
+@startuml cart-write
 
-title Cart Flow
+title Cart - 新增 / 更新 / 刪除流程
 
 actor User
 participant "API\n(Endpoint)" as API
 participant "Handler\n(Use Case)" as Handler
 participant "Redis\n(ICacher)" as Redis
 participant "PostgreSQL" as DB
-
-== Get Cart ==
-
-User -> API : GET /cart
-API -> Handler : GetCartQuery(userId)
-Handler -> Redis : GetAsync(cart:{userId})
-
-alt Cache Hit
-  Redis --> Handler : CartResponse
-else Cache Miss
-  Handler -> DB : GetByUserIdAsync(userId)
-  alt Cart exists
-    DB --> Handler : Cart + Items
-    loop Each cart item
-      Handler -> DB : GetSkuDetailsAsync(skuId)\n→ Product + Variant(含 Images) + Sku
-      opt SizeId exists
-        Handler -> DB : GetByIdAsync(sizeId)
-        DB --> Handler : Size.Name
-      end
-    end
-    Handler -> Redis : SetAsync(cart:{userId}, TTL 10min)
-  else Cart not found
-    Handler --> API : CartResponse(cartId=null, items=[])
-  end
-end
-
-Handler --> API : CartResponse
-API --> User : 200\n{ cartId, userId, items[{ itemId, skuId, quantity,\n  productName, color, sizeName, unitPrice, primaryImageUrl }] }
 
 == Add Item ==
 

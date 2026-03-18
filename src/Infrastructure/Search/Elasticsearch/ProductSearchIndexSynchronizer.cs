@@ -1,9 +1,7 @@
 using Elastic.Clients.Elasticsearch;
-using Application.Interfaces.Repositories;
 using Domain.Aggregates.Products;
 using Infrastructure.Data;
 using Infrastructure.Search.Embedding;
-using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Search.Elasticsearch;
 

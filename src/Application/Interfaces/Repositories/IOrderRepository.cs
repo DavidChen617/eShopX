@@ -13,4 +13,5 @@ public interface IOrderRepository
         CancellationToken cancellationToken = default);
     Task AddAsync(Order order, CancellationToken cancellationToken = default);
     void Update(Order order);
+    void Delete(Order order);
 }

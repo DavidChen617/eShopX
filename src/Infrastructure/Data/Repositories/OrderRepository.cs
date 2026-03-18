@@ -38,4 +38,7 @@ public class OrderRepository(EShopContext db) : IOrderRepository
 
     public void Update(Order order)
         => db.Orders.Update(order);
+
+    public void Delete(Order order)
+        => db.Orders.Remove(order);
 }

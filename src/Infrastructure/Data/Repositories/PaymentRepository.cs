@@ -15,4 +15,7 @@ public class PaymentRepository(EShopContext db) : IPaymentRepository
 
     public void Update(Payment payment)
         => db.Payments.Update(payment);
+
+    public void Delete(Payment payment)
+        => db.Payments.Remove(payment);
 }

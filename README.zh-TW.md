@@ -67,7 +67,8 @@ Domain 狀態變更（商品上架、付款成功）先寫入同一個 PostgreSQ
 
 ```
 eShopX.Api       → Minimal API Endpoints、DI 組裝、Middleware
-Application      → Use Cases（CQRS Handler）、Domain Model、介面定義
+Application      → Use Cases（CQRS Handler）、Validator、介面定義
+Domain           → Aggregates、Value Objects、Domain 例外、Outbox 事件
 Infrastructure   → EF Core、Repository、Redis、Kafka、Elasticsearch、第三方整合
 eShopX.Web       → Angular 前端
 ```
@@ -114,14 +115,12 @@ dotnet run --project src/eShopX.Api/
 ├── infra/
 │   ├── k8s/             # Kubernetes manifests
 │   └── terraform/       # AWS 基礎設施定義
-├── src/
-│   ├── Application/     # Use Cases、Domain Model、介面
-│   ├── Infrastructure/  # EF Core、快取、訊息、搜索、第三方
-│   ├── eShopX.Api/      # Minimal API Endpoints、啟動設定
-│   └── eShopX.Web/      # Angular 前端
-└── docs/
-    ├── api-spec.md       # API 規格文件
-    └── sequence/         # PlantUML 序列圖
+└── src/
+    ├── Domain/          # Aggregates、Value Objects、Domain 例外、Outbox 事件
+    ├── Application/     # Use Cases、CQRS Handler、Validator、介面定義
+    ├── Infrastructure/  # EF Core、快取、訊息、搜索、第三方
+    ├── eShopX.Api/      # Minimal API Endpoints、啟動設定
+    └── eShopX.Web/      # Angular 前端
 ```
 
 ---

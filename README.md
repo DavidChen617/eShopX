@@ -71,18 +71,20 @@ The backend is organized around feature-oriented slices rather than traditional 
 ├── infra
 │   ├── k8s
 │   └── terraform
-├── src
-│   ├── ApplicationCore
-│   ├── Infrastructure
-│   ├── eShopX.Api
-│   └── eShopX.Web
-└── tests
+└── src
+    ├── Application
+    ├── Domain
+    ├── Infrastructure
+    ├── eShopX.Api
+    └── eShopX.Web
 ```
 
 ### Layer Responsibilities
 
-- `src/ApplicationCore`
-  - entities, interfaces, use cases, commands, queries, validators
+- `src/Domain`
+  - aggregates, entities, value objects, domain exceptions, outbox events
+- `src/Application`
+  - use cases, commands, queries, validators, interfaces
 - `src/Infrastructure`
   - EF Core context, repositories, cache, messaging, search, third-party integrations
 - `src/eShopX.Api`
